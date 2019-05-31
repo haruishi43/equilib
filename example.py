@@ -40,7 +40,7 @@ def test_single_image(path=None):
         cv2.imshow("input", src_img_show)
         cv2.waitKey()
     else:
-        src_img = cv2.imread("./data/pano.jpg")
+        src_img = cv2.imread("./data/image.jpg")
 
     pi = math.pi
     inc = pi / 36

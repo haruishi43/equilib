@@ -14,12 +14,6 @@ class Pano2Pers:
         self.pers_img = np.zeros(self.pers_shape)
         print(f'Perspective Image: w={self.pers_w}, h={self.pers_h}')
 
-        self.pano_w = 4*w
-        self.pano_h = 4*h
-        self.pano_shape = (self.pano_w, self.pano_h)
-        self.pano_img = np.zeros(self.pano_shape)
-        print(f'Panoramic Image: w={self.pano_w}, h={self.pano_h}')
-
         K = self.create_intrinsic_param(w, h, fov)
         self.K_inv = np.linalg.inv(K)
         self.im2ori = np.zeros((3,3))
@@ -92,15 +86,19 @@ class Pano2Pers:
 
 
     def _with_numpy(self, pano_img, radius=128):
-        FOV = 90
+        FOV = 120
         THETA = 0
         PHI = 0
         RADIUS = radius
         height = self.pers_img.shape[1]
         width = self.pers_img.shape[0]
+        
 
-        equ_h = self.pano_img.shape[1]
-        equ_w = self.pano_img.shape[0]
+        print(pano_img.shape[1])
+        print(pano_img.shape[0])
+
+        equ_h = pano_img.shape[0]
+        equ_w = pano_img.shape[1]
         equ_cx = (equ_w - 1) / 2.0
         equ_cy = (equ_h - 1) / 2.0
 
@@ -149,8 +147,8 @@ class Pano2Pers:
 
         lon = lon.reshape([height, width]) / np.pi * 180
         lat = -lat.reshape([height, width]) / np.pi * 180
-        lon = lon / 180 * equ_cx + equ_cx
         lat = lat / 90 * equ_cy + equ_cy
+        lon = lon / 180 * equ_cx + equ_cx
     
         persp = cv2.remap(pano_img, lon.astype(np.float32), lat.astype(np.float32), cv2.INTER_CUBIC, borderMode=cv2.BORDER_WRAP)
         return persp
