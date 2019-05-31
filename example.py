@@ -50,7 +50,7 @@ def test_single_image(path=None):
     rot = [yaw, pitch, roll]
 
     p2p = Pano2Pers.from_crop_size(640, 480, 90)
-    p2p.set_rotation(rot)
+    p2p.set_rotation([0, 0, 0])
 
     s = time.time()
     dst_img = p2p.get_perspective(src_img)
