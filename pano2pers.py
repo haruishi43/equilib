@@ -34,7 +34,7 @@ class Pano2Pers:
     @classmethod
     def from_pano_size(cls, w, h, fov_x, fov_y):
         pers_w = int(w * fov_x / 360.0 + 0.5)
-        pers_h = int(h * fov_y / 360.0 + 0.5)
+        pers_h = int(h * fov_y / 180.0 + 0.5)
         return cls(pers_w, pers_h, fov_x)
     
     # supporting function
@@ -42,7 +42,7 @@ class Pano2Pers:
     def set_rotation(self, angles):
         # [yaw, pitch, roll]
         theta = angles[0]
-        phi = angles[0]
+        phi = angles[1]
 
         y_axis = np.array([0.0, 1.0, 0.0], np.float32)
         z_axis = np.array([0.0, 0.0, 1.0], np.float32)
@@ -57,7 +57,7 @@ class Pano2Pers:
 
     def get_perspective(self, pano_img):
         """
-        pano: numpy array
+        :param pano_img: numpy array
         """
 
         R = self.radius
@@ -115,9 +115,6 @@ class Pano2Pers:
         lon = lon / 180 * pano_cx + pano_cx
         lat = lat / 90 * pano_cy + pano_cy
 
-        _map = np.stack([lat, lon], -1)
-        _map = np.rollaxis(_map, -1)
-        print(_map.shape)
         print(pano_img.shape)
 
         persp = cv2.remap(pano_img, lon.astype(np.float32), lat.astype(np.float32), cv2.INTER_CUBIC, borderMode=cv2.BORDER_WRAP)

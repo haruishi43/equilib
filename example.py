@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-from pano2pers import Pano2Pers
+from pano2pers_torch import Pano2Pers
 
 
 def rescale_frame(frame, percent=75):
@@ -49,8 +49,8 @@ def test_single_image(path=None):
     roll = 0
     rot = [yaw, pitch, roll]
 
-    p2p = Pano2Pers.from_crop_size(640, 480, 90)
-    p2p.set_rotation([0, 0, 0])
+    p2p = Pano2Pers.from_crop_size(480, 640, 60)
+    p2p.set_rotation([yaw, pitch, roll])
 
     s = time.time()
     dst_img = p2p.get_perspective(src_img)
