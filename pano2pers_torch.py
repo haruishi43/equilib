@@ -39,7 +39,25 @@ class Pano2Pers:
 
     def set_rotation(self, rot):
         # [yaw, pitch, roll]
-        self.rot = rot
+        rot_yaw, rot_pitch, rot_roll = rot
+
+        R_yaw = [
+            [np.cos(rot_yaw), 0, -np.sin(rot_yaw)],
+            [0, 1, 0],
+            [np.sin(rot_yaw), 0, np.cos(rot_yaw)]
+        ]
+        R_pitch = [
+            [1, 0, 0],
+            [0, np.cos(rot_pitch), -np.sin(rot_pitch)],
+            [0, np.sin(rot_pitch), np.cos(rot_pitch)]
+        ]
+        R_roll = [
+            [np.cos(rot_roll), -np.sin(rot_roll), 0],
+            [np.sin(rot_roll), np.cos(rot_roll), 0],
+            [0, 0, 1]
+        ]
+
+        self.R = torch.Tensor(R_roll) @ torch.Tensor(R_pitch) @ torch.Tensor(R_yaw)
 
     def get_perspective(self, pano_img):
         """
@@ -51,7 +69,7 @@ class Pano2Pers:
             transforms.Lambda(lambda x: x[[2, 1, 0]])
         ])
 
-        rot_yaw, rot_pitch, rot_roll = self.rot
+        
 
         fov_y = float(pano_img.shape[0]) / pano_img.shape[1] * self.fov_x
 
@@ -71,24 +89,7 @@ class Pano2Pers:
         w = torch.ones_like(u)
         coord = torch.stack((u, v, w), dim=2)
 
-        R_yaw = [
-            [np.cos(rot_yaw), 0, -np.sin(rot_yaw)],
-            [0, 1, 0],
-            [np.sin(rot_yaw), 0, np.cos(rot_yaw)]
-        ]
-        R_pitch = [
-            [1, 0, 0],
-            [0, np.cos(rot_pitch), -np.sin(rot_pitch)],
-            [0, np.sin(rot_pitch), np.cos(rot_pitch)]
-        ]
-        R_roll = [
-            [np.cos(rot_roll), -np.sin(rot_roll), 0],
-            [np.sin(rot_roll), np.cos(rot_roll), 0],
-            [0, 0, 1]
-        ]
-        R = torch.Tensor(R_roll) @ torch.Tensor(R_pitch) @ torch.Tensor(R_yaw)
-
-        roted_coord = coord @ R
+        roted_coord = coord @ self.R
 
         x_sin = roted_coord[:, :, 0] / torch.norm(roted_coord[:, :, [0, 2]], dim=2)
         y_sin = roted_coord[:, :, 1] / torch.norm(roted_coord, dim=2)
