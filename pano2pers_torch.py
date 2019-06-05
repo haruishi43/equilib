@@ -16,9 +16,22 @@ class Pano2Pers:
         self.pers_size = [h, w]
         print(f'Perspective Image: h={self.pers_h}, w={self.pers_w}')
 
-        self.fov_x = fov
+        self.K_inv = self.create_intrinsic_params(fov, self.pers_w, self.pers_h)
 
         self.cuda = False
+
+        self.trans = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Lambda(lambda x: x[[2, 1, 0]])
+        ])
+
+        _vi = torch.linspace(0, self.pers_w - 1, self.pers_w)
+        _vj = torch.linspace(0, self.pers_h - 1, self.pers_h)
+
+        vj, vi = torch.meshgrid([_vj, _vi])
+        vk = torch.ones_like(vi)
+        coord = torch.stack((vi, vj, vk), dim=2)
+        self.coord = coord.unsqueeze(3)
 
     # Constructors:
 
@@ -36,6 +49,12 @@ class Pano2Pers:
         return cls(pers_h, pers_w, fov_x)
     
     # supporting function
+    def create_intrinsic_params(self, fov_x, pers_w, pers_h):
+        f = pers_w / (2 * np.tan(np.radians(fov_x) / 2))
+        K = torch.tensor([[f, 0, pers_w / 2],
+                        [0, f, pers_h / 2],
+                        [0, 0, 1]])
+        return K.inverse()
 
     def set_rotation(self, rot):
         # [yaw, pitch, roll]
@@ -56,56 +75,35 @@ class Pano2Pers:
             [np.sin(rot_roll), np.cos(rot_roll), 0],
             [0, 0, 1]
         ]
-
-        self.R = torch.Tensor(R_roll) @ torch.Tensor(R_pitch) @ torch.Tensor(R_yaw)
+        R = torch.Tensor(R_roll) @ torch.Tensor(R_pitch) @ torch.Tensor(R_yaw)
+        self.R_inv = R.inverse()
 
     def get_perspective(self, pano_img):
         """
         :param pano_img: numpy array
         """
-
-        trans = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Lambda(lambda x: x[[2, 1, 0]])
-        ])
-
         
 
-        fov_y = float(pano_img.shape[0]) / pano_img.shape[1] * self.fov_x
+        pano_h = pano_img.shape[0]
+        pano_w = pano_img.shape[1]
 
-        deg_f_x = (180 - self.fov_x) / 2.0
-        deg_f_y = (180 - fov_y) / 2.0
+        rot_coord = self.R_inv @ self.K_inv @ self.coord
+        rot_coord = rot_coord.squeeze(3)
 
-        f_x = np.radians(deg_f_x)
-        f_y = np.radians(deg_f_y)
+        a = torch.atan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
+        b = torch.asin(rot_coord[:, :, 1] / torch.norm(rot_coord, dim=2))
 
-        v_map = torch.linspace(-np.pi, np.pi, self.pers_size[0])
-        u_map = torch.linspace(-np.pi/2, np.pi/2, self.pers_size[1])
+        ui = (a + np.pi) * pano_w / (2 * np.pi)
+        uj = (b + np.pi / 2) * pano_h / np.pi
 
-        v, u = torch.meshgrid([v_map, u_map])
-        
-        u = u / f_x
-        v = v / f_y
-        w = torch.ones_like(u)
-        coord = torch.stack((u, v, w), dim=2)
+        norm_ui = 2 * (ui - pano_w / 2) / pano_w
+        norm_uj = 2 * (uj - pano_h / 2) / pano_h
 
-        roted_coord = coord @ self.R
+        grid = torch.stack((norm_ui, norm_uj), 2).unsqueeze(0)
 
-        x_sin = roted_coord[:, :, 0] / torch.norm(roted_coord[:, :, [0, 2]], dim=2)
-        y_sin = roted_coord[:, :, 1] / torch.norm(roted_coord, dim=2)
+        pano = self.trans(pano_img)
+        pano = pano.expand(grid.size(0), -1, -1, -1)
 
-        x_raw = torch.asin(x_sin)
-        x_raw = torch.where(roted_coord[:, :, 2] < 0, np.pi - x_raw, x_raw)
-        y_raw = torch.asin(y_sin)
-
-        x = x_raw / np.pi
-        y = 2 * y_raw / np.pi
-
-        grid = torch.stack((x, y), 2).unsqueeze(0)
-        pano_img = trans(pano_img)
-
-        pano_img = pano_img.expand(grid.size(0), -1, -1, -1)
-
-        pers = torch.nn.functional.grid_sample(pano_img, grid).squeeze(0)
+        pers = torch.nn.functional.grid_sample(pano, grid).squeeze(0)
         pers = pers.permute(1, 2, 0)
         return pers.numpy()[..., [2,1,0]]
