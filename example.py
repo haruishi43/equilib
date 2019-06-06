@@ -48,8 +48,11 @@ def test_single_image(path=None):
     pitch = 0 * inc  # -pi/2 < a < pi/2
     roll = 0
     rot = [yaw, pitch, roll]
+    h = 720 #480
+    w = 1080 #640
+    fov = 80
 
-    p2p = Pano2Pers.from_crop_size(480, 640, 60)
+    p2p = Pano2Pers.from_crop_size(h, w, fov)
     p2p.set_rotation([yaw, pitch, roll])
 
     s = time.time()

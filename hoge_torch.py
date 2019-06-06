@@ -53,7 +53,7 @@ def pano2pers_grid(size: List[int] = None, rot: List[float] = None, f: List[floa
     x_raw = torch.where(roted_coord[:, :, 2] < 0, np.pi - x_raw, x_raw)
     y_raw = torch.asin(y_sin)
 
-    x = x_raw / np.pi
+    x    = x_raw / np.pi
     x = torch.remainder(x, 2) - 1
     y = 2 * y_raw / np.pi
 
