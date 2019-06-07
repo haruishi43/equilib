@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-from pano2pers_torch import Pano2Pers
+from pano2pers import Pano2Pers
 
 
 def rescale_frame(frame, percent=75):
