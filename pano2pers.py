@@ -46,10 +46,18 @@ class Pano2Pers:
 
     @classmethod
     def from_crop_size(cls, pers_h, pers_w, fov, cuda=False, debug=False):
+        """
+        param: pers_h, pers_w: perspective image size
+        param: fov: field of view in deg
+        """
         return cls(pers_h, pers_w, fov, cuda, debug)
 
     @classmethod
     def from_pano_size(cls, pano_h, pano_w, fov_x, fov_y, cuda=False, debug=False):
+        """
+        param: pano_h, pano_w: panorama image size
+        param: fov_x, fov_y: field of view in deg
+        """
         pers_w = int(pano_w * fov_x / 360.0 + 0.5)
         pers_h = int(pano_h * fov_y / 360.0 + 0.5)
         return cls(pers_h, pers_w, fov_x, cuda, debug)
@@ -123,7 +131,6 @@ class Pano2Pers:
         """
         :param pano_img: numpy array
         """
-
         R = self.radius
         rot_1 = self.rot_1
         rot_2 = self.rot_2

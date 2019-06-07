@@ -67,20 +67,20 @@ def test_video(path=None):
     if path is not None:
         video_path = path
     else:
-        video_path = "./data/pano_4k_outdoor.MP4"
-
-    # initialize Pano2Perspective
-    p2p = pano.Pano2Perspective(640, 480, 90.0)
-    p2p.cuda(0)  # use cuda
-
-    K = p2p.get_intrinsics()
-    print(K)
+        video_path = "./data/R0010053_er_23.MP4"
 
     pi = math.pi
     inc = pi / 180
     yaw = 0  # -pi < b < pi
     pitch = 0  # -pi/2 < a < pi/2
     roll = 0
+    h = 720 #480
+    w = 1080 #640
+    fov = 80
+
+    # initialize Pano2Perspective
+    p2p = Pano2Pers.from_crop_size(h, w, fov, True, True)
+
     times = []
     cap = cv2.VideoCapture(video_path)
     while(cap.isOpened()):
@@ -92,7 +92,7 @@ def test_video(path=None):
         s = time.time()
         arr = [frame[:,:, 0], frame[:, :, 1], frame[:, :, 2]]
         p2p.set_rotation([yaw, pitch, roll])  # set rotation
-        dst_img = np.array(p2p.process_image(arr), copy=False)  # process the image
+        dst_img = p2p.get_perspective(frame)  # process the image
         e = time.time()
 
         cv2.imshow("video", dst_img)
