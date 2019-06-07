@@ -52,7 +52,7 @@ def test_single_image(path=None):
     w = 1080 #640
     fov = 80
 
-    p2p = Pano2Pers.from_crop_size(h, w, fov, True, True)
+    p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)
     p2p.set_rotation([yaw, pitch, roll])
 
     s = time.time()
@@ -79,7 +79,7 @@ def test_video(path=None):
     fov = 80
 
     # initialize Pano2Perspective
-    p2p = Pano2Pers.from_crop_size(h, w, fov, True, True)
+    p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)
 
     times = []
     cap = cv2.VideoCapture(video_path)

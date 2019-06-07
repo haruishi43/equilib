@@ -15,7 +15,7 @@ from scipy import ndimage
 
 
 class Pano2Pers:
-    def __init__(self, pers_h, pers_w, fov, cuda=False, debug=False):
+    def __init__(self, pers_h, pers_w, fov, device=-1, debug=False):
         """
         Initialize parameters
         :param pers_h, pers_w: height and width of perspective image (int)
@@ -39,28 +39,27 @@ class Pano2Pers:
         coord = torch.stack((vi, vj, vk), dim=2)
         self.coord = coord.unsqueeze(3)
 
-        self.cuda = cuda
-        if self.cuda:
-            self.K_inv = self.K_inv.cuda()
-            self.coord = self.coord.cuda()
+        self.device = torch.device(device if device > -1 else "cpu")
+        self.K_inv = self.K_inv.to(self.device)
+        self.coord = self.coord.to(self.device)
 
     @classmethod
-    def from_crop_size(cls, pers_h, pers_w, fov, cuda=False, debug=False):
+    def from_crop_size(cls, pers_h, pers_w, fov, device=-1, debug=False):
         """
         param: pers_h, pers_w: perspective image size
         param: fov: field of view in deg
         """
-        return cls(pers_h, pers_w, fov, cuda, debug)
+        return cls(pers_h, pers_w, fov, device, debug)
 
     @classmethod
-    def from_pano_size(cls, pano_h, pano_w, fov_x, fov_y, cuda=False, debug=False):
+    def from_pano_size(cls, pano_h, pano_w, fov_x, fov_y, device=-1, debug=False):
         """
         param: pano_h, pano_w: panorama image size
         param: fov_x, fov_y: field of view in deg
         """
         pers_w = int(pano_w * fov_x / 360.0 + 0.5)
         pers_h = int(pano_h * fov_y / 360.0 + 0.5)
-        return cls(pers_h, pers_w, fov_x, cuda, debug)
+        return cls(pers_h, pers_w, fov_x, device, debug)
 
     def create_intrinsic_params(self, pers_h, pers_w, fov_x):
         f = pers_w / (2 * np.tan(np.radians(fov_x) / 2))
@@ -90,8 +89,7 @@ class Pano2Pers:
             [0, 0, 1]]
         R = torch.Tensor(R_roll) @ torch.Tensor(R_pitch) @ torch.Tensor(R_yaw)
         self.R_inv = R.inverse()
-        if self.cuda:
-            self.R_inv = self.R_inv.cuda()
+        self.R_inv = self.R_inv.to(self.device)
         
     def get_perspective(self, pano_img):
         """
@@ -117,13 +115,11 @@ class Pano2Pers:
 
         pano = self.trans(pano_img)
         pano = pano.expand(grid.size(0), -1, -1, -1)
-        if self.cuda:
-            pano = pano.cuda()
+        pano = pano.to(self.device)
         
         pers = F.grid_sample(pano, grid).squeeze(0)
         pers = pers.permute(1, 2, 0)
-        if self.cuda:
-            pers = pers.cpu()
+        pers = pers.to("cpu")  # output is always cpu (for now...)
 
         return pers.numpy()[..., [2,1,0]]
 
