@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-from pano2pers import Pano2Pers
+
+# old project file
+import pano2perspective as pano
 
 
 def rescale_frame(frame, percent=75):
@@ -48,21 +50,16 @@ def test_single_image(path=None):
     pitch = 0 * inc  # -pi/2 < a < pi/2
     roll = 0
     rot = [yaw, pitch, roll]
-    h = 480 #480
-    w = 640 #640
-    fov = 90
 
-    p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)
-    p2p.set_rotation([yaw, pitch, roll])
-
+    arr = [src_img[:,:, 0], src_img[:, :, 1], src_img[:, :, 2]]
     s = time.time()
-    dst_img = p2p.get_perspective(src_img)
+    dst_img = np.array(pano.process_single_image(arr, rot, True, 640, 480, 90.0), copy=False)
     e = time.time()
     print(e - s)
-    dst_img = p2p.convert_rgb(dst_img)
+    dst_img = cv2.cvtColor(dst_img,cv2.COLOR_RGB2BGR)
     cv2.imshow("output", rescale_frame(dst_img,percent=100))
     cv2.waitKey()
-    cv2.imwrite("./data/output.jpg", dst_img)
+    cv2.imwrite("./data/output_original.jpg", dst_img)
 
 
 def test_video(path=None):
@@ -71,17 +68,19 @@ def test_video(path=None):
     else:
         video_path = "./data/R0010050_er_0.MP4"
 
+    # initialize Pano2Perspective
+    p2p = pano.Pano2Perspective(640, 480, 90.0)
+    p2p.cuda(0)  # use cuda
+
+    K = p2p.get_intrinsics()
+    print(K)
+
     pi = math.pi
     inc = pi / 180
     yaw = 0  # -pi < b < pi
     pitch = 0  # -pi/2 < a < pi/2
     roll = 0
-    h = 480 #480
-    w = 640 #640
-    fov = 80
 
-    # initialize Pano2Perspective
-    p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)
 
     times = []
     cap = cv2.VideoCapture(video_path)
@@ -94,7 +93,7 @@ def test_video(path=None):
         s = time.time()
         arr = [frame[:,:, 0], frame[:, :, 1], frame[:, :, 2]]
         p2p.set_rotation([yaw, pitch, roll])  # set rotation
-        dst_img = p2p.get_perspective(frame)  # process the image
+        dst_img = np.array(p2p.process_image(arr), copy=False)  # process the image
         e = time.time()
 
         cv2.imshow("video", dst_img)

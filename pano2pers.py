@@ -9,10 +9,6 @@ import torch
 import torch.nn.functional as F
 from torchvision import transforms
 
-# don't really need if you're just using torch
-import cv2
-from scipy import ndimage
-
 
 class Pano2Pers:
     def __init__(self, pers_h, pers_w, fov, device=-1, debug=False):
@@ -28,7 +24,11 @@ class Pano2Pers:
 
         self.trans = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Lambda(lambda x: x[[2, 1, 0]])
+            transforms.Lambda(lambda x: x[[2, 1, 0]])  # input assumes bgr
+        ])
+
+        self.invtrans = transforms.Compose([
+            transforms.ToPILImage()
         ])
 
         _vi = torch.linspace(0, pers_w - 1, pers_w)
@@ -90,7 +90,18 @@ class Pano2Pers:
         R = torch.Tensor(R_roll) @ torch.Tensor(R_pitch) @ torch.Tensor(R_yaw)
         self.R_inv = R.inverse()
         self.R_inv = self.R_inv.to(self.device)
-        
+
+    def convert_rgb(self, img):
+        return img[..., [2,1,0]]
+
+    def transform_pano(self, pano):
+        return self.trans(pano)
+
+    def pixel_wise_rot(self, rot_coord):
+        a = torch.atan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
+        b = torch.asin(rot_coord[:, :, 1] / torch.norm(rot_coord, dim=2))
+        return a, b
+
     def get_perspective(self, pano_img):
         """
         :param pano_img: numpy array
@@ -101,9 +112,8 @@ class Pano2Pers:
         rot_coord = self.R_inv @ self.K_inv @ self.coord
         rot_coord = rot_coord.squeeze(3)
 
-        a = torch.atan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
-        b = torch.asin(rot_coord[:, :, 1] / torch.norm(rot_coord, dim=2))
-
+        a, b = self.pixel_wise_rot(rot_coord)
+        
         ui = (a + math.pi) * pano_w / (2 * math.pi)
         uj = (b + math.pi / 2) * pano_h / math.pi
 
@@ -113,12 +123,16 @@ class Pano2Pers:
 
         grid = torch.stack((norm_ui, norm_uj), 2).unsqueeze(0)
 
-        pano = self.trans(pano_img)
+        pano = self.transform_pano(pano_img)
         pano = pano.expand(grid.size(0), -1, -1, -1)
         pano = pano.to(self.device)
         
         pers = F.grid_sample(pano, grid).squeeze(0)
         pers = pers.permute(1, 2, 0)
         pers = pers.to("cpu")  # output is always cpu (for now...)
+        
+        pers = pers.numpy()
+        pers = pers * 255
+        pers = pers.astype(np.uint8)
 
-        return pers.numpy()[..., [2,1,0]]
+        return pers
