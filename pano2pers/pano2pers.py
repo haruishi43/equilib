@@ -62,7 +62,7 @@ class Pano2Pers:
         return cls(pers_h, pers_w, fov_x, device, debug)
 
     def create_intrinsic_params(self, pers_h, pers_w, fov_x):
-        f = pers_w / (2 * np.tan(np.radians(fov_x) / 2))
+        f = pers_w / (2 * torch.tan(np.radians(fov_x) / 2))
         K = torch.tensor([
             [f, 0, pers_w / 2],
             [0, f, pers_h / 2],
@@ -76,16 +76,16 @@ class Pano2Pers:
         rot_yaw, rot_pitch, rot_roll = rot
 
         R_yaw = [
-            [np.cos(rot_yaw), 0, -np.sin(rot_yaw)],
+            [torch.cos(rot_yaw), 0, -torch.sin(rot_yaw)],
             [0, 1, 0],
-            [np.sin(rot_yaw), 0, np.cos(rot_yaw)]]
+            [torch.sin(rot_yaw), 0, torch.cos(rot_yaw)]]
         R_pitch = [
             [1, 0, 0],
-            [0, np.cos(rot_pitch), -np.sin(rot_pitch)],
-            [0, np.sin(rot_pitch), np.cos(rot_pitch)]]
+            [0, torch.cos(rot_pitch), -torch.sin(rot_pitch)],
+            [0, torch.sin(rot_pitch), torch.cos(rot_pitch)]]
         R_roll = [
-            [np.cos(rot_roll), -np.sin(rot_roll), 0],
-            [np.sin(rot_roll), np.cos(rot_roll), 0],
+            [torch.cos(rot_roll), -torch.sin(rot_roll), 0],
+            [torch.sin(rot_roll), torch.cos(rot_roll), 0],
             [0, 0, 1]]
         R = torch.Tensor(R_roll) @ torch.Tensor(R_pitch) @ torch.Tensor(R_yaw)
         self.R_inv = R.inverse()
