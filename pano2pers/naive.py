@@ -53,7 +53,13 @@ def pixel_wise_rot(rot_coord):
     return a, b
 
 
-def interp3d(src, y, x, y0, y1, x0, x1):
+def interp3d(src, y, x):
+    r"""Naive Bilinear Interpolation
+    """
+    y0 = int(np.floor(y))
+    y1 = int(np.floor(y)) + 1
+    x0 = int(np.floor(x))
+    x1 = int(np.floor(x)) + 1
     q_00 = src[:, y0, x0]
     q_10 = src[:, y1, x0]
     q_01 = src[:, y0, x1]
@@ -65,11 +71,6 @@ def interp3d(src, y, x, y0, y1, x0, x1):
         q_11*(x-x0)/(x1-x0)
     f_3 = f_0*(y1-y)/(y1-y0) + \
         f_1*(y-y0)/(y1-y0)
-
-    #FIXME: I don't like this part
-    f_3 = np.where(f_3 >= 255, 255, f_3)
-    f_3 = np.where(f_3<0, 0, f_3)
-    f_3 = f_3.astype(np.uint8)
     return f_3
 
 
@@ -84,14 +85,15 @@ def grid_sample(img, grid, mode='bilinear'):
     for y in range(h_out):
         for x in range(w_out):
             y_in, x_in = grid[:,y,x]
-            y0 = int(np.floor(y_in))
-            y1 = int(np.floor(y_in)) + 1
-            x0 = int(np.floor(x_in))
-            x1 = int(np.floor(x_in)) + 1
 
-            # basic sample
-            out[:,y,x] = interp3d(img, y_in, x_in, y0, y1, x0, x1)
+            if mode == 'bilinear':
+                _out = interp3d(img, y_in, x_in)
+            else:
+                print(f"{mode} is not supported.")
 
+            _out = np.where(_out >= 255, 255, _out)
+            _out = np.where(_out < 0, 0, _out)
+            out[:,y,x] = _out.astype(np.uint8)
     return out
 
 
