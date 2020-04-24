@@ -43,8 +43,6 @@ def grid_sample(
     img: np.array, grid: np.array,
     mode: str = 'bilinear',
 ) -> np.array:
-    r"""Naive grid sample algorithm
-    """
     channels, h_in, w_in = img.shape
     _, h_out, w_out = grid.shape
 
@@ -79,6 +77,10 @@ def grid_sample(
         max_grid[1,:,:]
     )
 
+    ys, xs = min_grid[0,:,:], min_grid[1,:,:]
+
+    Q00 = 
+
     for y in range(h_out):
         for x in range(w_out):
             # _y, _x = grid[:,y,x]
@@ -92,7 +94,7 @@ def grid_sample(
             q11 = img[:, y1, x1]
 
             out[:,y,x] = interp2d([q00,q10,q01,q11], dy, dx, mode=mode)
-
+    
     out = np.where(out >= _max, _max, out)
     out = np.where(out < _min, _min, out)
     return out.astype(_dtype)
