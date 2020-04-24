@@ -67,12 +67,12 @@ def interp3d(
         (y,x): target pixel
         mode: interpolation mode
     """
-    q_00, q_10, q_01, q_11 = Q
+    q00, q10, q01, q11 = Q
     if mode == 'bilinear':
-        f_0 = q_00*dx + q_01*(1-dx)
-        f_1 = q_10*dx + q_11*(1-dx)
-        f_3 = f_0*dy + f_1*(1-dy)
-        out = f_3
+        f0 = q00*(1-dx) + q01*dx
+        f1 = q10*(1-dx) + q11*dx
+        f3 = f0*(1-dy) + f1*dy
+        out = f3
     else:
         print(f"{mode} is not supported")
     return out
@@ -82,9 +82,12 @@ def grid_sample(
     img: np.array, grid: np.array,
     mode: str = 'bilinear',
 ) -> np.array:
-    r"""
+    r"""Naive grid sample algorithm
     """
     channels, h_in, w_in = img.shape
+    _, h_out, w_out = grid.shape
+
+    # Image conversion values
     if img.dtype == np.uint8:
         _min = 0
         _max = 255
@@ -95,36 +98,40 @@ def grid_sample(
         _dtype = np.float64
     else:
         print(f"{img.dtype} is not supported")
-    
-    _, h_out, w_out = grid.shape
+
+    # Initialize output image
     out = np.zeros((channels, h_out, w_out), dtype=_dtype)
+
+    min_grid = np.floor(grid).astype(np.uint64)
+    #NOTE: uint8 convertion causes truncation, so use uint64
+    max_grid = min_grid + 1
+    d_grid = grid - min_grid
+
+    max_grid[0,:,:] = np.where(
+        max_grid[0,:,:] >= h_in,
+        max_grid[0,:,:] - h_in,
+        max_grid[0,:,:]
+    )
+    max_grid[1,:,:] = np.where(
+        max_grid[1,:,:] >= w_in,
+        max_grid[1,:,:] - w_in,
+        max_grid[1,:,:]
+    )
 
     for y in range(h_out):
         for x in range(w_out):
-            y_in, x_in = grid[:,y,x]
-            
-            y0 = int(np.floor(y_in))
-            y1 = int(np.floor(y_in)) + 1
-            x0 = int(np.floor(x_in))
-            x1 = int(np.floor(x_in)) + 1
+            # _y, _x = grid[:,y,x]
+            dy, dx = d_grid[:,y,x]
+            y0, x0 = min_grid[:,y,x]
+            y1, x1 = max_grid[:,y,x]
 
-            dy = y_in - y0
-            dx = x_in - x0
+            q00 = img[:, y0, x0]
+            q10 = img[:, y1, x0]
+            q01 = img[:, y0, x1]
+            q11 = img[:, y1, x1]
 
-            if y1 >= h_in:
-                y1 = y1 - h_in
-            if x1 >= w_in:
-                x1 = x1 - w_in
+            _out = interp3d([q00,q10,q01,q11], dy, dx, mode=mode)
 
-            q_00 = img[:, y0, x0]
-            q_10 = img[:, y1, x0]
-            q_01 = img[:, y0, x1]
-            q_11 = img[:, y1, x1]
-
-            f_0 = q_00*(x1-x_in) + q_01*(x_in-x0)
-            f_1 = q_10*(x1-x_in) + q_11*(x_in-x0)
-            f_3 = f_0*(y1-y_in) + f_1*(y_in-y0)
-            _out = f_3
             _out = np.where(_out >= _max, _max, _out)
             _out = np.where(_out < _min, _min, _out)
             out[:,y,x] = _out.astype(_dtype)
@@ -154,7 +161,7 @@ if __name__ == "__main__":
     # Variables:
     h_pers = 480
     w_pers = 640
-    rot = [0, 0, 0]
+    rot = [0, 90, 0]
     fov_x = 80
 
     coord = create_coord(h_pers, w_pers)
