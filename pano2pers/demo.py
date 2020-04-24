@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # Variables:
     h_pers = 480
     w_pers = 640
-    rot = [45, 0, 0]
+    rot = [45, 45, 0]
     fov_x = 90
 
     tic = time.perf_counter()
