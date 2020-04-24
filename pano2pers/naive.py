@@ -58,43 +58,21 @@ def pixel_wise_rot(rot_coord: np.array) -> Tuple[np.array]:
     return a, b
 
 
-def bilinear(
-    Q: List[np.array],
-    y: int, x: int,
-    y0: int, y1: int,
-    x0: int, x1: int,
-) -> np.array:
-    r"""Naive Bilinear Interpolation
-    """
-    q_00, q_10, q_01, q_11 = Q
-    f_0 = q_00*(x1-x)/(x1-x0) + \
-        q_01*(x-x0)/(x1-x0)
-    f_1 = q_10*(x1-x)/(x1-x0) + \
-        q_11*(x-x0)/(x1-x0)
-    f_3 = f_0*(y1-y)/(y1-y0) + \
-        f_1*(y-y0)/(y1-y0)
-    return f_3
-
-
 def interp3d(
-    src: np.array,
-    y: float, x: float,
+    Q: List[np.array],
+    dy: float, dx: float,
     mode: str = 'bilinear',
 ) -> np.array:
     r"""Naive Interpolation
+        (y,x): target pixel
+        mode: interpolation mode
     """
-    y0 = int(np.floor(y))
-    y1 = int(np.floor(y)) + 1
-    x0 = int(np.floor(x))
-    x1 = int(np.floor(x)) + 1
-    q_00 = src[:, y0, x0]
-    q_10 = src[:, y1, x0]
-    q_01 = src[:, y0, x1]
-    q_11 = src[:, y1, x1]
-    Q = [q_00, q_10, q_01, q_11]
-
+    q_00, q_10, q_01, q_11 = Q
     if mode == 'bilinear':
-        out = bilinear(Q, y, x, y0, y1, x0, x1)
+        f_0 = q_00*dx + q_01*(1-dx)
+        f_1 = q_10*dx + q_11*(1-dx)
+        f_3 = f_0*dy + f_1*(1-dy)
+        out = f_3
     else:
         print(f"{mode} is not supported")
     return out
@@ -107,17 +85,49 @@ def grid_sample(
     r"""
     """
     channels, h_in, w_in = img.shape
+    if img.dtype == np.uint8:
+        _min = 0
+        _max = 255
+        _dtype = np.uint8
+    elif img.dtype == np.float64:
+        _min = 0.0
+        _max = 1.0
+        _dtype = np.float64
+    else:
+        print(f"{img.dtype} is not supported")
+    
     _, h_out, w_out = grid.shape
-    out = np.zeros((channels, h_out, w_out), dtype=np.uint8)
+    out = np.zeros((channels, h_out, w_out), dtype=_dtype)
 
     for y in range(h_out):
         for x in range(w_out):
             y_in, x_in = grid[:,y,x]
+            
+            y0 = int(np.floor(y_in))
+            y1 = int(np.floor(y_in)) + 1
+            x0 = int(np.floor(x_in))
+            x1 = int(np.floor(x_in)) + 1
 
-            _out = interp3d(img, y_in, x_in, mode=mode)
-            _out = np.where(_out >= 255, 255, _out)
-            _out = np.where(_out < 0, 0, _out)
-            out[:,y,x] = _out.astype(np.uint8)
+            dy = y_in - y0
+            dx = x_in - x0
+
+            if y1 >= h_in:
+                y1 = y1 - h_in
+            if x1 >= w_in:
+                x1 = x1 - w_in
+
+            q_00 = img[:, y0, x0]
+            q_10 = img[:, y1, x0]
+            q_01 = img[:, y0, x1]
+            q_11 = img[:, y1, x1]
+
+            f_0 = q_00*(x1-x_in) + q_01*(x_in-x0)
+            f_1 = q_10*(x1-x_in) + q_11*(x_in-x0)
+            f_3 = f_0*(y1-y_in) + f_1*(y_in-y0)
+            _out = f_3
+            _out = np.where(_out >= _max, _max, _out)
+            _out = np.where(_out < _min, _min, _out)
+            out[:,y,x] = _out.astype(_dtype)
     return out
 
 
@@ -168,12 +178,15 @@ if __name__ == "__main__":
     uj = np.where(uj < 0, uj + h_pano, uj)
     uj = np.where(uj >= h_pano, uj - h_pano, uj)
 
+    # pano = pano / 255.
+
     grid = np.stack((uj, ui), axis=0)
     sampled = grid_sample(pano, grid)
 
     # after sample
     pers = np.transpose(sampled, (1,2,0))
+    # pers = (pers * 255).astype(np.uint8)
     pers_img = Image.fromarray(pers)
 
-    pers_path = osp.join(data_path, 'out.jpg')
+    pers_path = osp.join(data_path, 'output.jpg')
     pers_img.save(pers_path)
