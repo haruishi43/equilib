@@ -53,11 +53,26 @@ def pixel_wise_rot(rot_coord):
     return a, b
 
 
-def grid_sample(img, grid):
+def grid_sample(img, grid, mode='bilinear'):
     r"""
     """
-    #TODO: Implement
-    return img
+    channels, h_in, w_in = img.shape
+    _, h_out, w_out = grid.shape
+    out = np.zeros((channels, h_out, w_out), dtype=np.uint8)
+    print(out.shape)
+
+    for y in range(h_out):
+        for x in range(w_out):
+            y_in, x_in = grid[:,y,x]
+            y0 = int(np.floor(y_in))
+            y1 = int(np.floor(y_in)) + 1
+            x0 = int(np.floor(x_in))
+            x1 = int(np.floor(x_in)) + 1
+            
+            # basic sample
+            out[:,y,x] = img[:,y1,x1]
+
+    return out
 
 
 if __name__ == "__main__":
@@ -70,11 +85,12 @@ if __name__ == "__main__":
     pano_path = osp.join(data_path, 'pano2.png')
 
     pano_img = Image.open(pano_path)
+    pano_img = pano_img.convert('RGB')
     pano = np.asarray(pano_img)
 
     pano = np.transpose(pano, (2,0,1))
-
     _, h_pano, w_pano = pano.shape
+    print('panorama size:')
     print(h_pano, w_pano)
     
     # Variables:
@@ -99,5 +115,19 @@ if __name__ == "__main__":
     ui = (a + np.pi) * w_pano / (2 * np.pi)
     uj = (b + np.pi / 2) * h_pano / np.pi
 
-    grid = np.stack((ui, uj), axis=2)
-    print(grid.shape)
+    ui = np.where(ui < 0, ui + w_pano, ui)
+    ui = np.where(ui >= w_pano, ui - w_pano, ui)
+    uj = np.where(uj < 0, uj + h_pano, uj)
+    uj = np.where(uj >= h_pano, uj - h_pano, uj)
+
+    grid = np.stack((uj, ui), axis=0)
+    sampled = grid_sample(pano, grid)
+    print(sampled.shape)
+
+    # after sample
+    pers = np.transpose(sampled, (1,2,0))
+    print(pers.shape)
+    pers_img = Image.fromarray(pers)
+
+    pers_path = osp.join(data_path, 'out.jpg')
+    pers_img.save(pers_path)
