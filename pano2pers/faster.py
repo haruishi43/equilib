@@ -11,7 +11,7 @@ def linear_interp(v0, v1, d, l):
 
 def interp2d(
     Q: List[np.ndarray],
-    dy: float, dx: float,
+    dy: np.array, dx: np.array,
     mode: str = 'bilinear',
 ) -> np.ndarray:
     r"""Naive Interpolation
