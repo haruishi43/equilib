@@ -53,6 +53,26 @@ def pixel_wise_rot(rot_coord):
     return a, b
 
 
+def interp3d(src, y, x, y0, y1, x0, x1):
+    q_00 = src[:, y0, x0]
+    q_10 = src[:, y1, x0]
+    q_01 = src[:, y0, x1]
+    q_11 = src[:, y1, x1]
+
+    f_0 = q_00*(x1-x)/(x1-x0) + \
+        q_01*(x-x0)/(x1-x0)
+    f_1 = q_10*(x1-x)/(x1-x0) + \
+        q_11*(x-x0)/(x1-x0)
+    f_3 = f_0*(y1-y)/(y1-y0) + \
+        f_1*(y-y0)/(y1-y0)
+
+    #FIXME: I don't like this part
+    f_3 = np.where(f_3 >= 255, 255, f_3)
+    f_3 = np.where(f_3<0, 0, f_3)
+    f_3 = f_3.astype(np.uint8)
+    return f_3
+
+
 def grid_sample(img, grid, mode='bilinear'):
     r"""
     """
@@ -68,9 +88,9 @@ def grid_sample(img, grid, mode='bilinear'):
             y1 = int(np.floor(y_in)) + 1
             x0 = int(np.floor(x_in))
             x1 = int(np.floor(x_in)) + 1
-            
+
             # basic sample
-            out[:,y,x] = img[:,y1,x1]
+            out[:,y,x] = interp3d(img, y_in, x_in, y0, y1, x0, x1)
 
     return out
 
@@ -85,6 +105,8 @@ if __name__ == "__main__":
     pano_path = osp.join(data_path, 'pano2.png')
 
     pano_img = Image.open(pano_path)
+
+    # Sometimes images are RGBA
     pano_img = pano_img.convert('RGB')
     pano = np.asarray(pano_img)
 
