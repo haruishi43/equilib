@@ -3,6 +3,8 @@
 import os
 import os.path as osp
 
+import time
+
 from PIL import Image
 import numpy as np
 
@@ -18,6 +20,7 @@ if __name__ == "__main__":
     data_path = osp.join('..', 'data')
     pano_path = osp.join(data_path, 'pano2.png')
 
+    tic = time.perf_counter()
     pano_img = Image.open(pano_path)
 
     # Sometimes images are RGBA
@@ -25,6 +28,10 @@ if __name__ == "__main__":
     pano = np.asarray(pano_img)
 
     pano = np.transpose(pano, (2,0,1))
+
+    toc = time.perf_counter()
+    print(f"Process Pano: {toc - tic:0.4f} seconds")
+
     _, h_pano, w_pano = pano.shape
     print('panorama size:')
     print(h_pano, w_pano)
@@ -35,19 +42,32 @@ if __name__ == "__main__":
     rot = [45, 0, 0]
     fov_x = 90
 
+    tic = time.perf_counter()
     coord = create_coord(h_pers, w_pers)
     K = create_K(h_pers, w_pers, fov_x)
     R = create_rot_mat(rot)
+    toc = time.perf_counter()
+    print(f"Process coord, K, R: {toc - tic:0.4f} seconds")
 
+    tic = time.perf_counter()
     K_inv = np.linalg.inv(K)
     R_inv = np.linalg.inv(R)
     coord = coord[:, :, :, np.newaxis]
+    toc = time.perf_counter()
+    print(f"Take Inverse: {toc - tic:0.4f} seconds")
 
+    tic = time.perf_counter()
     rot_coord = R_inv @ K_inv @ coord
     rot_coord = rot_coord.squeeze(3)
+    toc = time.perf_counter()
+    print(f"rot_coord: {toc - tic:0.4f} seconds")
 
+    tic = time.perf_counter()
     a, b = pixel_wise_rot(rot_coord)
+    toc = time.perf_counter()
+    print(f"pixel_wise_rot: {toc - tic:0.4f} seconds")
 
+    tic = time.perf_counter()
     ui = (a + np.pi) * w_pano / (2 * np.pi)
     uj = (b + np.pi / 2) * h_pano / np.pi
 
@@ -59,13 +79,26 @@ if __name__ == "__main__":
     # pano = pano / 255.  # scaling 0.0 - 1.0
 
     grid = np.stack((uj, ui), axis=0)
-    # sampled = naive_grid_sample(pano, grid, mode='bilinear')
-    sampled = faster_grid_sample(pano, grid, mode='bilinear')
+    toc = time.perf_counter()
+    print(f"preprocess grid: {toc - tic:0.4f} seconds")
+    
+    tic = time.perf_counter()
+    sampled = naive_grid_sample(pano, grid, mode='bilinear')
+    toc = time.perf_counter()
+    print(f"naive: {toc - tic:0.4f} seconds")
 
+    tic = time.perf_counter()
+    sampled = faster_grid_sample(pano, grid, mode='bilinear')
+    toc = time.perf_counter()
+    print(f"faster: {toc - tic:0.4f} seconds")
+
+    tic = time.perf_counter()
     # after sample
     pers = np.transpose(sampled, (1,2,0))
     # pers = (pers * 255).astype(np.uint8)  # unscaling
     pers_img = Image.fromarray(pers)
+    toc = time.perf_counter()
+    print(f"post process: {toc - tic:0.4f} seconds")
 
     pers_path = osp.join(data_path, 'output_.jpg')
     pers_img.save(pers_path)

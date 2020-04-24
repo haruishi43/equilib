@@ -23,8 +23,10 @@ def interp2d(
         f0 = linear_interp(q00, q01, dx, 1)
         f1 = linear_interp(q10, q11, dx, 1)
         return linear_interp(f0, f1, dy, 1)
+    elif mode == 'nearest':
+        raise NotImplementedError
     else:
-        return None
+        raise NotImplementedError
 
 
 def grid_sample(
@@ -85,9 +87,7 @@ def grid_sample(
     Q01 = img[:,y_mins,x_maxs]
     Q11 = img[:,y_maxs,x_maxs]
 
-    Q = [Q00, Q10, Q01, Q11]
-
-    out = interp2d(Q, y_d, x_d, mode='bilinear')
+    out = interp2d([Q00, Q10, Q01, Q11], y_d, x_d, mode='bilinear')
     out = out.reshape(channels, h_out, w_out)
 
     out = np.where(out >= _max, _max, out)
