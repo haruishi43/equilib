@@ -67,5 +67,5 @@ if __name__ == "__main__":
     # pers = (pers * 255).astype(np.uint8)  # unscaling
     pers_img = Image.fromarray(pers)
 
-    pers_path = osp.join(data_path, 'output.jpg')
+    pers_path = osp.join(data_path, 'output_.jpg')
     pers_img.save(pers_path)

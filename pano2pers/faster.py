@@ -10,10 +10,10 @@ def linear_interp(v0, v1, d, l):
 
 
 def interp2d(
-    Q: List[np.array],
+    Q: List[np.ndarray],
     dy: float, dx: float,
     mode: str = 'bilinear',
-) -> np.array:
+) -> np.ndarray:
     r"""Naive Interpolation
         (y,x): target pixel
         mode: interpolation mode
@@ -23,19 +23,7 @@ def interp2d(
         f0 = linear_interp(q00, q01, dx, 1)
         f1 = linear_interp(q10, q11, dx, 1)
         return linear_interp(f0, f1, dy, 1)
-    elif mode == 'nearest':
-        if dx < 0.5:
-            if dy < 0.5:
-                return q00
-            else:
-                return q10
-        else:
-            if dy < 0.5:
-                return q01
-            else:
-                return q11
     else:
-        print(f"{mode} is not supported")
         return None
 
 
@@ -77,24 +65,31 @@ def grid_sample(
         max_grid[1,:,:]
     )
 
-    ys, xs = min_grid[0,:,:], min_grid[1,:,:]
+    y_mins = min_grid[0,:,:]
+    x_mins = min_grid[1,:,:]
+    y_mins = y_mins.flatten()
+    x_mins = x_mins.flatten()
 
-    Q00 = 
+    y_maxs = max_grid[0,:,:]
+    x_maxs = max_grid[1,:,:]
+    y_maxs = y_maxs.flatten()
+    x_maxs = x_maxs.flatten()
 
-    for y in range(h_out):
-        for x in range(w_out):
-            # _y, _x = grid[:,y,x]
-            dy, dx = d_grid[:,y,x]
-            y0, x0 = min_grid[:,y,x]
-            y1, x1 = max_grid[:,y,x]
+    y_d = d_grid[0,:,:]
+    x_d = d_grid[1,:,:]
+    y_d = y_d.flatten()
+    x_d = x_d.flatten()
 
-            q00 = img[:, y0, x0]
-            q10 = img[:, y1, x0]
-            q01 = img[:, y0, x1]
-            q11 = img[:, y1, x1]
+    Q00 = img[:,y_mins,x_mins]
+    Q10 = img[:,y_maxs,x_mins]
+    Q01 = img[:,y_mins,x_maxs]
+    Q11 = img[:,y_maxs,x_maxs]
 
-            out[:,y,x] = interp2d([q00,q10,q01,q11], dy, dx, mode=mode)
-    
+    Q = [Q00, Q10, Q01, Q11]
+
+    out = interp2d(Q, y_d, x_d, mode='bilinear')
+    out = out.reshape(channels, h_out, w_out)
+
     out = np.where(out >= _max, _max, out)
     out = np.where(out < _min, _min, out)
     return out.astype(_dtype)
