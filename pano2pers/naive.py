@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+from typing import List, Tuple
+
 import numpy as np
 
 
 def create_coord(
     height: int,
     width: int,
-) -> None:
+) -> np.array:
     r"""Create mesh coordinate grid
     """
     _xs = np.linspace(0, width-1, width)
@@ -17,16 +19,19 @@ def create_coord(
     return coord
 
 
-def create_K(h, w, fov_x):
-    f = w / (2 * np.tan(np.radians(fov_x) / 2))
+def create_K(
+    height: int, width: int,
+    fov_x: float,
+) -> np.array:
+    f = width / (2 * np.tan(np.radians(fov_x) / 2))
     K = np.array([
-        [f, 0, w/2],
-        [0, f, h/2],
+        [f, 0, width/2],
+        [0, f, height/2],
         [0, 0, 1]])
     return K
 
 
-def create_rot_mat(rot):
+def create_rot_mat(rot: List[float]) -> np.array:
     r"""param: rot: [yaw, pitch, roll]
     """
     rot_yaw, rot_pitch, rot_roll = rot
@@ -47,24 +52,21 @@ def create_rot_mat(rot):
     return R
 
 
-def pixel_wise_rot(rot_coord):
+def pixel_wise_rot(rot_coord: np.array) -> Tuple[np.array]:
     a = np.arctan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
     b = np.arcsin(rot_coord[:, :, 1] / np.linalg.norm(rot_coord, axis=2))
     return a, b
 
 
-def interp3d(src, y, x):
+def bilinear(
+    Q: List[np.array],
+    y: int, x: int,
+    y0: int, y1: int,
+    x0: int, x1: int,
+) -> np.array:
     r"""Naive Bilinear Interpolation
     """
-    y0 = int(np.floor(y))
-    y1 = int(np.floor(y)) + 1
-    x0 = int(np.floor(x))
-    x1 = int(np.floor(x)) + 1
-    q_00 = src[:, y0, x0]
-    q_10 = src[:, y1, x0]
-    q_01 = src[:, y0, x1]
-    q_11 = src[:, y1, x1]
-
+    q_00, q_10, q_01, q_11 = Q
     f_0 = q_00*(x1-x)/(x1-x0) + \
         q_01*(x-x0)/(x1-x0)
     f_1 = q_10*(x1-x)/(x1-x0) + \
@@ -74,23 +76,45 @@ def interp3d(src, y, x):
     return f_3
 
 
-def grid_sample(img, grid, mode='bilinear'):
+def interp3d(
+    src: np.array,
+    y: float, x: float,
+    mode: str = 'bilinear',
+) -> np.array:
+    r"""Naive Interpolation
+    """
+    y0 = int(np.floor(y))
+    y1 = int(np.floor(y)) + 1
+    x0 = int(np.floor(x))
+    x1 = int(np.floor(x)) + 1
+    q_00 = src[:, y0, x0]
+    q_10 = src[:, y1, x0]
+    q_01 = src[:, y0, x1]
+    q_11 = src[:, y1, x1]
+    Q = [q_00, q_10, q_01, q_11]
+
+    if mode == 'bilinear':
+        out = bilinear(Q, y, x, y0, y1, x0, x1)
+    else:
+        print(f"{mode} is not supported")
+    return out
+
+
+def grid_sample(
+    img: np.array, grid: np.array,
+    mode: str = 'bilinear',
+) -> np.array:
     r"""
     """
     channels, h_in, w_in = img.shape
     _, h_out, w_out = grid.shape
     out = np.zeros((channels, h_out, w_out), dtype=np.uint8)
-    print(out.shape)
 
     for y in range(h_out):
         for x in range(w_out):
             y_in, x_in = grid[:,y,x]
 
-            if mode == 'bilinear':
-                _out = interp3d(img, y_in, x_in)
-            else:
-                print(f"{mode} is not supported.")
-
+            _out = interp3d(img, y_in, x_in, mode=mode)
             _out = np.where(_out >= 255, 255, _out)
             _out = np.where(_out < 0, 0, _out)
             out[:,y,x] = _out.astype(np.uint8)
@@ -146,11 +170,9 @@ if __name__ == "__main__":
 
     grid = np.stack((uj, ui), axis=0)
     sampled = grid_sample(pano, grid)
-    print(sampled.shape)
 
     # after sample
     pers = np.transpose(sampled, (1,2,0))
-    print(pers.shape)
     pers_img = Image.fromarray(pers)
 
     pers_path = osp.join(data_path, 'out.jpg')
