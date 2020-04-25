@@ -99,5 +99,5 @@ if __name__ == "__main__":
     toc = time.perf_counter()
     print(f"post process: {toc - tic:0.4f} seconds")
 
-    pers_path = osp.join(data_path, 'output.jpg')
+    pers_path = osp.join(data_path, 'output_numpy.jpg')
     pers_img.save(pers_path)
