@@ -41,16 +41,13 @@ def grid_sample(
     r"""Torch Grid Sample
         Supports batch 
     """
+    assert len(img.shape) == len(grid.shape), \
+        "ERR: img and grid does not match"
+    assert len(img.shape) > 2, \
+        "ERR: dim needs to be 3 or 4"
     if len(img.shape) == len(grid.shape) == 3:
         img = img.unsqueeze(0)
         grid = grid.unsqueeze(0)
-        batch, channels, h_in, w_in = img.shape
-        _, _, h_out, w_out = grid.shape
-    elif len(img.shape) == len(grid.shape) == 4:
-        batch, channels, h_in, w_in = img.shape
-        _, _, h_out, w_out = grid.shape
-    else:
-        raise "ERR: Tensor @ img or grid is not correct!"
     batch, channels, h_in, w_in = img.shape
     _, _, h_out, w_out = grid.shape
     _dtype = img.dtype
