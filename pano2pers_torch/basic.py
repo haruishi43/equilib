@@ -76,28 +76,35 @@ def grid_sample(
 
     y_mins = min_grid[:,0,:,:]
     x_mins = min_grid[:,1,:,:]
-    y_mins = y_mins.view(-1)
-    x_mins = x_mins.view(-1)
+    y_mins = torch.flatten(y_mins)
+    x_mins = torch.flatten(x_mins)
 
     y_maxs = max_grid[:,0,:,:]
     x_maxs = max_grid[:,1,:,:]
-    y_maxs = y_maxs.view(-1)
-    x_maxs = x_maxs.view(-1)
+    y_maxs = torch.flatten(y_maxs)
+    x_maxs = torch.flatten(x_maxs)
 
     y_d = d_grid[:,0,:,:]
     x_d = d_grid[:,1,:,:]
-    y_d = y_d.view(-1)
-    x_d = x_d.view(-1)
+    y_d = torch.flatten(y_d)
+    x_d = torch.flatten(x_d)
 
+    print(y_mins.shape)
+
+    #FIXME: batch size
     Q00 = img[:,:,y_mins,x_mins]
     Q10 = img[:,:,y_maxs,x_mins]
     Q01 = img[:,:,y_mins,x_maxs]
     Q11 = img[:,:,y_maxs,x_maxs]
 
+    print(Q00.shape)
+
     out = interp2d(
         [Q00, Q10, Q01, Q11],
         y_d, x_d,
         mode='bilinear')
+    
+    print(out.shape)
 
     out = torch.where(out >= _max, _max, out)
     out = torch.where(out < _min, _min, out)

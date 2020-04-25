@@ -93,27 +93,28 @@ if __name__ == "__main__":
     print(f"Create rot_coord: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    a, b = utils.pixel_wise_rot(rot_coord)
+    a, b = utils.pixel_wise_rot(rot_coords)
     toc = time.perf_counter()
     print(f"pixel_wise_rot: {toc - tic:0.4f} seconds")
 
-    # tic = time.perf_counter()
-    # ui = (a + math.pi) * w_pano / (2 * math.pi)
-    # uj = (b + math.pi / 2) * h_pano / math.pi
+    tic = time.perf_counter()
+    ui = (a + math.pi) * w_pano / (2 * math.pi)
+    uj = (b + math.pi / 2) * h_pano / math.pi
 
-    # ui = torch.where(ui < 0, ui + w_pano, ui)
-    # ui = torch.where(ui >= w_pano, ui - w_pano, ui)
-    # uj = torch.where(uj < 0, uj + h_pano, uj)
-    # uj = torch.where(uj >= h_pano, uj - h_pano, uj)
+    ui = torch.where(ui < 0, ui + w_pano, ui)
+    ui = torch.where(ui >= w_pano, ui - w_pano, ui)
+    uj = torch.where(uj < 0, uj + h_pano, uj)
+    uj = torch.where(uj >= h_pano, uj - h_pano, uj)
 
-    # grid = torch.stack((uj, ui), axis=0)
-    # toc = time.perf_counter()
-    # print(f"preprocess grid: {toc - tic:0.4f} seconds")
+    grid = torch.stack((uj, ui), axis=-3)  # 3rd to last
+    print("grid:", grid.shape)
+    toc = time.perf_counter()
+    print(f"preprocess grid: {toc - tic:0.4f} seconds")
     
-    # tic = time.perf_counter()
-    # pers = torch_sample(pano, grid, device=device, mode='bilinear')
-    # toc = time.perf_counter()
-    # print(f"torch: {toc - tic:0.4f} seconds")
+    tic = time.perf_counter()
+    pers = torch_sample(panos, grid, device=device, mode='bilinear')
+    toc = time.perf_counter()
+    print(f"torch: {toc - tic:0.4f} seconds")
 
     # tic = time.perf_counter()
     # pers = pers.to('cpu')
