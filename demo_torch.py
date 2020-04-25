@@ -83,10 +83,6 @@ if __name__ == "__main__":
     print(f"preprocess grid: {toc - tic:0.4f} seconds")
     
     tic = time.perf_counter()
-    # pano = pano.unsqueeze(0)
-    # grid = grid.unsqueeze(0)
-    print(pano.shape)
-    print(grid.shape)
     pers = torch_sample(pano, grid, device=device, mode='bilinear')
     toc = time.perf_counter()
     print(f"torch: {toc - tic:0.4f} seconds")

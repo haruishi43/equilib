@@ -65,7 +65,6 @@ def grid_sample(
     )
 
     min_grid = torch.floor(grid).type(torch.int64)
-    #NOTE: uint8 convertion causes truncation, so use uint64
     max_grid = min_grid + 1
     d_grid = grid - min_grid
 
