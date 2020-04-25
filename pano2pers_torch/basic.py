@@ -92,6 +92,7 @@ def grid_sample(
     print(y_mins.shape)
 
     #FIXME: batch size
+    # how do i index... Q00[batch, :, ys, xs]
     Q00 = img[:,:,y_mins,x_mins]
     Q10 = img[:,:,y_maxs,x_mins]
     Q01 = img[:,:,y_mins,x_maxs]
