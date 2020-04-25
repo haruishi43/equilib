@@ -8,17 +8,16 @@ import time
 from PIL import Image
 import numpy as np
 
-from naive import grid_sample as naive_grid_sample
-from faster import grid_sample as faster_grid_sample
-from utils import (
-    create_coord, create_K, create_rot_mat,
-    pixel_wise_rot,
+from pano2pers import (
+    naive_sample,
+    faster_sample,
+    utils
 )
 
 
 if __name__ == "__main__":
-    data_path = osp.join('..', 'data')
-    pano_path = osp.join(data_path, 'pano2.png')
+    data_path = osp.join('.', 'data')
+    pano_path = osp.join(data_path, 'pano.jpg')
 
     tic = time.perf_counter()
     pano_img = Image.open(pano_path)
@@ -39,13 +38,13 @@ if __name__ == "__main__":
     # Variables:
     h_pers = 480
     w_pers = 640
-    rot = [45, 45, 0]
+    rot = [45, 0, 0]
     fov_x = 90
 
     tic = time.perf_counter()
-    coord = create_coord(h_pers, w_pers)
-    K = create_K(h_pers, w_pers, fov_x)
-    R = create_rot_mat(rot)
+    coord = utils.create_coord(h_pers, w_pers)
+    K = utils.create_K(h_pers, w_pers, fov_x)
+    R = utils.create_rot_mat(rot)
     toc = time.perf_counter()
     print(f"Process coord, K, R: {toc - tic:0.4f} seconds")
 
@@ -63,7 +62,7 @@ if __name__ == "__main__":
     print(f"rot_coord: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    a, b = pixel_wise_rot(rot_coord)
+    a, b = utils.pixel_wise_rot(rot_coord)
     toc = time.perf_counter()
     print(f"pixel_wise_rot: {toc - tic:0.4f} seconds")
 
@@ -83,12 +82,12 @@ if __name__ == "__main__":
     print(f"preprocess grid: {toc - tic:0.4f} seconds")
     
     tic = time.perf_counter()
-    sampled = naive_grid_sample(pano, grid, mode='bilinear')
+    sampled = naive_sample(pano, grid, mode='bilinear')
     toc = time.perf_counter()
     print(f"naive: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    sampled = faster_grid_sample(pano, grid, mode='bilinear')
+    sampled = faster_sample(pano, grid, mode='bilinear')
     toc = time.perf_counter()
     print(f"faster: {toc - tic:0.4f} seconds")
 
@@ -100,5 +99,5 @@ if __name__ == "__main__":
     toc = time.perf_counter()
     print(f"post process: {toc - tic:0.4f} seconds")
 
-    pers_path = osp.join(data_path, 'output_.jpg')
+    pers_path = osp.join(data_path, 'output.jpg')
     pers_img.save(pers_path)

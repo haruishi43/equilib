@@ -6,6 +6,8 @@ import numpy as np
 
 
 def linear_interp(v0, v1, d, l):
+    r"""Basic Linear Interpolation
+    """
     return v0*(1-d)/l + v1*d/l
 
 
@@ -33,11 +35,14 @@ def grid_sample(
     img: np.array, grid: np.array,
     mode: str = 'bilinear',
 ) -> np.array:
+    r"""Numpy Grid Sample
+    """
     channels, h_in, w_in = img.shape
     _, h_out, w_out = grid.shape
 
-    # Image conversion values
+    # Image conversion values (Lookup Image dtype)
     if img.dtype == np.uint8:
+        # uint8 is faster
         _min = 0
         _max = 255
         _dtype = np.uint8
@@ -59,13 +64,11 @@ def grid_sample(
     max_grid[0,:,:] = np.where(
         max_grid[0,:,:] >= h_in,
         max_grid[0,:,:] - h_in,
-        max_grid[0,:,:]
-    )
+        max_grid[0,:,:])
     max_grid[1,:,:] = np.where(
         max_grid[1,:,:] >= w_in,
         max_grid[1,:,:] - w_in,
-        max_grid[1,:,:]
-    )
+        max_grid[1,:,:])
 
     y_mins = min_grid[0,:,:]
     x_mins = min_grid[1,:,:]
@@ -87,7 +90,10 @@ def grid_sample(
     Q01 = img[:,y_mins,x_maxs]
     Q11 = img[:,y_maxs,x_maxs]
 
-    out = interp2d([Q00, Q10, Q01, Q11], y_d, x_d, mode='bilinear')
+    out = interp2d(
+        [Q00, Q10, Q01, Q11],
+        y_d, x_d,
+        mode='bilinear')
     out = out.reshape(channels, h_out, w_out)
 
     out = np.where(out >= _max, _max, out)
