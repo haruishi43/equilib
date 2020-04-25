@@ -8,7 +8,7 @@ import time
 from PIL import Image
 import numpy as np
 
-from pano2pers import (
+from pano2pers_numpy import (
     naive_sample,
     faster_sample,
     utils
@@ -17,17 +17,14 @@ from pano2pers import (
 
 if __name__ == "__main__":
     data_path = osp.join('.', 'data')
-    pano_path = osp.join(data_path, 'pano.jpg')
+    pano_path = osp.join(data_path, 'pano2.png')
 
     tic = time.perf_counter()
     pano_img = Image.open(pano_path)
-
-    # Sometimes images are RGBA
+    #NOTE: Sometimes images are RGBA
     pano_img = pano_img.convert('RGB')
     pano = np.asarray(pano_img)
-
     pano = np.transpose(pano, (2,0,1))
-
     toc = time.perf_counter()
     print(f"Process Pano: {toc - tic:0.4f} seconds")
 

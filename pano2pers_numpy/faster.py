@@ -94,8 +94,8 @@ def grid_sample(
         [Q00, Q10, Q01, Q11],
         y_d, x_d,
         mode='bilinear')
-    out = out.reshape(channels, h_out, w_out)
 
     out = np.where(out >= _max, _max, out)
     out = np.where(out < _min, _min, out)
+    out = out.reshape(channels, h_out, w_out)
     return out.astype(_dtype)
