@@ -7,12 +7,31 @@ import torch
 pi = torch.Tensor([3.14159265358979323846])
 
 
-def deg2rad(tensor):
+def sizeof(tensor: torch.tensor):
+    assert torch.is_tensor(tensor), "ERR: is not tensor"
+    return tensor.element_size() * tensor.nelement()
+
+
+def deg2rad(tensor: torch.tensor):
     r"""Function that converts angles from degrees to radians.
     """
     if not torch.is_tensor(tensor):
         return tensor * float(pi) / 180.
     return tensor * pi.to(tensor.device).type(tensor.dtype) / 180.
+
+
+def create_rot_coord(
+    height: int, width: int,
+    fov_x: float,
+    rot: List[float],
+    device: torch.device = torch.device('cpu')
+) -> torch.tensor:
+    coord = create_coord(height, width, device=device)
+    K = create_K(height, width, fov_x, device=device)
+    R = create_rot_mat(rot, device=device)
+    rot_coord = R.inverse() @ K.inverse() @ coord.unsqueeze(3)
+    rot_coord = rot_coord.squeeze(3)
+    return rot_coord
 
 
 def create_coord(
@@ -74,6 +93,11 @@ def create_rot_mat(
 
 
 def pixel_wise_rot(rot_coord: torch.tensor) -> Tuple[torch.tensor]:
-    a = torch.atan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
-    b = torch.asin(rot_coord[:, :, 1] / torch.norm(rot_coord, dim=2))
+    if len(rot_coord.shape) == 3:
+        rot_coord = rot_coord.unsqueeze(0)
+    a = torch.atan2(rot_coord[:,:,:,0], rot_coord[:,:,:,2])
+    b = torch.asin(rot_coord[:,:,:,1] / torch.norm(rot_coord, dim=-1))
+    if a.shape[0] == b.shape[0] == 1:
+        a = a.squeeze(0)
+        b = b.squeeze(0)
     return a, b

@@ -23,9 +23,9 @@ def interp2d(
     """
     q00, q10, q01, q11 = Q
     if mode == 'bilinear':
-        f0 = linear_interp(q00, q01, dx, 1)
-        f1 = linear_interp(q10, q11, dx, 1)
-        return linear_interp(f0, f1, dy, 1)
+        f0 = linear_interp(q00, q01, dx, 1.)
+        f1 = linear_interp(q10, q11, dx, 1.)
+        return linear_interp(f0, f1, dy, 1.)
     elif mode == 'nearest':
         raise NotImplementedError
     else:
