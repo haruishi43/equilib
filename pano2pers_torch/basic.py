@@ -48,7 +48,7 @@ def grid_sample(
     if len(img.shape) == len(grid.shape) == 3:
         img = img.unsqueeze(0)
         grid = grid.unsqueeze(0)
-    batch, channels, h_in, w_in = img.shape
+    batches, channels, h_in, w_in = img.shape
     _, _, h_out, w_out = grid.shape
     _dtype = img.dtype
     _max = torch.tensor(1., device=device)
@@ -56,7 +56,7 @@ def grid_sample(
 
     # Initialize output image
     out = torch.zeros(
-        (batch, channels, h_out, w_out),
+        (batches, channels, h_out, w_out),
         dtype=_dtype,
         device=device
     )
@@ -76,40 +76,38 @@ def grid_sample(
 
     y_mins = min_grid[:,0,:,:]
     x_mins = min_grid[:,1,:,:]
-    y_mins = torch.flatten(y_mins)
-    x_mins = torch.flatten(x_mins)
-
+    y_mins = y_mins.view(batches, -1)
+    x_mins = x_mins.view(batches, -1)
+    
     y_maxs = max_grid[:,0,:,:]
     x_maxs = max_grid[:,1,:,:]
-    y_maxs = torch.flatten(y_maxs)
-    x_maxs = torch.flatten(x_maxs)
+    y_maxs = y_maxs.view(batches, -1)
+    x_maxs = x_maxs.view(batches, -1)
 
     y_d = d_grid[:,0,:,:]
     x_d = d_grid[:,1,:,:]
-    y_d = torch.flatten(y_d)
-    x_d = torch.flatten(x_d)
+    y_d = y_d.view(batches, -1)
+    x_d = x_d.view(batches, -1)
 
-    print(y_mins.shape)
+    # Q00 = torch.zeros((batches, channels, y_mins.shape[-1]))
+    # Q10 = torch.zeros((batches, channels, y_mins.shape[-1]))
+    # Q01 = torch.zeros((batches, channels, y_mins.shape[-1]))
+    # Q11 = torch.zeros((batches, channels, y_mins.shape[-1]))
+    for b in range(batches):
+        Q00 = img[b][:, y_mins[b], x_mins[b]]
+        Q10 = img[b][:, y_maxs[b], x_mins[b]]
+        Q01 = img[b][:, y_mins[b], x_maxs[b]]
+        Q11 = img[b][:, y_maxs[b], x_maxs[b]]
 
-    #FIXME: batch size
-    # how do i index... Q00[batch, :, ys, xs]
-    Q00 = img[:,:,y_mins,x_mins]
-    Q10 = img[:,:,y_maxs,x_mins]
-    Q01 = img[:,:,y_mins,x_maxs]
-    Q11 = img[:,:,y_maxs,x_maxs]
-
-    print(Q00.shape)
-
-    out = interp2d(
-        [Q00, Q10, Q01, Q11],
-        y_d, x_d,
-        mode='bilinear')
+        out[b] = interp2d(
+            [Q00, Q10, Q01, Q11],
+            y_d[b], x_d[b],
+            mode='bilinear'
+        ).view(channels, h_out, w_out)
     
-    print(out.shape)
-
     out = torch.where(out >= _max, _max, out)
     out = torch.where(out < _min, _min, out)
-    out = out.reshape(batch, channels, h_out, w_out)
+    out = out.reshape(batches, channels, h_out, w_out)
     out = out.type(_dtype)
     if out.shape[0] == 1:
         out = out.squeeze(0)

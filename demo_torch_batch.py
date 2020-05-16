@@ -116,11 +116,12 @@ if __name__ == "__main__":
     toc = time.perf_counter()
     print(f"torch: {toc - tic:0.4f} seconds")
 
-    # tic = time.perf_counter()
-    # pers = pers.to('cpu')
-    # pers_img = to_PIL(pers)
-    # toc = time.perf_counter()
-    # print(f"post process: {toc - tic:0.4f} seconds")
+    pers = pers[5]
+    tic = time.perf_counter()
+    pers = pers.to('cpu')
+    pers_img = to_PIL(pers)
+    toc = time.perf_counter()
+    print(f"post process: {toc - tic:0.4f} seconds")
 
-    # pers_path = osp.join(data_path, 'output_torch.jpg')
-    # pers_img.save(pers_path)
+    pers_path = osp.join(data_path, 'output_torch_batch.jpg')
+    pers_img.save(pers_path)
