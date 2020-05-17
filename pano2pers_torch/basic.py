@@ -93,6 +93,7 @@ def grid_sample(
     # Q10 = torch.zeros((batches, channels, y_mins.shape[-1]))
     # Q01 = torch.zeros((batches, channels, y_mins.shape[-1]))
     # Q11 = torch.zeros((batches, channels, y_mins.shape[-1]))
+    #FIXME: looping batch... slow...
     for b in range(batches):
         Q00 = img[b][:, y_mins[b], x_mins[b]]
         Q10 = img[b][:, y_maxs[b], x_mins[b]]

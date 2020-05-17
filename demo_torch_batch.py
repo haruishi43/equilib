@@ -14,6 +14,7 @@ from torchvision import transforms
 
 from pano2pers_torch import (
     torch_sample,
+    torch_original,
     utils,
 )
 
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     tic = time.perf_counter()
     pers = torch_sample(panos, grid, device=device, mode='bilinear')
     toc = time.perf_counter()
-    print(f"torch: {toc - tic:0.4f} seconds")
+    print(f"torch mine: {toc - tic:0.4f} seconds")
 
     pers = pers[5]
     tic = time.perf_counter()
@@ -123,5 +124,24 @@ if __name__ == "__main__":
     toc = time.perf_counter()
     print(f"post process: {toc - tic:0.4f} seconds")
 
-    pers_path = osp.join(data_path, 'output_torch_batch.jpg')
+    pers_path = osp.join(data_path, 'output_torch_batch_1.jpg')
+    pers_img.save(pers_path)
+    
+    tic = time.perf_counter()
+    #FIXME: move the normalizing function
+    norm_ui = 2 * (ui - w_pano / 2) / w_pano
+    norm_uj = 2 * (uj - h_pano / 2) / h_pano
+    grid = torch.stack((norm_ui, norm_uj), axis=-1)
+    pers = torch_original(panos, grid, device=device, mode='bilinear')
+    toc = time.perf_counter()
+    print(f"torch original: {toc - tic:0.4f} seconds")
+
+    pers = pers[5]
+    tic = time.perf_counter()
+    pers = pers.to('cpu')
+    pers_img = to_PIL(pers)
+    toc = time.perf_counter()
+    print(f"post process: {toc - tic:0.4f} seconds")
+
+    pers_path = osp.join(data_path, 'output_torch_batch_2.jpg')
     pers_img.save(pers_path)
