@@ -129,9 +129,6 @@ if __name__ == "__main__":
     
     tic = time.perf_counter()
     #FIXME: move the normalizing function
-    norm_ui = 2 * (ui - w_pano / 2) / w_pano
-    norm_uj = 2 * (uj - h_pano / 2) / h_pano
-    grid = torch.stack((norm_ui, norm_uj), axis=-1)
     pers = torch_original(panos, grid, device=device, mode='bilinear')
     toc = time.perf_counter()
     print(f"torch original: {toc - tic:0.4f} seconds")
