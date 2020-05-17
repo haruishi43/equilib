@@ -15,7 +15,7 @@ def grid_sample(
     batch, channels, h_img, w_img = img.shape
     _, xy, h_out, w_out = grid.shape
 
-    # normalize grid
+    # normalize grid -1~1
     grid[:,1,:,:] = 2 * (grid[:,1,:,:] - w_img / 2) / w_img
     grid[:,0,:,:] = 2 * (grid[:,0,:,:] - h_img / 2) / h_img
     grid = grid.view(batch, h_out, w_out, xy)
