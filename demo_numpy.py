@@ -38,37 +38,42 @@ if __name__ == "__main__":
     # Variables:
     h_pers = 480
     w_pers = 640
-    rot = [45, 0, 0]
+    rot = [0, 0, np.pi/4]
     fov_x = 90
 
     tic = time.perf_counter()
-    coord = utils.create_coord(h_pers, w_pers)
+    m = utils.create_coord(h_pers, w_pers)
     K = utils.create_K(h_pers, w_pers, fov_x)
     R = utils.create_rot_mat(rot)
     toc = time.perf_counter()
-    print(f"Process coord, K, R: {toc - tic:0.4f} seconds")
+    print(f"Process m, K, R: {toc - tic:0.4f} seconds")
+
+    # m = P M
+    # P = K [R | t] = K R (in this case...)
+    # R^-1 K^-1 m = M
+    # 
 
     tic = time.perf_counter()
     K_inv = np.linalg.inv(K)
     R_inv = np.linalg.inv(R)
-    coord = coord[:, :, :, np.newaxis]
+    m = m[:, :, :, np.newaxis]
     toc = time.perf_counter()
     print(f"Take Inverse: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    rot_coord = R_inv @ K_inv @ coord
-    rot_coord = rot_coord.squeeze(3)
+    M = R_inv @ K_inv @ m
+    M = M.squeeze(3)
     toc = time.perf_counter()
-    print(f"rot_coord: {toc - tic:0.4f} seconds")
+    print(f"M = R^-1 K^-1 m: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    a, b = utils.pixel_wise_rot(rot_coord)
+    phi, theta = utils.pixel_wise_rot(M)
     toc = time.perf_counter()
     print(f"pixel_wise_rot: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    ui = (a + np.pi) * w_pano / (2 * np.pi)
-    uj = (b + np.pi / 2) * h_pano / np.pi
+    ui = (theta + np.pi) * w_pano / (2 * np.pi)
+    uj = (phi + np.pi / 2) * h_pano / np.pi
 
     ui = np.where(ui < 0, ui + w_pano, ui)
     ui = np.where(ui >= w_pano, ui - w_pano, ui)

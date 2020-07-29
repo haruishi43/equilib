@@ -7,7 +7,7 @@ import numpy as np
 def create_coord(
     height: int,
     width: int,
-) -> np.array:
+) -> np.ndarray:
     r"""Create mesh coordinate grid
     """
     _xs = np.linspace(0, width-1, width)
@@ -21,37 +21,47 @@ def create_coord(
 def create_K(
     height: int, width: int,
     fov_x: float,
-) -> np.array:
+) -> np.ndarray:
+    r"""http://ksimek.github.io/2013/08/13/intrinsic/
+    """
+    # perspective projection (focal length)
     f = width / (2. * np.tan(np.radians(fov_x) / 2.))
+    # axis skew
+    s = 0.
+    # transform between camera frame and pixel coordinates
     K = np.array([
-        [f, 0., width/2],
+        [f, s, width/2],
         [0., f, height/2],
         [0., 0., 1.]])
     return K
 
 
-def create_rot_mat(rot: List[float]) -> np.array:
-    r"""param: rot: [yaw, pitch, roll]
+def create_rot_mat(rot: List[float]) -> np.ndarray:
+    r"""param: rot: [roll, pitch, yaw] in radians
     """
-    rot_yaw, rot_pitch, rot_roll = rot
-
-    R_yaw = np.array([
-        [np.cos(rot_yaw), 0., -np.sin(rot_yaw)],
-        [0., 1., 0.],
-        [np.sin(rot_yaw), 0., np.cos(rot_yaw)]])
-    R_pitch = np.array([
+    roll, pitch, yaw = rot
+    
+    # calculate rotation about the x-axis
+    R_x = np.array([
         [1., 0., 0.],
-        [0., np.cos(rot_pitch), -np.sin(rot_pitch)],
-        [0., np.sin(rot_pitch), np.cos(rot_pitch)]])
-    R_roll = np.array([
-        [np.cos(rot_roll), -np.sin(rot_roll), 0.],
-        [np.sin(rot_roll), np.cos(rot_roll), 0.],
+        [0., np.cos(roll), -np.sin(roll)],
+        [0., np.sin(roll), np.cos(roll)]])
+    # calculate rotation about the y-axis
+    R_y = np.array([
+        [np.cos(pitch), 0., np.sin(pitch)],
+        [0., 1., 0.],
+        [-np.sin(pitch), 0., np.cos(pitch)]])
+    # calculate rotation about the z-axis
+    R_z = np.array([
+        [np.cos(yaw), -np.sin(yaw), 0.],
+        [np.sin(yaw), np.cos(yaw), 0.],
         [0., 0., 1.]])
-    R = R_roll @ R_pitch @ R_yaw
+    
+    R = R_z @ R_y @ R_x
     return R
 
 
-def pixel_wise_rot(rot_coord: np.array) -> Tuple[np.array]:
-    a = np.arctan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
-    b = np.arcsin(rot_coord[:, :, 1] / np.linalg.norm(rot_coord, axis=2))
-    return a, b
+def pixel_wise_rot(rot_coord: np.ndarray) -> Tuple[np.ndarray]:
+    phis = np.arcsin(rot_coord[:, :, 1] / np.linalg.norm(rot_coord, axis=2))
+    thetas = np.arctan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
+    return phis, thetas
