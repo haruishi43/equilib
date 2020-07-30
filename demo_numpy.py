@@ -17,7 +17,7 @@ from pano2pers_numpy import (
 
 if __name__ == "__main__":
     data_path = osp.join('.', 'data')
-    pano_path = osp.join(data_path, 'pano2.png')
+    pano_path = osp.join(data_path, '8081_earthmap4k.jpg')
 
     tic = time.perf_counter()
     pano_img = Image.open(pano_path)
@@ -38,20 +38,23 @@ if __name__ == "__main__":
     # Variables:
     h_pers = 480
     w_pers = 640
-    rot = [0, 0, np.pi/4]
+    rot = {
+        'roll': 0,
+        'pitch': 0,
+        'yaw': 0,
+    }
     fov_x = 90
 
     tic = time.perf_counter()
     m = utils.create_coord(h_pers, w_pers)
     K = utils.create_K(h_pers, w_pers, fov_x)
-    R = utils.create_rot_mat(rot)
+    R = utils.create_rot_mat(**rot)
     toc = time.perf_counter()
     print(f"Process m, K, R: {toc - tic:0.4f} seconds")
 
     # m = P M
-    # P = K [R | t] = K R (in this case...)
-    # R^-1 K^-1 m = M
-    # 
+    # P = K [R^-1 | t] = K R^-1 (in this case...)
+    # R K^-1 m = M
 
     tic = time.perf_counter()
     K_inv = np.linalg.inv(K)
@@ -72,6 +75,7 @@ if __name__ == "__main__":
     print(f"pixel_wise_rot: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
+    # this normalization is needed? how to represent it in equation...
     ui = (theta + np.pi) * w_pano / (2 * np.pi)
     uj = (phi + np.pi / 2) * h_pano / np.pi
 
