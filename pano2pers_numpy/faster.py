@@ -57,38 +57,38 @@ def grid_sample(
     out = np.zeros((channels, h_out, w_out), dtype=_dtype)
 
     min_grid = np.floor(grid).astype(np.uint64)
-    #NOTE: uint8 convertion causes truncation, so use uint64
+    # NOTE: uint8 convertion causes truncation, so use uint64
     max_grid = min_grid + 1
     d_grid = grid - min_grid
 
-    max_grid[0,:,:] = np.where(
-        max_grid[0,:,:] >= h_in,
-        max_grid[0,:,:] - h_in,
-        max_grid[0,:,:])
-    max_grid[1,:,:] = np.where(
-        max_grid[1,:,:] >= w_in,
-        max_grid[1,:,:] - w_in,
-        max_grid[1,:,:])
+    max_grid[0, :, :] = np.where(
+        max_grid[0, :, :] >= h_in,
+        max_grid[0, :, :] - h_in,
+        max_grid[0, :, :])
+    max_grid[1, :, :] = np.where(
+        max_grid[1, :, :] >= w_in,
+        max_grid[1, :, :] - w_in,
+        max_grid[1, :, :])
 
-    y_mins = min_grid[0,:,:]
-    x_mins = min_grid[1,:,:]
+    y_mins = min_grid[0, :, :]
+    x_mins = min_grid[1, :, :]
     y_mins = y_mins.flatten()
     x_mins = x_mins.flatten()
 
-    y_maxs = max_grid[0,:,:]
-    x_maxs = max_grid[1,:,:]
+    y_maxs = max_grid[0, :, :]
+    x_maxs = max_grid[1, :, :]
     y_maxs = y_maxs.flatten()
     x_maxs = x_maxs.flatten()
 
-    y_d = d_grid[0,:,:]
-    x_d = d_grid[1,:,:]
+    y_d = d_grid[0, :, :]
+    x_d = d_grid[1, :, :]
     y_d = y_d.flatten()
     x_d = x_d.flatten()
 
-    Q00 = img[:,y_mins,x_mins]
-    Q10 = img[:,y_maxs,x_mins]
-    Q01 = img[:,y_mins,x_maxs]
-    Q11 = img[:,y_maxs,x_maxs]
+    Q00 = img[:, y_mins, x_mins]
+    Q10 = img[:, y_maxs, x_mins]
+    Q01 = img[:, y_mins, x_maxs]
+    Q11 = img[:, y_maxs, x_maxs]
 
     out = interp2d(
         [Q00, Q10, Q01, Q11],

@@ -48,8 +48,8 @@ def test_single_image(path=None):
     pitch = 0 * inc  # -pi/2 < a < pi/2
     roll = 0
     rot = [yaw, pitch, roll]
-    h = 480 #480
-    w = 640 #640
+    h = 480  # 480
+    w = 640  # 640
     fov = 90
 
     p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)

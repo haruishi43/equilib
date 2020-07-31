@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import os.path as osp
 
 import time
@@ -21,12 +20,11 @@ from pano2pers_torch import (
 
 if __name__ == "__main__":
     data_path = osp.join('.', 'data')
-    pano_path = osp.join(data_path, 'pano2.png')
+    pano_path = osp.join(data_path, '8081_earthmap4k.jpg')
 
     # Variables:
     h_pers = 480
     w_pers = 640
-    rot = [45., 0., 0.]
     fov_x = 90.
     batch_size = 16
 
@@ -46,7 +44,7 @@ if __name__ == "__main__":
 
     tic = time.perf_counter()
     pano_img = Image.open(pano_path)
-    #NOTE: Sometimes images are RGBA
+    # NOTE: Sometimes images are RGBA
     pano_img = pano_img.convert('RGB')
     imgs = []
     for i in range(batch_size):
@@ -62,25 +60,23 @@ if __name__ == "__main__":
     print('panorama size:')
     print(h_pano, w_pano)
 
-
     def get_rots(batch_size):
         rots = []
         for i in range(batch_size):
-            rot = [
-                i * (360/batch_size),
-                0.,
-                0.,
-            ]
+            rot = {
+                'roll': 0.,
+                'pitch': i * (360/batch_size),
+                'yaw': 0.,
+            }
             rots.append(rot)
         return rots
-
 
     def get_batch_coord(coord, batch_size):
         coords = []
         for i in range(batch_size):
             coords.append(coord.clone())
         return torch.stack(coords, dim=0)
-    
+
     tic = time.perf_counter()
     rot_coords = []
     for rot in get_rots(batch_size):
@@ -94,13 +90,13 @@ if __name__ == "__main__":
     print(f"Create rot_coord: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    a, b = utils.pixel_wise_rot(rot_coords)
+    phi, theta = utils.pixel_wise_rot(rot_coords)
     toc = time.perf_counter()
     print(f"pixel_wise_rot: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    ui = (a + math.pi) * w_pano / (2 * math.pi)
-    uj = (b + math.pi / 2) * h_pano / math.pi
+    ui = (theta - math.pi) * w_pano / (2 * math.pi)
+    uj = (phi - math.pi / 2) * h_pano / math.pi
 
     ui = torch.where(ui < 0, ui + w_pano, ui)
     ui = torch.where(ui >= w_pano, ui - w_pano, ui)
@@ -111,7 +107,7 @@ if __name__ == "__main__":
     print("grid:", grid.shape)
     toc = time.perf_counter()
     print(f"preprocess grid: {toc - tic:0.4f} seconds")
-    
+
     tic = time.perf_counter()
     pers = torch_sample(panos, grid, device=device, mode='bilinear')
     toc = time.perf_counter()

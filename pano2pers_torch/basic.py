@@ -3,7 +3,6 @@
 from typing import List
 
 import torch
-import torch.nn.functional as F
 
 
 def linear_interp(v0, v1, d, l):
@@ -39,7 +38,7 @@ def grid_sample(
     mode: str = 'bilinear',
 ) -> torch.tensor:
     r"""Torch Grid Sample
-        Supports batch 
+        Supports batch
     """
     assert len(img.shape) == len(grid.shape), \
         "ERR: img and grid does not match"
@@ -65,27 +64,27 @@ def grid_sample(
     max_grid = min_grid + 1
     d_grid = grid - min_grid
 
-    max_grid[:,0,:,:] = torch.where(
-        max_grid[:,0,:,:] >= h_in,
-        max_grid[:,0,:,:] - h_in,
-        max_grid[:,0,:,:])
-    max_grid[:,1,:,:] = torch.where(
-        max_grid[:,1,:,:] >= w_in,
-        max_grid[:,1,:,:] - w_in,
-        max_grid[:,1,:,:])
+    max_grid[:, 0, :, :] = torch.where(
+        max_grid[:, 0, :, :] >= h_in,
+        max_grid[:, 0, :, :] - h_in,
+        max_grid[:, 0, :, :])
+    max_grid[:, 1, :, :] = torch.where(
+        max_grid[:, 1, :, :] >= w_in,
+        max_grid[:, 1, :, :] - w_in,
+        max_grid[:, 1, :, :])
 
-    y_mins = min_grid[:,0,:,:]
-    x_mins = min_grid[:,1,:,:]
+    y_mins = min_grid[:, 0, :, :]
+    x_mins = min_grid[:, 1, :, :]
     y_mins = y_mins.view(batches, -1)
     x_mins = x_mins.view(batches, -1)
-    
-    y_maxs = max_grid[:,0,:,:]
-    x_maxs = max_grid[:,1,:,:]
+
+    y_maxs = max_grid[:, 0, :, :]
+    x_maxs = max_grid[:, 1, :, :]
     y_maxs = y_maxs.view(batches, -1)
     x_maxs = x_maxs.view(batches, -1)
 
-    y_d = d_grid[:,0,:,:]
-    x_d = d_grid[:,1,:,:]
+    y_d = d_grid[:, 0, :, :]
+    x_d = d_grid[:, 1, :, :]
     y_d = y_d.view(batches, -1)
     x_d = x_d.view(batches, -1)
 
@@ -93,7 +92,7 @@ def grid_sample(
     # Q10 = torch.zeros((batches, channels, y_mins.shape[-1]))
     # Q01 = torch.zeros((batches, channels, y_mins.shape[-1]))
     # Q11 = torch.zeros((batches, channels, y_mins.shape[-1]))
-    #FIXME: looping batch... slow...
+    # FIXME: looping batch... slow...
     for b in range(batches):
         Q00 = img[b][:, y_mins[b], x_mins[b]]
         Q10 = img[b][:, y_maxs[b], x_mins[b]]
@@ -105,7 +104,7 @@ def grid_sample(
             y_d[b], x_d[b],
             mode='bilinear'
         ).view(channels, h_out, w_out)
-    
+
     out = torch.where(out >= _max, _max, out)
     out = torch.where(out < _min, _min, out)
     out = out.reshape(batches, channels, h_out, w_out)

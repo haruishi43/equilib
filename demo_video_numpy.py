@@ -6,6 +6,7 @@ import os.path as osp
 import time
 
 from PIL import Image
+import cv2
 import numpy as np
 
 from pano2pers_numpy import (
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     _, h_pano, w_pano = pano.shape
     print('panorama size:')
     print(h_pano, w_pano)
-
+    
     # Variables:
     h_pers = 480
     w_pers = 640
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     grid = np.stack((uj, ui), axis=0)
     toc = time.perf_counter()
     print(f"preprocess grid: {toc - tic:0.4f} seconds")
-
+    
     tic = time.perf_counter()
     sampled = naive_sample(pano, grid, mode='bilinear')
     toc = time.perf_counter()

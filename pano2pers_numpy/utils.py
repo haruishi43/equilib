@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import List, Tuple
+from typing import Tuple
 import numpy as np
 
 
@@ -71,6 +71,9 @@ def create_rot_mat(
 
     return:
         rotation matrix: numpy.ndarray
+
+    Camera coordinates -> z-axis points forward, y-axis points upward
+    Global coordinates -> x-axis points forward, z-axis poitns upward
     """
 
     # default rotation that changes global to camera coordinates
@@ -96,7 +99,6 @@ def create_rot_mat(
     R = R_z_ @ R_y_ @ R_x_
 
     # rotation matrix
-
     # roll: calculate rotation about the x-axis
     R_x = np.array([
         [1., 0., 0.],
@@ -112,7 +114,7 @@ def create_rot_mat(
         [np.cos(yaw), -np.sin(yaw), 0.],
         [np.sin(yaw), np.cos(yaw), 0.],
         [0., 0., 1.]])
-    
+
     R = R @ R_z @ R_y @ R_x
     return R
 

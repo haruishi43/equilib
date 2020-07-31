@@ -64,34 +64,34 @@ def grid_sample(
     out = np.zeros((channels, h_out, w_out), dtype=_dtype)
 
     min_grid = np.floor(grid).astype(np.uint64)
-    #NOTE: uint8 convertion causes truncation, so use uint64
+    # NOTE: uint8 convertion causes truncation, so use uint64
     max_grid = min_grid + 1
     d_grid = grid - min_grid
 
-    max_grid[0,:,:] = np.where(
-        max_grid[0,:,:] >= h_in,
-        max_grid[0,:,:] - h_in,
-        max_grid[0,:,:]
+    max_grid[0, :, :] = np.where(
+        max_grid[0, :, :] >= h_in,
+        max_grid[0, :, :] - h_in,
+        max_grid[0, :, :]
     )
-    max_grid[1,:,:] = np.where(
-        max_grid[1,:,:] >= w_in,
-        max_grid[1,:,:] - w_in,
-        max_grid[1,:,:]
+    max_grid[1, :, :] = np.where(
+        max_grid[1, :, :] >= w_in,
+        max_grid[1, :, :] - w_in,
+        max_grid[1, :, :]
     )
 
     for y in range(h_out):
         for x in range(w_out):
             # _y, _x = grid[:,y,x]
-            dy, dx = d_grid[:,y,x]
-            y0, x0 = min_grid[:,y,x]
-            y1, x1 = max_grid[:,y,x]
+            dy, dx = d_grid[:, y, x]
+            y0, x0 = min_grid[:, y, x]
+            y1, x1 = max_grid[:, y, x]
 
             q00 = img[:, y0, x0]
             q10 = img[:, y1, x0]
             q01 = img[:, y0, x1]
             q11 = img[:, y1, x1]
 
-            out[:,y,x] = interp2d([q00,q10,q01,q11], dy, dx, mode=mode)
+            out[:, y, x] = interp2d([q00, q10, q01, q11], dy, dx, mode=mode)
 
     out = np.where(out >= _max, _max, out)
     out = np.where(out < _min, _min, out)
