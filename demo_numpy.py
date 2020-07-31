@@ -76,8 +76,8 @@ if __name__ == "__main__":
 
     tic = time.perf_counter()
     # this normalization is needed? how to represent it in equation...
-    ui = (theta + np.pi) * w_pano / (2 * np.pi)
-    uj = (phi + np.pi / 2) * h_pano / np.pi
+    ui = (theta - np.pi) * w_pano / (2 * np.pi)
+    uj = (phi - np.pi / 2) * h_pano / np.pi
 
     ui = np.where(ui < 0, ui + w_pano, ui)
     ui = np.where(ui >= w_pano, ui - w_pano, ui)

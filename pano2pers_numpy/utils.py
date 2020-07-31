@@ -73,26 +73,47 @@ def create_rot_mat(
         rotation matrix: numpy.ndarray
     """
 
-    
-
-
+    # default rotation that changes global to camera coordinates
+    x = np.pi
+    y = np.pi
+    z = np.pi
     # calculate rotation about the x-axis
+    R_x_ = np.array([
+        [1., 0., 0.],
+        [0., np.cos(x), -np.sin(x)],
+        [0., np.sin(x), np.cos(x)]])
+    # calculate rotation about the y-axis
+    R_y_ = np.array([
+        [np.cos(y), 0., np.sin(y)],
+        [0., 1., 0.],
+        [-np.sin(y), 0., np.cos(y)]])
+    # calculate rotation about the z-axis
+    R_z_ = np.array([
+        [np.cos(z), -np.sin(z), 0.],
+        [np.sin(z), np.cos(z), 0.],
+        [0., 0., 1.]])
+
+    R = R_z_ @ R_y_ @ R_x_
+
+    # rotation matrix
+
+    # roll: calculate rotation about the x-axis
     R_x = np.array([
         [1., 0., 0.],
         [0., np.cos(roll), -np.sin(roll)],
         [0., np.sin(roll), np.cos(roll)]])
-    # calculate rotation about the y-axis
+    # pitch: calculate rotation about the y-axis
     R_y = np.array([
         [np.cos(pitch), 0., np.sin(pitch)],
         [0., 1., 0.],
         [-np.sin(pitch), 0., np.cos(pitch)]])
-    # calculate rotation about the z-axis
+    # yaw: calculate rotation about the z-axis
     R_z = np.array([
         [np.cos(yaw), -np.sin(yaw), 0.],
         [np.sin(yaw), np.cos(yaw), 0.],
         [0., 0., 1.]])
     
-    R = R_z @ R_y @ R_x
+    R = R @ R_z @ R_y @ R_x
     return R
 
 
