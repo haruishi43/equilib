@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import os.path as osp
 
 import time
@@ -83,14 +82,9 @@ if __name__ == "__main__":
     uj = torch.where(uj < 0, uj + h_pano, uj)
     uj = torch.where(uj >= h_pano, uj - h_pano, uj)
 
-    grid = torch.stack((uj, ui), axis=0)
+    grid = torch.stack((uj, ui), axis=-3)
     toc = time.perf_counter()
     print(f"preprocess grid: {toc - tic:0.4f} seconds")
-
-    # tic = time.perf_counter()
-    # pers = torch_sample(pano, grid, device=device, mode='bilinear')
-    # toc = time.perf_counter()
-    # print(f"torch: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
     pers = torch_sample(pano, grid, device=device, mode='bilinear')
@@ -103,5 +97,19 @@ if __name__ == "__main__":
     toc = time.perf_counter()
     print(f"post process: {toc - tic:0.4f} seconds")
 
-    pers_path = osp.join(data_path, 'output_torch.jpg')
+    pers_path = osp.join(data_path, 'output_torch_1.jpg')
+    pers_img.save(pers_path)
+
+    tic = time.perf_counter()
+    pers = torch_original(pano, grid, device=device, mode='bilinear')
+    toc = time.perf_counter()
+    print(f"torch original: {toc - tic:0.4f} seconds")
+
+    tic = time.perf_counter()
+    pers = pers.to('cpu')
+    pers_img = to_PIL(pers)
+    toc = time.perf_counter()
+    print(f"post process: {toc - tic:0.4f} seconds")
+
+    pers_path = osp.join(data_path, 'output_torch_2.jpg')
     pers_img.save(pers_path)

@@ -104,6 +104,8 @@ def create_rot_mat(
 
     Camera coordinates -> z-axis points forward, y-axis points upward
     Global coordinates -> x-axis points forward, z-axis poitns upward
+
+    NOTE: https://www.sciencedirect.com/topics/engineering/intrinsic-parameter
     """
     # default rotation that changes global to camera coordinates
     x = np.pi
@@ -160,8 +162,10 @@ def pixel_wise_rot(rot_coord: torch.tensor) -> Tuple[torch.tensor]:
     """
     if len(rot_coord.shape) == 3:
         rot_coord = rot_coord.unsqueeze(0)
+
+    norms = torch.norm(rot_coord, dim=-1)
     thetas = torch.atan2(rot_coord[:, :, :, 0], rot_coord[:, :, :, 2])
-    phis = torch.asin(rot_coord[:, :, :, 1] / torch.norm(rot_coord, dim=-1))
+    phis = torch.asin(rot_coord[:, :, :, 1] / norms)
     if thetas.shape[0] == phis.shape[0] == 1:
         thetas = thetas.squeeze(0)
         phis = phis.squeeze(0)

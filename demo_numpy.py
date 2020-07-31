@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import os.path as osp
 
 import time
@@ -26,7 +25,7 @@ if __name__ == "__main__":
     pano_img = pano_img.convert('RGB')
     pano = np.asarray(pano_img)
 
-    pano = np.transpose(pano, (2,0,1))
+    pano = np.transpose(pano, (2, 0, 1))
 
     toc = time.perf_counter()
     print(f"Process Pano: {toc - tic:0.4f} seconds")
@@ -101,7 +100,7 @@ if __name__ == "__main__":
 
     tic = time.perf_counter()
     # after sample
-    pers = np.transpose(sampled, (1,2,0))
+    pers = np.transpose(sampled, (1, 2, 0))
     # pers = (pers * 255).astype(np.uint8)  # unscaling
     pers_img = Image.fromarray(pers)
     toc = time.perf_counter()

@@ -129,6 +129,6 @@ def pixel_wise_rot(rot_coord: np.ndarray) -> Tuple[np.ndarray]:
         phis: np.ndarray
         thetas: np.ndarray
     """
-    phis = np.arcsin(rot_coord[:, :, 1] / np.linalg.norm(rot_coord, axis=2))
+    phis = np.arcsin(rot_coord[:, :, 1] / np.linalg.norm(rot_coord, axis=-1))
     thetas = np.arctan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
     return phis, thetas
