@@ -12,8 +12,6 @@ def grid_sample(
 ) -> torch.tensor:
     r"""Grid Sample using torch function
     """
-
-    # FIXME: doesn't work batched...
     if len(img.shape) == 3:
         img = img.unsqueeze(0)
         grid = grid.unsqueeze(0)
@@ -28,6 +26,7 @@ def grid_sample(
     grid = grid.permute(0, 2, 3, 1)
     norm_uj = 2 * (grid[:, :, :, 0] - h_img/2) / h_img
     norm_ui = 2 * (grid[:, :, :, 1] - w_img/2) / w_img
+    # grid sample takes xy, not (height, width)
     grid[:, :, :, 0] = norm_ui
     grid[:, :, :, 1] = norm_uj
 
