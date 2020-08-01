@@ -45,7 +45,7 @@ def grid_sample(
         img,
         grid,
         mode=mode,
-        align_corners=False,
+        align_corners=True,
     )
     if out.shape[0] == 1:
         out = out.squeeze(0)

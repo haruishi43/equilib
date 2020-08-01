@@ -25,7 +25,7 @@ if __name__ == "__main__":
     h_pers = 480
     w_pers = 640
     rot = {
-        'roll': 0.,
+        'roll': utils.pi/2,
         'pitch': 0.,
         'yaw': 0.,
     }
