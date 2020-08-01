@@ -87,7 +87,7 @@ if __name__ == "__main__":
     print(f"preprocess grid: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    pers = torch_sample(pano, grid, device=device, mode='nearest')
+    pers = torch_sample(pano, grid, device=device, mode='bilinear')
     toc = time.perf_counter()
     print(f"torch: {toc - tic:0.4f} seconds")
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     pers_img.save(pers_path)
 
     tic = time.perf_counter()
-    pers = torch_original(pano, grid, device=device, mode='nearest')
+    pers = torch_original(pano, grid, device=device, mode='bilinear')
     toc = time.perf_counter()
     print(f"torch original: {toc - tic:0.4f} seconds")
 

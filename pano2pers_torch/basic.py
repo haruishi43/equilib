@@ -129,6 +129,33 @@ def grid_sample(
             mode=mode,
         ).view(channels, h_out, w_out)
 
+    # NOTE: it is faster, but uses too much memory
+    # def _flatten(t):
+    #     return t.reshape((t.shape[0] * t.shape[1]))
+
+    # # trying to reduce for loops
+    # y_d = _flatten(y_d)
+    # x_d = _flatten(x_d)
+    # y_mins = _flatten(y_mins)
+    # x_mins = _flatten(x_mins)
+    # y_maxs = _flatten(y_maxs)
+    # x_maxs = _flatten(x_maxs)
+
+    # img = img.permute(1, 0, 2, 3)
+    # img = img.view(channels, -1, h_in, w_in).squeeze(1)
+
+    # out = interp2d(
+    #     [
+    #         img[:, y_mins, x_mins],
+    #         img[:, y_maxs, x_mins],
+    #         img[:, y_mins, x_maxs],
+    #         img[:, y_maxs, x_maxs],
+    #     ],
+    #     y_d,
+    #     x_d,
+    #     mode=mode,
+    # ).reshape(channels, batches, h_out, w_out).permute(1, 0, 2, 3)
+
     out = torch.where(out >= _max, _max, out)
     out = torch.where(out < _min, _min, out)
     out = out.reshape(batches, channels, h_out, w_out)

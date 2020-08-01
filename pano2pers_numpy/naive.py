@@ -11,7 +11,8 @@ def linear_interp(v0, v1, d, l):
 
 def interp2d(
     Q: List[np.array],
-    dy: float, dx: float,
+    dy: float,
+    dx: float,
     mode: str = 'bilinear',
 ) -> np.array:
     r"""Naive Interpolation
@@ -40,7 +41,8 @@ def interp2d(
 
 
 def grid_sample(
-    img: np.array, grid: np.array,
+    img: np.array,
+    grid: np.array,
     mode: str = 'bilinear',
 ) -> np.array:
     r"""Naive grid sample algorithm

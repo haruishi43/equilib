@@ -46,7 +46,8 @@ def interp2d(
 
 
 def grid_sample(
-    img: np.array, grid: np.array,
+    img: np.array,
+    grid: np.array,
     mode: str = 'bilinear',
 ) -> np.array:
     r"""Numpy Grid Sample
