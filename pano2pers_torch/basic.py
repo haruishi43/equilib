@@ -13,7 +13,8 @@ def linear_interp(v0, v1, d, l):
 
 def interp2d(
     Q: List[torch.tensor],
-    dy: torch.tensor, dx: torch.tensor,
+    dy: torch.tensor,
+    dx: torch.tensor,
     mode: str = 'bilinear',
 ) -> torch.tensor:
     r"""Naive Interpolation
@@ -26,7 +27,21 @@ def interp2d(
         f1 = linear_interp(q10, q11, dx, 1.)
         return linear_interp(f0, f1, dy, 1.)
     elif mode == 'nearest':
-        raise NotImplementedError
+        pixels = dy.shape[0]
+        out = torch.zeros_like(q00)
+        # FIXME: smarter, faster ways
+        for pixel in range(pixels):
+            if dx[pixel] < 0.5:
+                if dy[pixel] < 0.5:
+                    out[:, pixel] = q00[:, pixel]
+                else:
+                    out[:, pixel] = q11[:, pixel]
+            else:
+                if dy[pixel] < 0.5:
+                    out[:, pixel] = q01[:, pixel]
+                else:
+                    out[:, pixel] = q11[:, pixel]
+        return out
     else:
         raise NotImplementedError
 
@@ -37,8 +52,17 @@ def grid_sample(
     device: torch.device = torch.device('cpu'),
     mode: str = 'bilinear',
 ) -> torch.tensor:
-    r"""Torch Grid Sample
-        Supports batch
+    r"""Torch Grid Sample (Custom)
+
+    params:
+        img: Tensor[B, C, H, W]  or Tensor[C, H, W]
+        grid: Tensor[B, 2, H, W] or Tensor[2, H, W]
+        device: torch.device
+        mode: `bilinear` or `nearest`
+
+    returns:
+        out: Tensor[B, C, H, W] or Tensor[C, H, W]
+            where H, W are grid size
     """
     assert len(img.shape) == len(grid.shape), \
         "ERR: img and grid does not match"
@@ -102,7 +126,7 @@ def grid_sample(
         out[b] = interp2d(
             [Q00, Q10, Q01, Q11],
             y_d[b], x_d[b],
-            mode='bilinear'
+            mode=mode,
         ).view(channels, h_out, w_out)
 
     out = torch.where(out >= _max, _max, out)

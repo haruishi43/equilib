@@ -10,7 +10,18 @@ def grid_sample(
     device: torch.device = torch.device('cpu'),
     mode: str = 'bilinear',
 ) -> torch.tensor:
-    r"""Grid Sample using torch function
+    r"""Torch Grid Sample (default)
+        Uses `torch.nn.functional.grid_sample`
+
+    params:
+        img: Tensor[B, C, H, W]  or Tensor[C, H, W]
+        grid: Tensor[B, 2, H, W] or Tensor[2, H, W]
+        device: torch.device
+        mode: `bilinear` or `nearest`
+
+    returns:
+        out: Tensor[B, C, H, W] or Tensor[C, H, W]
+            where H, W are grid size
     """
     if len(img.shape) == 3:
         img = img.unsqueeze(0)

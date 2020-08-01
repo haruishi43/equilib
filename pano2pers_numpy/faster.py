@@ -26,7 +26,21 @@ def interp2d(
         f1 = linear_interp(q10, q11, dx, 1)
         return linear_interp(f0, f1, dy, 1)
     elif mode == 'nearest':
-        raise NotImplementedError
+        pixels = dy.shape[0]
+        out = np.zeros_like(q00)
+        # FIXME: smarter, faster ways
+        for pixel in range(pixels):
+            if dx[pixel] < 0.5:
+                if dy[pixel] < 0.5:
+                    out[:, pixel] = q00[:, pixel]
+                else:
+                    out[:, pixel] = q11[:, pixel]
+            else:
+                if dy[pixel] < 0.5:
+                    out[:, pixel] = q01[:, pixel]
+                else:
+                    out[:, pixel] = q11[:, pixel]
+        return out
     else:
         raise NotImplementedError
 
