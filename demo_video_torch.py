@@ -9,10 +9,13 @@ import matplotlib.pyplot as plt
 
 import cv2
 import numpy as np
+import torch
+from torchvision import transforms
 
-from pano2pers_numpy import (
-    faster_sample,
-    utils
+from pano2pers_torch import (
+    torch_original,
+    torch_sample,
+    utils,
 )
 
 matplotlib.use('Agg')
@@ -50,9 +53,10 @@ def test_single_image(path=None):
 
     pi = math.pi
     inc = pi / 36
-    yaw = 0 * inc  # -pi < b < pi
-    pitch = 0 * inc  # -pi/2 < a < pi/2
-    roll = 0
+    roll = 0  # -pi/2 < a < pi/2
+    pitch = 0 * inc  # -pi < b < pi
+    yaw = 0 * inc
+
     rot = {
         'roll': roll,
         'pitch': pitch,
@@ -62,37 +66,42 @@ def test_single_image(path=None):
     w_pers = 640  # 640
     fov_x = 90.
 
+    device = torch.device('cuda')
+
+    to_tensor = transforms.Compose([
+        transforms.ToTensor(),
+    ])
+
     pano = cv2.cvtColor(src_img, cv2.COLOR_BGR2RGB)
-    pano = np.transpose(pano, (2, 0, 1))
+    pano = to_tensor(pano)
+    pano = pano.to(device)
     _, h_pano, w_pano = pano.shape
 
     s = time.time()
 
     # whole system
-    m = utils.create_coord(h_pers, w_pers)
-    K = utils.create_K(h_pers, w_pers, fov_x)
-    R = utils.create_rot_mat(**rot)
-    K_inv = np.linalg.inv(K)
-    R_inv = np.linalg.inv(R)
-    m = m[:, :, :, np.newaxis]
-    M = R_inv @ K_inv @ m
+    m = utils.create_coord(h_pers, w_pers, device=device)
+    K = utils.create_K(h_pers, w_pers, fov_x, device=device)
+    R = utils.create_rot_mat(**rot, device=device)
+    M = R.inverse() @ K.inverse() @ m.unsqueeze(3)
     M = M.squeeze(3)
     phi, theta = utils.pixel_wise_rot(M)
-    ui = (theta - np.pi) * w_pano / (2 * np.pi)
-    uj = (phi - np.pi / 2) * h_pano / np.pi
-    ui = np.where(ui < 0, ui + w_pano, ui)
-    ui = np.where(ui >= w_pano, ui - w_pano, ui)
-    uj = np.where(uj < 0, uj + h_pano, uj)
-    uj = np.where(uj >= h_pano, uj - h_pano, uj)
-    grid = np.stack((uj, ui), axis=0)
-    sampled = faster_sample(pano, grid, mode='bilinear')
-    pers = np.transpose(sampled, (1, 2, 0))
+    ui = (theta - math.pi) * w_pano / (2 * math.pi)
+    uj = (phi - math.pi / 2) * h_pano / math.pi
+    ui = torch.where(ui < 0, ui + w_pano, ui)
+    ui = torch.where(ui >= w_pano, ui - w_pano, ui)
+    uj = torch.where(uj < 0, uj + h_pano, uj)
+    uj = torch.where(uj >= h_pano, uj - h_pano, uj)
+    grid = torch.stack((uj, ui), axis=-3)
+    sampled = torch_sample(pano, grid, device=device, mode='bilinear')
+    pers = np.asarray(sampled.cpu().numpy() * 255, dtype=np.uint8)
+    pers = np.transpose(pers, (1, 2, 0))
 
     e = time.time()
     print(e - s)
     pers = cv2.cvtColor(pers, cv2.COLOR_RGB2BGR)
-    cv2.imshow("output", rescale_frame(pers, percent=100))
-    cv2.waitKey()
+    # cv2.imshow("output", rescale_frame(pers, percent=100))
+    # cv2.waitKey()
     cv2.imwrite("./data/output_numpy_single.jpg", pers)
 
 
@@ -107,6 +116,12 @@ def test_video(path=None):
     roll = 0  # -pi/2 < a < pi/2
     pitch = 0  # -pi < b < pi
     yaw = 0
+
+    device = torch.device('cuda')
+
+    to_tensor = transforms.Compose([
+        transforms.ToTensor(),
+    ])
 
     h_pers = 480  # 480
     w_pers = 640  # 640
@@ -130,26 +145,25 @@ def test_video(path=None):
         s = time.time()
         # whole system
         pano = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        pano = np.transpose(pano, (2, 0, 1))
+        pano = to_tensor(pano)
+        pano = pano.to(device)
         _, h_pano, w_pano = pano.shape
-        m = utils.create_coord(h_pers, w_pers)
-        K = utils.create_K(h_pers, w_pers, fov_x)
-        R = utils.create_rot_mat(**rot)
-        K_inv = np.linalg.inv(K)
-        R_inv = np.linalg.inv(R)
-        m = m[:, :, :, np.newaxis]
-        M = R_inv @ K_inv @ m
+        m = utils.create_coord(h_pers, w_pers, device=device)
+        K = utils.create_K(h_pers, w_pers, fov_x, device=device)
+        R = utils.create_rot_mat(**rot, device=device)
+        M = R.inverse() @ K.inverse() @ m.unsqueeze(3)
         M = M.squeeze(3)
         phi, theta = utils.pixel_wise_rot(M)
-        ui = (theta - np.pi) * w_pano / (2 * np.pi)
-        uj = (phi - np.pi / 2) * h_pano / np.pi
-        ui = np.where(ui < 0, ui + w_pano, ui)
-        ui = np.where(ui >= w_pano, ui - w_pano, ui)
-        uj = np.where(uj < 0, uj + h_pano, uj)
-        uj = np.where(uj >= h_pano, uj - h_pano, uj)
-        grid = np.stack((uj, ui), axis=0)
-        sampled = faster_sample(pano, grid, mode='bilinear')
-        pers = np.transpose(sampled, (1, 2, 0))
+        ui = (theta - math.pi) * w_pano / (2 * math.pi)
+        uj = (phi - math.pi / 2) * h_pano / math.pi
+        ui = torch.where(ui < 0, ui + w_pano, ui)
+        ui = torch.where(ui >= w_pano, ui - w_pano, ui)
+        uj = torch.where(uj < 0, uj + h_pano, uj)
+        uj = torch.where(uj >= h_pano, uj - h_pano, uj)
+        grid = torch.stack((uj, ui), axis=-3)
+        sampled = torch_sample(pano, grid, device=device, mode='bilinear')
+        pers = np.asarray(sampled.cpu().numpy() * 255, dtype=np.uint8)
+        pers = np.transpose(pers, (1, 2, 0))
         pers = cv2.cvtColor(pers, cv2.COLOR_RGB2BGR)
         e = time.time()
 
@@ -175,7 +189,7 @@ def test_video(path=None):
     print(sum(times)/len(times))
     x_axis = [i for i in range(len(times))]
     plt.plot(x_axis, times)
-    plt.savefig('test_numpy_video.png')
+    plt.savefig('test_torch_video.png')
 
 
 if __name__ == "__main__":

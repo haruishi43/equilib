@@ -19,7 +19,7 @@ from pano2pers_torch import (
 
 if __name__ == "__main__":
     data_path = osp.join('.', 'data')
-    pano_path = osp.join(data_path, '8081_earthmap4k.jpg')
+    pano_path = osp.join(data_path, 'pano.jpg')
 
     # Variables:
     h_pers = 480
@@ -56,20 +56,20 @@ if __name__ == "__main__":
     print(h_pano, w_pano)
 
     tic = time.perf_counter()
-    coord = utils.create_coord(h_pers, w_pers, device=device)
+    m = utils.create_coord(h_pers, w_pers, device=device)
     K = utils.create_K(h_pers, w_pers, fov_x, device=device)
     R = utils.create_rot_mat(**rot, device=device)
     toc = time.perf_counter()
     print(f"Process coord, K, R: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    rot_coord = R.inverse() @ K.inverse() @ coord.unsqueeze(3)
-    rot_coord = rot_coord.squeeze(3)
+    M = R.inverse() @ K.inverse() @ m.unsqueeze(3)
+    M = M.squeeze(3)
     toc = time.perf_counter()
     print(f"Take Inverse and rot_coord: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    phi, theta = utils.pixel_wise_rot(rot_coord)
+    phi, theta = utils.pixel_wise_rot(M)
     toc = time.perf_counter()
     print(f"pixel_wise_rot: {toc - tic:0.4f} seconds")
 

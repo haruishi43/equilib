@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-from pano2pers import Pano2Pers
+from pano2perspective import Pano2Perspective as Pano2Pers
 
 matplotlib.use('Agg')
 
@@ -44,7 +44,7 @@ def test_single_image(path=None):
         cv2.imshow("input", src_img_show)
         cv2.waitKey()
     else:
-        src_img = cv2.imread("./data/pano.jpg")
+        frame = cv2.imread("./data/pano.jpg")
 
     pi = math.pi
     inc = pi / 36
@@ -60,13 +60,14 @@ def test_single_image(path=None):
     w = 640  # 640
     fov = 90
 
-    p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)
+    p2p = Pano2Pers(w, h, fov)
     p2p.set_rotation([
         rot['roll'], rot['pitch'], rot['yaw'],
     ])
 
     s = time.time()
-    dst_img = p2p.get_perspective(src_img)
+    frame = [frame[:, :, 0], frame[:, :, 1], frame[:, :, 2]]
+    dst_img = p2p.process_image(frame)
     e = time.time()
     print(e - s)
     dst_img = p2p.convert_rgb(dst_img)
@@ -79,7 +80,7 @@ def test_video(path=None):
     if path is not None:
         video_path = path
     else:
-        video_path = "./data/R0010050_er_0.MP4"
+        video_path = "./data/R0010053_er_23.MP4"
 
     pi = math.pi
     inc = pi / 180
@@ -91,7 +92,8 @@ def test_video(path=None):
     fov = 80
 
     # initialize Pano2Perspective
-    p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)
+    p2p = Pano2Pers(w, h, fov)
+    p2p.cuda(0)
 
     times = []
     cap = cv2.VideoCapture(video_path)
@@ -103,10 +105,11 @@ def test_video(path=None):
 
         s = time.time()
         p2p.set_rotation([yaw, pitch, roll])  # set rotation
-        dst_img = p2p.get_perspective(frame)  # process the image
+        frame = [frame[:, :, 0], frame[:, :, 1], frame[:, :, 2]]
+        dst_img = p2p.process_image(frame)  # process the image
         e = time.time()
 
-        cv2.imshow("video", dst_img)
+        # cv2.imshow("video", dst_img)
 
         k = cv2.waitKey(1)
         if k == ord('q'):
