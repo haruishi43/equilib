@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import argparse
-import os.path as osp
 
 import time
 import math
@@ -12,10 +9,8 @@ import matplotlib.pyplot as plt
 
 import cv2
 import numpy as np
-from PIL import Image
 
 from pano2pers_numpy import (
-    naive_sample,
     faster_sample,
     utils
 )
@@ -63,23 +58,42 @@ def test_single_image(path=None):
         'pitch': pitch,
         'yaw': yaw,
     }
-    h = 480  # 480
-    w = 640  # 640
-    fov = 90
+    h_pers = 480  # 480
+    w_pers = 640  # 640
+    fov_x = 90.
 
-    p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)
-    p2p.set_rotation([
-        rot['roll'], rot['pitch'], rot['yaw'],
-    ])
+    pano = cv2.cvtColor(src_img, cv2.COLOR_BGR2RGB)
+    pano = np.transpose(pano, (2, 0, 1))
+    _, h_pano, w_pano = pano.shape
 
     s = time.time()
-    dst_img = p2p.get_perspective(src_img)
+
+    # whole system
+    m = utils.create_coord(h_pers, w_pers)
+    K = utils.create_K(h_pers, w_pers, fov_x)
+    R = utils.create_rot_mat(**rot)
+    K_inv = np.linalg.inv(K)
+    R_inv = np.linalg.inv(R)
+    m = m[:, :, :, np.newaxis]
+    M = R_inv @ K_inv @ m
+    M = M.squeeze(3)
+    phi, theta = utils.pixel_wise_rot(M)
+    ui = (theta - np.pi) * w_pano / (2 * np.pi)
+    uj = (phi - np.pi / 2) * h_pano / np.pi
+    ui = np.where(ui < 0, ui + w_pano, ui)
+    ui = np.where(ui >= w_pano, ui - w_pano, ui)
+    uj = np.where(uj < 0, uj + h_pano, uj)
+    uj = np.where(uj >= h_pano, uj - h_pano, uj)
+    grid = np.stack((uj, ui), axis=0)
+    sampled = faster_sample(pano, grid, mode='bilinear')
+    pers = np.transpose(sampled, (1, 2, 0))
+
     e = time.time()
     print(e - s)
-    dst_img = p2p.convert_rgb(dst_img)
-    cv2.imshow("output", rescale_frame(dst_img, percent=100))
+    pers = cv2.cvtColor(pers, cv2.COLOR_RGB2BGR)
+    cv2.imshow("output", rescale_frame(pers, percent=100))
     cv2.waitKey()
-    cv2.imwrite("./data/output.jpg", dst_img)
+    cv2.imwrite("./data/output_numpy_single.jpg", pers)
 
 
 def test_video(path=None):
@@ -90,43 +104,68 @@ def test_video(path=None):
 
     pi = math.pi
     inc = pi / 180
-    yaw = 0  # -pi < b < pi
-    pitch = 0  # -pi/2 < a < pi/2
-    roll = 0
-    h = 480  #480
-    w = 640  #640
-    fov = 80
+    roll = 0  # -pi/2 < a < pi/2
+    pitch = 0  # -pi < b < pi
+    yaw = 0
+
+    h_pers = 480  # 480
+    w_pers = 640  # 640
+    fov_x = 80
 
     # initialize Pano2Perspective
-    p2p = Pano2Pers.from_crop_size(h, w, fov, device=0, debug=True)
-
     times = []
     cap = cv2.VideoCapture(video_path)
     while(cap.isOpened()):
         ret, frame = cap.read()
 
+        rot = {
+            'roll': roll,
+            'pitch': pitch,
+            'yaw': yaw,
+        }
+
         if not ret:
             break
 
         s = time.time()
-        arr = [frame[:, :, 0], frame[:, :, 1], frame[:, :, 2]]
-        p2p.set_rotation([yaw, pitch, roll])  # set rotation
-        dst_img = p2p.get_perspective(frame)  # process the image
+        # whole system
+        pano = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        pano = np.transpose(pano, (2, 0, 1))
+        _, h_pano, w_pano = pano.shape
+        m = utils.create_coord(h_pers, w_pers)
+        K = utils.create_K(h_pers, w_pers, fov_x)
+        R = utils.create_rot_mat(**rot)
+        K_inv = np.linalg.inv(K)
+        R_inv = np.linalg.inv(R)
+        m = m[:, :, :, np.newaxis]
+        M = R_inv @ K_inv @ m
+        M = M.squeeze(3)
+        phi, theta = utils.pixel_wise_rot(M)
+        ui = (theta - np.pi) * w_pano / (2 * np.pi)
+        uj = (phi - np.pi / 2) * h_pano / np.pi
+        ui = np.where(ui < 0, ui + w_pano, ui)
+        ui = np.where(ui >= w_pano, ui - w_pano, ui)
+        uj = np.where(uj < 0, uj + h_pano, uj)
+        uj = np.where(uj >= h_pano, uj - h_pano, uj)
+        grid = np.stack((uj, ui), axis=0)
+        sampled = faster_sample(pano, grid, mode='bilinear')
+        pers = np.transpose(sampled, (1, 2, 0))
+        pers = cv2.cvtColor(pers, cv2.COLOR_RGB2BGR)
         e = time.time()
 
-        cv2.imshow("video", dst_img)
+        cv2.imshow("video", pers)
 
         k = cv2.waitKey(1)
         if k == ord('q'):
             break
         if k == ord('w'):
-            pitch -= inc
+            roll -= inc
         if k == ord('s'):
-            pitch += inc
+            roll += inc
         if k == ord('a'):
-            yaw -= inc
+            pitch += inc
         if k == ord('d'):
-            yaw += inc
+            pitch -= inc
 
         times.append(e - s)
 
@@ -136,101 +175,8 @@ def test_video(path=None):
     print(sum(times)/len(times))
     x_axis = [i for i in range(len(times))]
     plt.plot(x_axis, times)
-    plt.savefig('test_video.png')
-
+    plt.savefig('test_numpy_video.png')
 
 
 if __name__ == "__main__":
-    data_path = osp.join('.', 'data')
-    pano_path = osp.join(data_path, '8081_earthmap4k.jpg')
-
-    tic = time.perf_counter()
-    pano_img = Image.open(pano_path)
-
-    # Sometimes images are RGBA
-    pano_img = pano_img.convert('RGB')
-    pano = np.asarray(pano_img)
-
-    pano = np.transpose(pano, (2, 0, 1))
-
-    toc = time.perf_counter()
-    print(f"Process Pano: {toc - tic:0.4f} seconds")
-
-    _, h_pano, w_pano = pano.shape
-    print('panorama size:')
-    print(h_pano, w_pano)
-
-    # Variables:
-    h_pers = 480
-    w_pers = 640
-    rot = {
-        'roll': 0,
-        'pitch': 0,
-        'yaw': 0,
-    }
-    fov_x = 90
-
-    tic = time.perf_counter()
-    m = utils.create_coord(h_pers, w_pers)
-    K = utils.create_K(h_pers, w_pers, fov_x)
-    R = utils.create_rot_mat(**rot)
-    toc = time.perf_counter()
-    print(f"Process m, K, R: {toc - tic:0.4f} seconds")
-
-    # m = P M
-    # P = K [R | t] = K R (in this case...)
-    # R^-1 K^-1 m = M
-
-    tic = time.perf_counter()
-    K_inv = np.linalg.inv(K)
-    R_inv = np.linalg.inv(R)
-    m = m[:, :, :, np.newaxis]
-    toc = time.perf_counter()
-    print(f"Take Inverse: {toc - tic:0.4f} seconds")
-
-    tic = time.perf_counter()
-    M = R_inv @ K_inv @ m
-    M = M.squeeze(3)
-    toc = time.perf_counter()
-    print(f"M = R^-1 K^-1 m: {toc - tic:0.4f} seconds")
-
-    tic = time.perf_counter()
-    phi, theta = utils.pixel_wise_rot(M)
-    toc = time.perf_counter()
-    print(f"pixel_wise_rot: {toc - tic:0.4f} seconds")
-
-    tic = time.perf_counter()
-    ui = (theta - np.pi) * w_pano / (2 * np.pi)
-    uj = (phi - np.pi / 2) * h_pano / np.pi
-
-    ui = np.where(ui < 0, ui + w_pano, ui)
-    ui = np.where(ui >= w_pano, ui - w_pano, ui)
-    uj = np.where(uj < 0, uj + h_pano, uj)
-    uj = np.where(uj >= h_pano, uj - h_pano, uj)
-
-    # pano = pano / 255.  # scaling 0.0 - 1.0
-
-    grid = np.stack((uj, ui), axis=0)
-    toc = time.perf_counter()
-    print(f"preprocess grid: {toc - tic:0.4f} seconds")
-    
-    tic = time.perf_counter()
-    sampled = naive_sample(pano, grid, mode='bilinear')
-    toc = time.perf_counter()
-    print(f"naive: {toc - tic:0.4f} seconds")
-
-    tic = time.perf_counter()
-    sampled = faster_sample(pano, grid, mode='bilinear')
-    toc = time.perf_counter()
-    print(f"faster: {toc - tic:0.4f} seconds")
-
-    tic = time.perf_counter()
-    # after sample
-    pers = np.transpose(sampled, (1,2,0))
-    # pers = (pers * 255).astype(np.uint8)  # unscaling
-    pers_img = Image.fromarray(pers)
-    toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
-
-    pers_path = osp.join(data_path, 'output_numpy.jpg')
-    pers_img.save(pers_path)
+    main()
