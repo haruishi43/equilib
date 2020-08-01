@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import argparse
 import os.path as osp
 
@@ -14,17 +12,13 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from pano2pers_numpy import (
-    naive_sample,
-    faster_sample,
-    utils
-)
+from pano2pers import Pano2Pers
 
 matplotlib.use('Agg')
 
 
 def rescale_frame(frame, percent=75):
-    '''Rescale image for imshow'''
+    r"""Rescale image for imshow"""
     width = int(frame.shape[1] * percent / 100)
     height = int(frame.shape[0] * percent / 100)
     dim = (width, height)

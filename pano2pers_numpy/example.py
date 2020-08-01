@@ -60,7 +60,7 @@ def test_single_image(path=None):
     e = time.time()
     print(e - s)
     dst_img = p2p.convert_rgb(dst_img)
-    cv2.imshow("output", rescale_frame(dst_img,percent=100))
+    cv2.imshow("output", rescale_frame(dst_img, percent=100))
     cv2.waitKey()
     cv2.imwrite("./data/output.jpg", dst_img)
 
@@ -76,8 +76,8 @@ def test_video(path=None):
     yaw = 0  # -pi < b < pi
     pitch = 0  # -pi/2 < a < pi/2
     roll = 0
-    h = 480 #480
-    w = 640 #640
+    h = 480  #480
+    w = 640  #640
     fov = 80
 
     # initialize Pano2Perspective
@@ -92,7 +92,7 @@ def test_video(path=None):
             break
 
         s = time.time()
-        arr = [frame[:,:, 0], frame[:, :, 1], frame[:, :, 2]]
+        arr = [frame[:, :, 0], frame[:, :, 1], frame[:, :, 2]]
         p2p.set_rotation([yaw, pitch, roll])  # set rotation
         dst_img = p2p.get_perspective(frame)  # process the image
         e = time.time()
@@ -117,10 +117,10 @@ def test_video(path=None):
     cv2.destroyAllWindows()
 
     print(sum(times)/len(times))
-    x_axis = [ i for i in range(len(times)) ]
+    x_axis = [i for i in range(len(times))]
     plt.plot(x_axis, times)
     plt.savefig('test_video.png')
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
