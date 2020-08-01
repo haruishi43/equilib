@@ -12,6 +12,7 @@ def grid_sample(
 ) -> torch.tensor:
     r"""Torch Grid Sample (default)
         Uses `torch.nn.functional.grid_sample`
+        By far the best way to sample
 
     params:
         img: Tensor[B, C, H, W]  or Tensor[C, H, W]
