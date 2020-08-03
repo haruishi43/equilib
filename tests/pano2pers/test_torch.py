@@ -38,6 +38,7 @@ def run(pano, rot):
         rot=rot,
         sampling_method="torch",
         mode="bilinear",
+        debug=True,
     )
     toc = time.perf_counter()
     print(f"Sample: {toc - tic:0.4f} seconds")
