@@ -4,19 +4,16 @@ from typing import List
 
 import torch
 
-
-def linear_interp(v0, v1, d, l):
-    r"""Basic Linear Interpolation
-    """
-    return v0*(1-d)/l + v1*d/l
+from .iterp import linear_interp
+from .utils import get_device
 
 
 def interp2d(
-    Q: List[torch.tensor],
-    dy: torch.tensor,
-    dx: torch.tensor,
+    Q: List[torch.Tensor],
+    dy: torch.Tensor,
+    dx: torch.Tensor,
     mode: str = 'bilinear',
-) -> torch.tensor:
+) -> torch.Tensor:
     r"""Naive Interpolation
         (y,x): target pixel
         mode: interpolation mode
@@ -47,17 +44,15 @@ def interp2d(
 
 
 def grid_sample(
-    img: torch.tensor,
-    grid: torch.tensor,
-    device: torch.device = torch.device('cpu'),
+    img: torch.Tensor,
+    grid: torch.Tensor,
     mode: str = 'bilinear',
-) -> torch.tensor:
+) -> torch.Tensor:
     r"""Torch Grid Sample (Custom)
 
     params:
         img: Tensor[B, C, H, W]  or Tensor[C, H, W]
         grid: Tensor[B, 2, H, W] or Tensor[2, H, W]
-        device: torch.device
         mode: `bilinear` or `nearest`
 
     returns:
@@ -73,6 +68,11 @@ def grid_sample(
         grid = grid.unsqueeze(0)
     batches, channels, h_in, w_in = img.shape
     _, _, h_out, w_out = grid.shape
+
+    assert img.get_device == grid.get_device, \
+        "ERR: img and grid does not match device"
+    device = get_device(img)
+
     _dtype = img.dtype
     _max = torch.tensor(1., device=device)
     _min = torch.tensor(0., device=device)

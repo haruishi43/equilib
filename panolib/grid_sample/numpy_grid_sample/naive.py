@@ -4,17 +4,15 @@ from typing import List
 
 import numpy as np
 
-
-def linear_interp(v0, v1, d, l):
-    return v0*(1-d)/l + v1*d/l
+from .iterp import linear_interp
 
 
 def interp2d(
-    Q: List[np.array],
+    Q: List[np.ndarray],
     dy: float,
     dx: float,
     mode: str = 'bilinear',
-) -> np.array:
+) -> np.ndarray:
     r"""Naive Interpolation
         (y,x): target pixel
         mode: interpolation mode
@@ -41,10 +39,10 @@ def interp2d(
 
 
 def grid_sample(
-    img: np.array,
-    grid: np.array,
+    img: np.ndarray,
+    grid: np.ndarray,
     mode: str = 'bilinear',
-) -> np.array:
+) -> np.ndarray:
     r"""Naive grid sample algorithm
     """
     channels, h_in, w_in = img.shape

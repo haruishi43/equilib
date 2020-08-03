@@ -5,11 +5,11 @@ import torch.nn.functional as F
 
 
 def grid_sample(
-    img: torch.tensor,
-    grid: torch.tensor,
-    device: torch.device = torch.device('cpu'),
+    img: torch.Tensor,
+    grid: torch.Tensor,
     mode: str = 'bilinear',
-) -> torch.tensor:
+    **kwargs,
+) -> torch.Tensor:
     r"""Torch Grid Sample (default)
         Uses `torch.nn.functional.grid_sample`
         By far the best way to sample

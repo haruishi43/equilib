@@ -12,7 +12,7 @@ import numpy as np
 
 from pano2pers_numpy import (
     faster_sample,
-    utils
+    utils,
 )
 
 matplotlib.use('Agg')

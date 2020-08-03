@@ -4,16 +4,12 @@ from typing import List
 
 import numpy as np
 
-
-def linear_interp(v0, v1, d, l):
-    r"""Basic Linear Interpolation
-    """
-    return v0*(1-d)/l + v1*d/l
+from .interp import linear_interp
 
 
 def interp2d(
     Q: List[np.ndarray],
-    dy: np.array, dx: np.array,
+    dy: np.ndarray, dx: np.ndarray,
     mode: str = 'bilinear',
 ) -> np.ndarray:
     r"""Naive Interpolation
@@ -46,10 +42,10 @@ def interp2d(
 
 
 def grid_sample(
-    img: np.array,
-    grid: np.array,
+    img: np.ndarray,
+    grid: np.ndarray,
     mode: str = 'bilinear',
-) -> np.array:
+) -> np.ndarray:
     r"""Numpy Grid Sample
     """
     channels, h_in, w_in = img.shape
