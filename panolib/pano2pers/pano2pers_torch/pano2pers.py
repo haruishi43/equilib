@@ -39,7 +39,7 @@ class Pano2Pers(BasePano2Pers):
         NOTE:
             ref: http://ksimek.github.io/2013/08/13/intrinsic/
         """
-        if self._K is None:
+        if not hasattr(self, '_K'):
             fov_x = torch.tensor(self.fov_x)
             f = self.w_pers / (2 * torch.tan(deg2rad(fov_x) / 2))
             self._K = torch.tensor([
@@ -68,7 +68,7 @@ class Pano2Pers(BasePano2Pers):
     def global2camera_rotation_matrix(self) -> torch.Tensor:
         r"""Default rotation that changes global to camera coordinates
         """
-        if self._g2c_rot is None:
+        if not hasattr(self, '_g2c_rot'):
             x = pi
             y = pi
             z = pi
@@ -105,7 +105,7 @@ class Pano2Pers(BasePano2Pers):
         # batch, channel, height, width
         return img.shape[-2], img.shape[-1]
 
-    def run(
+    def __call__(
         self,
         pano: torch.Tensor,
         rot: Union[Dict[str, float], List[Dict[str, float]]],
@@ -172,7 +172,7 @@ class Pano2Pers(BasePano2Pers):
         grid_sample = getattr(
             torch_func,
             sampling_method,
-            default="torch"
+            "torch"
         )
         samples = grid_sample(pano, grid, mode=mode)
 

@@ -4,7 +4,7 @@ from typing import List
 
 import torch
 
-from .iterp import linear_interp
+from .interp import linear_interp
 from .utils import get_device
 
 

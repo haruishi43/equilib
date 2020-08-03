@@ -34,7 +34,7 @@ class Pano2Pers(BasePano2Pers):
         NOTE:
             ref: http://ksimek.github.io/2013/08/13/intrinsic/
         """
-        if self._K is None:
+        if not hasattr(self, '_K'):
             # perspective projection (focal length)
             f = self.w_pers / (2. * np.tan(np.radians(self.fov_x) / 2.))
             # transform between camera frame and pixel coordinates
@@ -62,7 +62,7 @@ class Pano2Pers(BasePano2Pers):
     def global2camera_rotation_matrix(self) -> np.ndarray:
         r"""Default rotation that changes global to camera coordinates
         """
-        if self._g2c_rot is None:
+        if not hasattr(self, '_g2c_rot'):
             x = np.pi
             y = np.pi
             z = np.pi
@@ -138,12 +138,12 @@ class Pano2Pers(BasePano2Pers):
         grid_sample = getattr(
             numpy_func,
             sampling_method,
-            default="faster"
+            "faster"
         )
         sampled = grid_sample(pano, grid, mode=mode)
         return sampled
 
-    def run(
+    def __call__(
         self,
         pano: Union[np.ndarray, List[np.ndarray]],
         rot: Union[Dict[str, float], List[Dict[str, float]]],

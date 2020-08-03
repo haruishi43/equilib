@@ -29,6 +29,16 @@ Panorama to perspective transformation
 
 I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch`.
 
+```Python
+class SomePano2Pers(BasePano2Pers):
+    def __init__(self, ...):
+        ...
+    def __call__(self, ...):
+        ...
+    def run(self, ...):
+        ...
+```
+
 ### C++
 
 __WIP__

@@ -4,7 +4,7 @@ from typing import List
 
 import numpy as np
 
-from .iterp import linear_interp
+from .interp import linear_interp
 
 
 def interp2d(
@@ -80,7 +80,6 @@ def grid_sample(
 
     for y in range(h_out):
         for x in range(w_out):
-            # _y, _x = grid[:,y,x]
             dy, dx = d_grid[:, y, x]
             y0, x0 = min_grid[:, y, x]
             y1, x1 = max_grid[:, y, x]

@@ -20,7 +20,7 @@ class BasePano2Pers(object):
             w_pers, h_pers: perspective size
             fov_x: perspective image fov of x-axis (width direction)
         """
-        self._init(
+        self._init_params(
             w_pano=w_pano,
             h_pano=h_pano,
             w_pers=w_pers,
@@ -65,37 +65,10 @@ class BasePano2Pers(object):
     def _get_img_size(img):
         raise NotImplementedError
 
-    def run(
+    def __call__(
         self,
         pano,
         rot,
         **kwargs,
     ):
         raise NotImplementedError
-
-    def __call__(
-        self,
-        pano,
-        rot,
-        w_pers: int,
-        h_pers: int,
-        fov_x: float,
-        **kwargs
-    ):
-        r"""Call Pano2Pers without initializing anything
-
-        rot: Dict[roll, pitch, yaw] or List[Dict[roll, pitch, yaw]]
-        """
-        h_pano, w_pano = self._get_img_size(pano)
-        self._init(
-            w_pano=w_pano,
-            h_pano=h_pano,
-            w_pers=w_pers,
-            h_pers=h_pers,
-            fov_x=fov_x,
-        )
-        return self.run(
-            pano=pano,
-            rot=rot,
-            **kwargs,
-        )
