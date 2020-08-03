@@ -34,8 +34,7 @@ def interp2d(
             else:
                 return q11
     else:
-        print(f"{mode} is not supported")
-        return None
+        return NotImplementedError
 
 
 def grid_sample(
@@ -58,7 +57,7 @@ def grid_sample(
         _max = 1.0
         _dtype = np.float64
     else:
-        print(f"{img.dtype} is not supported")
+        raise ValueError(f"{img.dtype} is not supported")
 
     # Initialize output image
     out = np.zeros((channels, h_out, w_out), dtype=_dtype)

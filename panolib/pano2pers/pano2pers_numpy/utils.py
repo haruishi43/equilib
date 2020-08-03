@@ -58,6 +58,40 @@ def create_K(
     return K
 
 
+def create_rotation_matrix(
+    x: float,
+    y: float,
+    z: float,
+) -> np.ndarray:
+    r"""Create Rotation Matrix
+
+    params:
+        x: x-axis rotation float
+        y: y-axis rotation float
+        z: z-axis rotation float
+
+    return:
+        rotation matrix: numpy.ndarray
+    """
+    # calculate rotation about the x-axis
+    R_x = np.array([
+        [1., 0., 0.],
+        [0., np.cos(x), -np.sin(x)],
+        [0., np.sin(x), np.cos(x)]])
+    # calculate rotation about the y-axis
+    R_y = np.array([
+        [np.cos(y), 0., np.sin(y)],
+        [0., 1., 0.],
+        [-np.sin(y), 0., np.cos(y)]])
+    # calculate rotation about the z-axis
+    R_z = np.array([
+        [np.cos(z), -np.sin(z), 0.],
+        [np.sin(z), np.cos(z), 0.],
+        [0., 0., 1.]])
+
+    return R_z @ R_y @ R_x
+
+
 def create_rot_mat(
     roll: float,
     pitch: float,
@@ -81,42 +115,10 @@ def create_rot_mat(
     x = np.pi
     y = np.pi
     z = np.pi
-    # calculate rotation about the x-axis
-    R_x_ = np.array([
-        [1., 0., 0.],
-        [0., np.cos(x), -np.sin(x)],
-        [0., np.sin(x), np.cos(x)]])
-    # calculate rotation about the y-axis
-    R_y_ = np.array([
-        [np.cos(y), 0., np.sin(y)],
-        [0., 1., 0.],
-        [-np.sin(y), 0., np.cos(y)]])
-    # calculate rotation about the z-axis
-    R_z_ = np.array([
-        [np.cos(z), -np.sin(z), 0.],
-        [np.sin(z), np.cos(z), 0.],
-        [0., 0., 1.]])
-
-    R = R_z_ @ R_y_ @ R_x_
+    R = create_rotation_matrix(x=x, y=y, z=z)
 
     # rotation matrix
-    # roll: calculate rotation about the x-axis
-    R_x = np.array([
-        [1., 0., 0.],
-        [0., np.cos(roll), -np.sin(roll)],
-        [0., np.sin(roll), np.cos(roll)]])
-    # pitch: calculate rotation about the y-axis
-    R_y = np.array([
-        [np.cos(pitch), 0., np.sin(pitch)],
-        [0., 1., 0.],
-        [-np.sin(pitch), 0., np.cos(pitch)]])
-    # yaw: calculate rotation about the z-axis
-    R_z = np.array([
-        [np.cos(yaw), -np.sin(yaw), 0.],
-        [np.sin(yaw), np.cos(yaw), 0.],
-        [0., 0., 1.]])
-
-    R = R @ R_z @ R_y @ R_x
+    R = R @ create_rotation_matrix(x=roll, y=pitch, z=yaw)
     return R
 
 

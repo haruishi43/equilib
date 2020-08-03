@@ -15,6 +15,14 @@ def sizeof(tensor: torch.Tensor) -> float:
     return tensor.element_size() * tensor.nelement()
 
 
+def get_device(a: torch.Tensor) -> torch.device:
+    r"""Get device of a Tensor
+    """
+    return torch.device(
+        a.get_device() if a.get_device() > 0 else 'cpu'
+    )
+
+
 def deg2rad(tensor: torch.Tensor) -> torch.Tensor:
     r"""Function that converts angles from degrees to radians.
     """
@@ -23,20 +31,20 @@ def deg2rad(tensor: torch.Tensor) -> torch.Tensor:
     return tensor * pi.to(tensor.device).type(tensor.dtype) / 180.
 
 
-def create_rot_coord(
-    height: int, width: int,
+def create_M(
+    height: int,
+    width: int,
     fov_x: float,
     rot: Dict[str, float],
-    device: torch.device = torch.device('cpu')
 ) -> torch.tensor:
-    r"""Create rot coordinates
+    r"""Create M
     """
-    coord = create_coord(height, width).to(device)
-    K = create_K(height, width, fov_x).to(device)
-    R = create_rot_mat(**rot).to(device)
-    rot_coord = R.inverse() @ K.inverse() @ coord.unsqueeze(3)
-    rot_coord = rot_coord.squeeze(3)
-    return rot_coord
+    m = create_coord(height, width)
+    K = create_K(height, width, fov_x)
+    R = create_rot_mat(**rot)
+    M = R.inverse() @ K.inverse() @ m.unsqueeze(3)
+    M = M.squeeze(3)
+    return M
 
 
 def create_coord(
@@ -84,6 +92,40 @@ def create_K(
     return K
 
 
+def create_rotation_matrix(
+    x: float,
+    y: float,
+    z: float,
+) -> torch.Tensor:
+    r"""Create Rotation Matrix
+
+    params:
+        x: x-axis rotation float
+        y: y-axis rotation float
+        z: z-axis rotation float
+
+    return:
+        rotation matrix: torch.Tensor
+    """
+    # calculate rotation about the x-axis
+    R_x = torch.tensor([
+        [1., 0., 0.],
+        [0., np.cos(x), -np.sin(x)],
+        [0., np.sin(x), np.cos(x)]])
+    # calculate rotation about the y-axis
+    R_y = torch.tensor([
+        [np.cos(y), 0., np.sin(y)],
+        [0., 1., 0.],
+        [-np.sin(y), 0., np.cos(y)]])
+    # calculate rotation about the z-axis
+    R_z = torch.tensor([
+        [np.cos(z), -np.sin(z), 0.],
+        [np.sin(z), np.cos(z), 0.],
+        [0., 0., 1.]])
+
+    return R_z @ R_y @ R_x
+
+
 def create_rot_mat(
     roll: float,
     pitch: float,
@@ -108,61 +150,30 @@ def create_rot_mat(
     x = np.pi
     y = np.pi
     z = np.pi
-    # calculate rotation about the x-axis
-    R_x_ = torch.tensor([
-        [1., 0., 0.],
-        [0., np.cos(x), -np.sin(x)],
-        [0., np.sin(x), np.cos(x)]])
-    # calculate rotation about the y-axis
-    R_y_ = torch.tensor([
-        [np.cos(y), 0., np.sin(y)],
-        [0., 1., 0.],
-        [-np.sin(y), 0., np.cos(y)]])
-    # calculate rotation about the z-axis
-    R_z_ = torch.tensor([
-        [np.cos(z), -np.sin(z), 0.],
-        [np.sin(z), np.cos(z), 0.],
-        [0., 0., 1.]])
-
-    R = R_z_ @ R_y_ @ R_x_
+    R = create_rotation_matrix(x=x, y=y, z=z)
 
     # rotation matrix
-    # roll: calculate rotation about the x-axis
-    R_x = torch.tensor([
-        [1., 0., 0.],
-        [0., np.cos(roll), -np.sin(roll)],
-        [0., np.sin(roll), np.cos(roll)]])
-    # pitch: calculate rotation about the y-axis
-    R_y = torch.tensor([
-        [np.cos(pitch), 0., np.sin(pitch)],
-        [0., 1., 0.],
-        [-np.sin(pitch), 0., np.cos(pitch)]])
-    # yaw: calculate rotation about the z-axis
-    R_z = torch.tensor([
-        [np.cos(yaw), -np.sin(yaw), 0.],
-        [np.sin(yaw), np.cos(yaw), 0.],
-        [0., 0., 1.]])
-
-    R = R @ R_z @ R_y @ R_x
+    R = R @ create_rotation_matrix(x=roll, y=pitch, z=yaw)
     return R
 
 
-def pixel_wise_rot(rot_coord: torch.Tensor) -> Tuple[torch.Tensor]:
+def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
     r"""Rotation coordinates to phi/theta of the panorama image
 
     params:
-        rot_coord: torch.Tensor
+        M: torch.Tensor
 
     return:
         phis: torch.Tensor
         thetas: torch.Tensor
     """
-    if len(rot_coord.shape) == 3:
-        rot_coord = rot_coord.unsqueeze(0)
+    if len(M.shape) == 3:
+        M = M.unsqueeze(0)
 
-    norms = torch.norm(rot_coord, dim=-1)
-    thetas = torch.atan2(rot_coord[:, :, :, 0], rot_coord[:, :, :, 2])
-    phis = torch.asin(rot_coord[:, :, :, 1] / norms)
+    norms = torch.norm(M, dim=-1)
+    thetas = torch.atan2(M[:, :, :, 0], M[:, :, :, 2])
+    phis = torch.asin(M[:, :, :, 1] / norms)
+
     if thetas.shape[0] == phis.shape[0] == 1:
         thetas = thetas.squeeze(0)
         phis = phis.squeeze(0)

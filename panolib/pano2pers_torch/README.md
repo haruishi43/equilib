@@ -1,2 +1,0 @@
-# Pano2Pers Torch
-

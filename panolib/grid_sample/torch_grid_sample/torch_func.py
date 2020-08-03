@@ -30,9 +30,9 @@ def grid_sample(
 
     # grid in shape: (batch, channel, h_out, w_out)
     # grid out shape: (batch, h_out, w_out, channel)
-    batch, channels, h_img, w_img = img.shape
-    batch_, xy, h_out, w_out = grid.shape
-    assert batch == batch_, "Batch size mismatch"
+    batches, channels, h_img, w_img = img.shape
+    _batches, xy, h_out, w_out = grid.shape
+    assert batches == _batches, "Batch size mismatch"
 
     # normalize grid -1~1
     grid = grid.permute(0, 2, 3, 1)

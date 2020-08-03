@@ -20,7 +20,7 @@ from panolib.grid_sample import (
 - `faster`: faster implementation by removing iteration
 - `naive`: slow implementation (serves no purpose really)
 
-## Torch
+## PyTorch
 
 - `torch`: default `torch.grid_sample` function with wrapper
 - `custom`: custom implementation

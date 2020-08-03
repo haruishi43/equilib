@@ -19,13 +19,14 @@ In this library we implement varieties of methods using `c++`, `numpy`, and `pyt
 This part of the code needs `cuda` acceleration because grid sampling is parallizable.
 For `c++` and `pytorch`, I tried to take advantage of `cuda`.
 For `numpy`, I implemented `naive` and `faster` approaches for learning purposes.
-Developing a _faster_ `c++` and `pytorch` approach is __WIP__.
+Developing _faster_ `c++` and `pytorch` approaches are __WIP__.
 
 See [here](panolib/grid_sample/README.md) for more info on implementations.
 
 ## Pano2Pers
 
 Panorama to perspective transformation
+
 I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch`.
 
 ### C++
@@ -33,3 +34,5 @@ I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch
 ### Numpy
 
 ### PyTorch
+
+## Pano2Pano
