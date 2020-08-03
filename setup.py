@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-import numpy as np
 import os.path as osp
-from setuptools import setup, find_packages
+
+import numpy as np
+
+from setuptools import find_packages, setup
 
 
 def readme():
