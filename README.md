@@ -2,6 +2,18 @@
 
 A library for processing panorama (equirectangular) image
 
+## Installation:
+
+```Bash
+git clone --recursive https://github.com/Toraudonn/panolib.git
+cd panolib
+
+pip install -r requirements.txt
+
+python setup.py develop
+```
+
+
 ## What is a panorama image
 
 <img src="data/pano.jpg" alt="pano" width="480"/>
@@ -56,3 +68,13 @@ from panolib.pano2pers import TorchPano2Pers
 ```
 
 ## Pano2Pano
+
+
+## Develop:
+
+Test files for `panolib` is included under `tests`.
+
+Running tests:
+```Bash
+pytest tests
+```
