@@ -31,8 +31,18 @@ I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch
 
 ### C++
 
+__WIP__
+
 ### Numpy
 
+```Python
+from panolib.pano2pers import NumpyPano2Pers
+```
+
 ### PyTorch
+
+```Python
+from panolib.pano2pers import TorchPano2Pers
+```
 
 ## Pano2Pano

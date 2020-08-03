@@ -122,16 +122,16 @@ def create_rot_mat(
     return R
 
 
-def pixel_wise_rot(rot_coord: np.ndarray) -> Tuple[np.ndarray]:
+def pixel_wise_rot(M: np.ndarray) -> Tuple[np.ndarray]:
     r"""Rotation coordinates to phi/theta of the panorama image
 
     params:
-        rot_coord: np.ndarray
+        M: np.ndarray
 
     return:
         phis: np.ndarray
         thetas: np.ndarray
     """
-    phis = np.arcsin(rot_coord[:, :, 1] / np.linalg.norm(rot_coord, axis=-1))
-    thetas = np.arctan2(rot_coord[:, :, 0], rot_coord[:, :, 2])
+    phis = np.arcsin(M[:, :, 1] / np.linalg.norm(M, axis=-1))
+    thetas = np.arctan2(M[:, :, 0], M[:, :, 2])
     return phis, thetas
