@@ -4,7 +4,7 @@ A library for processing panorama (equirectangular) image
 
 ## What is a panorama image
 
-![](data/pano.jpg =320x)
+<img src="data/pano.jpg" alt="pano" width="320"/>
 
 Any image size with `2:1` ratio that captures 360 degree field of view.
 
