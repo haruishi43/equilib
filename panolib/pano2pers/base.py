@@ -7,8 +7,6 @@ class BasePano2Pers(object):
 
     def __init__(
         self,
-        w_pano: int,
-        h_pano: int,
         w_pers: int,
         h_pers: int,
         fov_x: float,
@@ -16,13 +14,10 @@ class BasePano2Pers(object):
     ) -> None:
         r"""
         params:
-            w_pano, h_pano: panorama size
             w_pers, h_pers: perspective size
             fov_x: perspective image fov of x-axis (width direction)
         """
         self._init_params(
-            w_pano=w_pano,
-            h_pano=h_pano,
             w_pers=w_pers,
             h_pers=h_pers,
             fov_x=fov_x,
@@ -30,8 +25,6 @@ class BasePano2Pers(object):
 
     def _init_params(
         self,
-        w_pano: int,
-        h_pano: int,
         w_pers: int,
         h_pers: int,
         fov_x: float,
@@ -39,8 +32,6 @@ class BasePano2Pers(object):
     ) -> None:
         r"""Initialize local `self` parameters
         """
-        self.w_pano = w_pano
-        self.h_pano = h_pano
         self.w_pers = w_pers
         self.h_pers = h_pers
         self.fov_x = fov_x

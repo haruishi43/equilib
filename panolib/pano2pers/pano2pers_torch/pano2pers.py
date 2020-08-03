@@ -2,6 +2,7 @@
 
 from typing import Dict, List, Tuple, Union
 
+import math
 import torch
 
 from panolib.grid_sample import torch_func
@@ -10,7 +11,7 @@ from .utils import (
     create_rotation_matrix,
     deg2rad,
     get_device,
-    pi,
+    sizeof,
 )
 from ..base import BasePano2Pers
 
@@ -69,9 +70,9 @@ class Pano2Pers(BasePano2Pers):
         r"""Default rotation that changes global to camera coordinates
         """
         if not hasattr(self, '_g2c_rot'):
-            x = pi
-            y = pi
-            z = pi
+            x = math.pi
+            y = math.pi
+            z = math.pi
             self._g2c_rot = create_rotation_matrix(x=x, y=y, z=z)
         return self._g2c_rot
 
@@ -103,7 +104,7 @@ class Pano2Pers(BasePano2Pers):
     def _get_img_size(img: torch.Tensor) -> Tuple[int]:
         r"""Return height and width"""
         # batch, channel, height, width
-        return img.shape[-2], img.shape[-1]
+        return img.shape[-2:]
 
     def __call__(
         self,
@@ -111,6 +112,7 @@ class Pano2Pers(BasePano2Pers):
         rot: Union[Dict[str, float], List[Dict[str, float]]],
         sampling_method: str = "torch",
         mode: str = "bilinear",
+        debug: bool = False
     ) -> torch.Tensor:
         r"""Run Pano2Pers
 
@@ -138,6 +140,10 @@ class Pano2Pers(BasePano2Pers):
             pano = pano.unsqueeze(dim=0)
             rot = [rot]
 
+        h_pano, w_pano = self._get_img_size(pano)
+        if debug:
+            print("Pano: ", sizeof(pano)/10e6, "mb")
+
         # get device
         device = get_device(pano)
 
@@ -159,13 +165,13 @@ class Pano2Pers(BasePano2Pers):
         phi = torch.asin(M[:, :, :, 1] / norms)
 
         # center the image and convert to pixel locatio
-        ui = (theta - pi) * self.w_pano / (2 * pi)
-        uj = (phi - pi / 2) * self.h_pano / pi
+        ui = (theta - math.pi) * w_pano / (2 * math.pi)
+        uj = (phi - math.pi / 2) * h_pano / math.pi
         # out-of-bounds calculations
-        ui = torch.where(ui < 0, ui + self.w_pano, ui)
-        ui = torch.where(ui >= self.w_pano, ui - self.w_pano, ui)
-        uj = torch.where(uj < 0, uj + self.h_pano, uj)
-        uj = torch.where(uj >= self.h_pano, uj - self.h_pano, uj)
+        ui = torch.where(ui < 0, ui + w_pano, ui)
+        ui = torch.where(ui >= w_pano, ui - w_pano, ui)
+        uj = torch.where(uj < 0, uj + h_pano, uj)
+        uj = torch.where(uj >= h_pano, uj - h_pano, uj)
         grid = torch.stack((uj, ui), axis=-3)  # 3rd to last
 
         # grid sample

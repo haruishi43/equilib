@@ -96,7 +96,7 @@ class Pano2Pers(BasePano2Pers):
     @staticmethod
     def _get_img_size(img: np.ndarray) -> Tuple[int]:
         r"""Return height and width"""
-        return img.shape[1], img.shape[2]
+        return img.shape[-2:]
 
     def _run_single(
         self,
@@ -106,6 +106,7 @@ class Pano2Pers(BasePano2Pers):
         mode: str,
     ) -> np.ndarray:
         # define variables
+        h_pano, w_pano = self._get_img_size(pano)
         m = self.perspective_coordinate
         K = self.intrinsic_matrix
         R = self.rotation_matrix(**rot)
@@ -125,13 +126,13 @@ class Pano2Pers(BasePano2Pers):
         theta = np.arctan2(M[:, :, 0], M[:, :, 2])
 
         # center the image and convert to pixel location
-        ui = (theta - np.pi) * self.w_pano / (2 * np.pi)
-        uj = (phi - np.pi / 2) * self.h_pano / np.pi
+        ui = (theta - np.pi) * w_pano / (2 * np.pi)
+        uj = (phi - np.pi / 2) * h_pano / np.pi
         # out-of-bounds calculations
-        ui = np.where(ui < 0, ui + self.w_pano, ui)
-        ui = np.where(ui >= self.w_pano, ui - self.w_pano, ui)
-        uj = np.where(uj < 0, uj + self.h_pano, uj)
-        uj = np.where(uj >= self.h_pano, uj - self.h_pano, uj)
+        ui = np.where(ui < 0, ui + w_pano, ui)
+        ui = np.where(ui >= w_pano, ui - w_pano, ui)
+        uj = np.where(uj < 0, uj + h_pano, uj)
+        uj = np.where(uj >= h_pano, uj - h_pano, uj)
         grid = np.stack((uj, ui), axis=0)
 
         # grid sample
@@ -180,13 +181,14 @@ class Pano2Pers(BasePano2Pers):
         for p, r in zip(pano, rot):
             # iterate through batches
             # TODO: batch implementation
+            sample = self._run_single(
+                pano=p,
+                rot=r,
+                sampling_method=sampling_method,
+                mode=mode,
+            )
             samples.append(
-                self._run_single(
-                    pano=p,
-                    rot=r,
-                    sampling_method=sampling_method,
-                    mode=mode,
-                )
+                sample
             )
 
         if _return_type == np.ndarray:

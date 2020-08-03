@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
 import os.path as osp
+
 import time
 
+import copy
 import numpy as np
 from PIL import Image
+import torch
+from torchvision import transforms
 
-from panolib.pano2pers import NumpyPano2Pers
+from panolib.pano2pers import TorchPano2Pers
 
 
 def run(pano, rot):
@@ -20,7 +24,7 @@ def run(pano, rot):
     fov_x = 90
 
     tic = time.perf_counter()
-    pano2pers = NumpyPano2Pers(
+    pano2pers = TorchPano2Pers(
         w_pers=w_pers,
         h_pers=h_pers,
         fov_x=fov_x
@@ -32,7 +36,7 @@ def run(pano, rot):
     sample = pano2pers(
         pano=pano,
         rot=rot,
-        sampling_method="faster",
+        sampling_method="torch",
         mode="bilinear",
     )
     toc = time.perf_counter()
@@ -41,54 +45,74 @@ def run(pano, rot):
     return sample
 
 
-def test_numpy_single():
+def test_torch_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
     pano_path = osp.join(data_path, 'test.jpg')
+    device = torch.device('cuda')
+
+    # Transforms
+    to_tensor = transforms.Compose([
+        transforms.ToTensor(),
+    ])
+
+    to_PIL = transforms.Compose([
+        transforms.ToPILImage(),
+    ])
 
     tic = time.perf_counter()
     pano_img = Image.open(pano_path)
-    # Sometimes images are RGBA
+    # NOTE: Sometimes images are RGBA
     pano_img = pano_img.convert('RGB')
-    pano = np.asarray(pano_img)
-    pano = np.transpose(pano, (2, 0, 1))
+    pano = to_tensor(pano_img)
+    pano = pano.to(device)
     toc = time.perf_counter()
     print(f"Process Pano: {toc - tic:0.4f} seconds")
 
     rot = {
-        'roll': 0,
-        'pitch': 0,
-        'yaw': 0,
+        'roll': 0.,
+        'pitch': 0.,
+        'yaw': 0.,
     }
 
     sample = run(pano, rot)
 
     tic = time.perf_counter()
-    pers = np.transpose(sample, (1, 2, 0))
-    pers_img = Image.fromarray(pers)
+    pers = sample.to('cpu')
+    pers_img = to_PIL(pers)
     toc = time.perf_counter()
     print(f"post process: {toc - tic:0.4f} seconds")
 
-    pers_path = osp.join(result_path, 'output_numpy_single.jpg')
+    pers_path = osp.join(result_path, 'output_torch_single.jpg')
     pers_img.save(pers_path)
 
 
-def test_numpy_batch():
+def test_torch_batch():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
     pano_path = osp.join(data_path, 'test.jpg')
-    batch_size = 4
+    device = torch.device('cuda')
+    batch_size = 16
+
+    # Transforms
+    to_tensor = transforms.Compose([
+        transforms.ToTensor(),
+    ])
+
+    to_PIL = transforms.Compose([
+        transforms.ToPILImage(),
+    ])
 
     tic = time.perf_counter()
+    pano_img = Image.open(pano_path)
+    # NOTE: Sometimes images are RGBA
+    pano_img = pano_img.convert('RGB')
     batched_pano = []
-    for _ in range(batch_size):
-        pano_img = Image.open(pano_path)
-        # Sometimes images are RGBA
-        pano_img = pano_img.convert('RGB')
-        pano = np.asarray(pano_img)
-        pano = np.transpose(pano, (2, 0, 1))
-        batched_pano.append(pano)
-    batched_pano = np.stack(batched_pano, axis=0)
+    for i in range(batch_size):
+        pano = to_tensor(pano_img)
+        batched_pano.append(copy.deepcopy(pano))
+    batched_pano = torch.stack(batched_pano, dim=0)
+    batched_pano = batched_pano.to(device)
     toc = time.perf_counter()
     print(f"Process Pano: {toc - tic:0.4f} seconds")
 
@@ -103,16 +127,16 @@ def test_numpy_batch():
         batched_rot.append(rot)
 
     batched_sample = run(batched_pano, batched_rot)
-
     tic = time.perf_counter()
     batched_pers = []
     for i in range(batch_size):
-        sample = batched_sample[i]
-        pers = np.transpose(sample, (1, 2, 0))
-        pers_img = Image.fromarray(pers)
+        sample = copy.deepcopy(batched_sample[i])
+        sample = sample.to('cpu')
+        pers_img = to_PIL(sample)
         batched_pers.append(pers_img)
     toc = time.perf_counter()
+    print(f"post process: {toc - tic:0.4f} seconds")
 
     for i, pers in enumerate(batched_pers):
-        pers_path = osp.join(result_path, f'output_numpy_batch_{i}.jpg')
+        pers_path = osp.join(result_path, f'output_torch_batch_{i}.jpg')
         pers.save(pers_path)
