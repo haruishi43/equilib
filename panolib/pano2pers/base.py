@@ -56,10 +56,5 @@ class BasePano2Pers(object):
     def _get_img_size(img):
         raise NotImplementedError
 
-    def __call__(
-        self,
-        pano,
-        rot,
-        **kwargs,
-    ):
+    def __call__(self, pano, rot, **kwargs):
         raise NotImplementedError
