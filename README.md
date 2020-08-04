@@ -65,6 +65,11 @@ from panolib.pano2pers import NumpyPano2Pers
 from panolib.pano2pers import TorchPano2Pers
 ```
 
+## TODO:
+
+[] Pano2Pers outputs for `numpy` and `torch` differs a little bit. Need to figure out why this happens. The outputs are the same regardless of the sampling method, so it must be the preprocessing (where the rotation matrix is set).
+
+
 ## Pano2Pano
 
 

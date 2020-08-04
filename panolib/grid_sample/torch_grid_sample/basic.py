@@ -69,8 +69,11 @@ def grid_sample(
     batches, channels, h_in, w_in = img.shape
     _, _, h_out, w_out = grid.shape
 
-    assert img.get_device == grid.get_device, \
-        "ERR: img and grid does not match device"
+    assert get_device(img) == get_device(grid), \
+        (
+            "ERR: img and grid does not match device "
+            f"{get_device(img)} vs {get_device(grid)}"
+        )
     device = get_device(img)
 
     _dtype = img.dtype
