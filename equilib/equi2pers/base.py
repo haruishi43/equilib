@@ -2,7 +2,7 @@
 
 
 class BaseEqui2Pers(object):
-    r"""Base Equi2Pers clss to build off of
+    r"""Base Equi2Pers class to build off of
     """
 
     def __init__(
