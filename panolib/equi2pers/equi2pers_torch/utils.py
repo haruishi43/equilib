@@ -158,7 +158,7 @@ def create_rot_mat(
 
 
 def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
-    r"""Rotation coordinates to phi/theta of the panorama image
+    r"""Rotation coordinates to phi/theta of the equirectangular image
 
     params:
         M: torch.Tensor

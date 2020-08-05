@@ -6,13 +6,13 @@ import time
 import numpy as np
 from PIL import Image
 
-from panolib.pano2pers import NumpyPano2Pers
+from equilib.equi2pers import NumpyEqui2Pers
 
 
-def run(pano, rot):
-    h_pano, w_pano = pano.shape[-2:]
-    print('panorama size:')
-    print(h_pano, w_pano)
+def run(equi, rot):
+    h_equi, w_equi = equi.shape[-2:]
+    print('equirectangular image size:')
+    print(h_equi, w_equi)
 
     # Variables:
     h_pers = 480
@@ -20,17 +20,17 @@ def run(pano, rot):
     fov_x = 90
 
     tic = time.perf_counter()
-    pano2pers = NumpyPano2Pers(
+    equi2pers = NumpyEqui2Pers(
         w_pers=w_pers,
         h_pers=h_pers,
         fov_x=fov_x
     )
     toc = time.perf_counter()
-    print(f"Init Pano2Pers: {toc - tic:0.4f} seconds")
+    print(f"Init Equi2Pers: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    sample = pano2pers(
-        pano=pano,
+    sample = equi2pers(
+        equi=equi,
         rot=rot,
         sampling_method="faster",
         mode="bilinear",
@@ -44,16 +44,16 @@ def run(pano, rot):
 def test_numpy_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
-    pano_path = osp.join(data_path, 'test.jpg')
+    equi_path = osp.join(data_path, 'test.jpg')
 
     tic = time.perf_counter()
-    pano_img = Image.open(pano_path)
+    equi_img = Image.open(equi_path)
     # Sometimes images are RGBA
-    pano_img = pano_img.convert('RGB')
-    pano = np.asarray(pano_img)
-    pano = np.transpose(pano, (2, 0, 1))
+    equi_img = equi_img.convert('RGB')
+    equi = np.asarray(equi_img)
+    equi = np.transpose(equi, (2, 0, 1))
     toc = time.perf_counter()
-    print(f"Process Pano: {toc - tic:0.4f} seconds")
+    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
 
     rot = {
         'roll': 0,
@@ -61,7 +61,7 @@ def test_numpy_single():
         'yaw': 0,
     }
 
-    sample = run(pano, rot)
+    sample = run(equi, rot)
 
     tic = time.perf_counter()
     pers = np.transpose(sample, (1, 2, 0))
@@ -76,21 +76,21 @@ def test_numpy_single():
 def test_numpy_batch():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
-    pano_path = osp.join(data_path, 'test.jpg')
+    equi_path = osp.join(data_path, 'test.jpg')
     batch_size = 4
 
     tic = time.perf_counter()
-    batched_pano = []
+    batched_equi = []
     for _ in range(batch_size):
-        pano_img = Image.open(pano_path)
+        equi_img = Image.open(equi_path)
         # Sometimes images are RGBA
-        pano_img = pano_img.convert('RGB')
-        pano = np.asarray(pano_img)
-        pano = np.transpose(pano, (2, 0, 1))
-        batched_pano.append(pano)
-    batched_pano = np.stack(batched_pano, axis=0)
+        equi_img = equi_img.convert('RGB')
+        equi = np.asarray(equi_img)
+        equi = np.transpose(equi, (2, 0, 1))
+        batched_equi.append(equi)
+    batched_equi = np.stack(batched_equi, axis=0)
     toc = time.perf_counter()
-    print(f"Process Pano: {toc - tic:0.4f} seconds")
+    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
 
     batched_rot = []
     inc = np.pi/8
@@ -102,7 +102,7 @@ def test_numpy_batch():
         }
         batched_rot.append(rot)
 
-    batched_sample = run(batched_pano, batched_rot)
+    batched_sample = run(batched_equi, batched_rot)
 
     tic = time.perf_counter()
     batched_pers = []

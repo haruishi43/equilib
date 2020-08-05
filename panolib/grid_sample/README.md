@@ -1,6 +1,6 @@
 # Grid Sampling Functions
 
-Fast grid sampling methods are needed for gathering pixels from panorama images to convert into perspective (or transform to another panorama) image.
+Fast grid sampling methods are needed for gathering pixels from equirectangular images to convert into perspective (or transform to another equirectangular) image.
 
 Implemented for two different libraries:
 - `numpy_func`
@@ -9,7 +9,7 @@ Implemented for two different libraries:
 You can import them using:
 
 ```Python
-from panolib.grid_sample import (
+from equilib.grid_sample import (
     numpy_func,
     torch_fund,
 )

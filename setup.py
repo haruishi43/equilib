@@ -14,7 +14,7 @@ def readme():
 
 
 def find_version():
-    version_file = 'panolib/__init__.py'
+    version_file = 'equilib/__init__.py'
     with open(version_file, 'r') as f:
         exec(compile(f.read(), version_file, 'exec'))
     return locals()['__version__']
@@ -36,7 +36,7 @@ def get_requirements(filename='requirements.txt'):
 
 
 setup(
-    name='panolib',
+    name='equilib',
     version=find_version(),
     description='',
     author='Haruya Ishikawa',
@@ -45,5 +45,5 @@ setup(
     url='',
     packages=find_packages(),
     install_requires=get_requirements(),
-    keywords=['Panorama', 'Equirectangular', 'Computer Vision'],
+    keywords=['Equirectangular', 'Computer Vision'],
 )

@@ -10,9 +10,11 @@ import cv2
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from torchvision import transforms
 from PIL import Image
 
-from panolib.pano2pers import NumpyPano2Pers
+from equilib.equi2pers import TorchEqui2Pers
 
 matplotlib.use('Agg')
 
@@ -20,7 +22,7 @@ matplotlib.use('Agg')
 def preprocess(
     img: Union[np.ndarray, Image.Image],
     is_cv2: bool = False,
-) -> np.ndarray:
+) -> torch.Tensor:
     r"""Preprocesses image
     """
     if isinstance(img, np.ndarray) and is_cv2:
@@ -28,11 +30,32 @@ def preprocess(
     if isinstance(img, Image.Image):
         # Sometimes images are RGBA
         img = img.convert('RGB')
-        img = np.asarray(img)
+
+    to_tensor = transforms.Compose([
+        transforms.ToTensor(),
+    ])
+    img = to_tensor(img)
     assert len(img.shape) == 3, "input must be dim=3"
-    assert img.shape[-1] == 3, "input must be HWC"
-    img = np.transpose(img, (2, 0, 1))
+    assert img.shape[0] == 3, "input must be HWC"
     return img
+
+
+def postprocess(
+    img: torch.Tensor,
+    to_cv2: bool = False,
+) -> Union[np.ndarray, Image.Image]:
+    if to_cv2:
+        img = np.asarray(img.to('cpu').numpy() * 255, dtype=np.uint8)
+        img = np.transpose(img, (1, 2, 0))
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        return img
+    else:
+        to_PIL = transforms.Compose([
+            transforms.ToPILImage(),
+        ])
+        img = img.to('cpu')
+        img = to_PIL(img)
+        return img
 
 
 def test_video(
@@ -50,12 +73,13 @@ def test_video(
     pitch = 0  # -pi < b < pi
     yaw = 0
 
-    # Initialize pano2pers
-    pano2pers = NumpyPano2Pers(
+    # Initialize equi2pers
+    equi2pers = TorchEqui2Pers(
         w_pers=w_pers,
         h_pers=h_pers,
         fov_x=fov_x
     )
+    device = torch.device('cuda')
 
     times = []
     cap = cv2.VideoCapture(path)
@@ -73,19 +97,18 @@ def test_video(
             break
 
         s = time.time()
-        pano_img = preprocess(frame, is_cv2=True)
-        pers_img = pano2pers(
-            pano=pano_img,
+        equi_img = preprocess(frame, is_cv2=True).to(device)
+        pers_img = equi2pers(
+            equi=equi_img,
             rot=rot,
-            sampling_method="faster",
+            sampling_method="torch",
             mode="bilinear",
         )
-        pers_img = np.transpose(pers_img, (1, 2, 0))
-        pers_img = cv2.cvtColor(pers_img, cv2.COLOR_RGB2BGR)
+        pers_img = postprocess(pers_img, to_cv2=True)
         e = time.time()
         times.append(e - s)
 
-        # cv2.imshow("video", pers)
+        # cv2.imshow("video", pers_img)
 
         # change direction `wasd` or exit with `q`
         k = cv2.waitKey(1)
@@ -106,7 +129,7 @@ def test_video(
     print(sum(times)/len(times))
     x_axis = [i for i in range(len(times))]
     plt.plot(x_axis, times)
-    save_path = osp.join('./results', 'times_pano2pers_numpy_video.png')
+    save_path = osp.join('./results', 'times_equi2pers_torch_video.png')
     plt.savefig(save_path)
 
 
@@ -125,28 +148,27 @@ def test_image(
         'yaw': 0,
     }
 
-    # Initialize pano2pers
-    pano2pers = NumpyPano2Pers(
+    # Initialize equi2pers
+    equi2pers = TorchEqui2Pers(
         w_pers=w_pers,
         h_pers=h_pers,
         fov_x=fov_x
     )
+    device = torch.device('cuda')
 
     # Open Image
-    pano_img = Image.open(path)
-    pano_img = preprocess(pano_img)
+    equi_img = Image.open(path)
+    equi_img = preprocess(equi_img).to(device)
 
-    pers_img = pano2pers(
-        pano_img,
+    pers_img = equi2pers(
+        equi_img,
         rot=rot,
-        sampling_method="faster",
+        sampling_method="torch",
         mode="bilinear",
     )
+    pers_img = postprocess(pers_img)
 
-    pers_img = np.transpose(pers_img, (1, 2, 0))
-    pers_img = Image.fromarray(pers_img)
-
-    pers_path = osp.join('./results', 'output_pano2pers_numpy_image.jpg')
+    pers_path = osp.join('./results', 'output_equi2pers_torch_image.jpg')
     pers_img.save(pers_path)
 
 
@@ -169,7 +191,7 @@ def main():
         test_video(data_path, h_pers, w_pers, fov_x)
     else:
         if data_path is None:
-            data_path = "./data/pano.jpg"
+            data_path = "./data/equi.jpg"
         assert osp.exists(data_path)
         test_image(data_path, h_pers, w_pers, fov_x)
 

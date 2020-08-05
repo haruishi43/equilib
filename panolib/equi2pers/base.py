@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 
-class BasePano2Pers(object):
-    r"""Base Pano2Pers clss to build off of
+class BaseEqui2Pers(object):
+    r"""Base Equi2Pers clss to build off of
     """
 
     def __init__(
@@ -56,5 +56,5 @@ class BasePano2Pers(object):
     def _get_img_size(img):
         raise NotImplementedError
 
-    def __call__(self, pano, rot, **kwargs):
+    def __call__(self, equi, rot, **kwargs):
         raise NotImplementedError

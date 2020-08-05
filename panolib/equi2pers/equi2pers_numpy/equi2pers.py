@@ -4,18 +4,18 @@ from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
-from panolib.grid_sample import numpy_func
+from equilib.grid_sample import numpy_func
 
 from .utils import create_rotation_matrix
-from ..base import BasePano2Pers
+from ..base import BaseEqui2Pers
 
-__all__ = ["Pano2Pers"]
+__all__ = ["Equi2Pers"]
 
 
-class Pano2Pers(BasePano2Pers):
+class Equi2Pers(BaseEqui2Pers):
 
     def __init__(self, **kwargs):
-        r"""Pano2Pers Numpy
+        r"""Equi2Pers Numpy
         """
         super().__init__(**kwargs)
 
@@ -100,13 +100,13 @@ class Pano2Pers(BasePano2Pers):
 
     def _run_single(
         self,
-        pano: np.ndarray,
+        equi: np.ndarray,
         rot: Dict[str, float],
         sampling_method: str,
         mode: str,
     ) -> np.ndarray:
         # define variables
-        h_pano, w_pano = self._get_img_size(pano)
+        h_equi, w_equi = self._get_img_size(equi)
         m = self.perspective_coordinate
         K = self.intrinsic_matrix
         R = self.rotation_matrix(**rot)
@@ -126,13 +126,13 @@ class Pano2Pers(BasePano2Pers):
         theta = np.arctan2(M[:, :, 0], M[:, :, 2])
 
         # center the image and convert to pixel location
-        ui = (theta - np.pi) * w_pano / (2 * np.pi)
-        uj = (phi - np.pi / 2) * h_pano / np.pi
+        ui = (theta - np.pi) * w_equi / (2 * np.pi)
+        uj = (phi - np.pi / 2) * h_equi / np.pi
         # out-of-bounds calculations
-        ui = np.where(ui < 0, ui + w_pano, ui)
-        ui = np.where(ui >= w_pano, ui - w_pano, ui)
-        uj = np.where(uj < 0, uj + h_pano, uj)
-        uj = np.where(uj >= h_pano, uj - h_pano, uj)
+        ui = np.where(ui < 0, ui + w_equi, ui)
+        ui = np.where(ui >= w_equi, ui - w_equi, ui)
+        uj = np.where(uj < 0, uj + h_equi, uj)
+        uj = np.where(uj >= h_equi, uj - h_equi, uj)
         grid = np.stack((uj, ui), axis=0)
 
         # grid sample
@@ -141,20 +141,20 @@ class Pano2Pers(BasePano2Pers):
             sampling_method,
             "faster"
         )
-        sampled = grid_sample(pano, grid, mode=mode)
+        sampled = grid_sample(equi, grid, mode=mode)
         return sampled
 
     def __call__(
         self,
-        pano: Union[np.ndarray, List[np.ndarray]],
+        equi: Union[np.ndarray, List[np.ndarray]],
         rot: Union[Dict[str, float], List[Dict[str, float]]],
         sampling_method: str = "faster",
         mode: str = "bilinear",
     ) -> np.ndarray:
-        r"""Run Pano2Pers
+        r"""Run Equi2Pers
 
         params:
-            pano: panorama image np.ndarray[C, H, W]
+            equi: equirectangular image np.ndarray[C, H, W]
             rot: Dict[str, float]
             sampling_method: str (default="faster")
             mode: str (default="bilinear")
@@ -165,24 +165,24 @@ class Pano2Pers(BasePano2Pers):
         NOTE: input can be batched [B, C, H, W] or List[np.ndarray]
         NOTE: when using batches, the output types match
         """
-        _return_type = type(pano)
-        _original_shape_len = len(pano.shape)
+        _return_type = type(equi)
+        _original_shape_len = len(equi.shape)
         if _return_type == np.ndarray:
             assert _original_shape_len >= 3, \
-                f"ERR: got {_original_shape_len} for input pano"
+                f"ERR: got {_original_shape_len} for input equi"
             if _original_shape_len == 3:
-                pano = pano[np.newaxis, :, :, :]
+                equi = equi[np.newaxis, :, :, :]
                 rot = [rot]
 
-        assert len(pano) == len(rot), \
-            f"ERR: length of pano and rot differs {len(pano)} vs {len(rot)}"
+        assert len(equi) == len(rot), \
+            f"ERR: length of equi and rot differs {len(equi)} vs {len(rot)}"
 
         samples = []
-        for p, r in zip(pano, rot):
+        for p, r in zip(equi, rot):
             # iterate through batches
             # TODO: batch implementation
             sample = self._run_single(
-                pano=p,
+                equi=p,
                 rot=r,
                 sampling_method=sampling_method,
                 mode=mode,

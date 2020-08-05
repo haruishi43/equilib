@@ -1,12 +1,12 @@
-# panolib
+# equilib
 
-A library for processing panorama (equirectangular) image
+A library for processing equirectangular image
 
 ## Installation:
 
 ```Bash
-git clone --recursive https://github.com/Toraudonn/panolib.git
-cd panolib
+git clone --recursive https://github.com/Toraudonn/equilib.git
+cd equilib
 
 pip install -r requirements.txt
 
@@ -14,9 +14,9 @@ python setup.py develop
 ```
 
 
-## What is a panorama image
+## What is a equirectangular image
 
-<img src="data/pano.jpg" alt="pano" width="480"/>
+<img src="data/equi.jpg" alt="equi" width="480"/>
 
 Any image size with `2:1` ratio that captures 360 degree field of view.
 
@@ -26,23 +26,23 @@ Common image sizes:
 
 ## Grid Sampling
 
-In order to process panorama images fast, whether to crop perspective images from the panorama image, the library takes advantage from grid sampling techniques.
+In order to process equirectangular images fast, whether to crop perspective images from the equirectangular image, the library takes advantage from grid sampling techniques.
 In this library we implement varieties of methods using `c++`, `numpy`, and `pytorch`.
 This part of the code needs `cuda` acceleration because grid sampling is parallizable.
 For `c++` and `pytorch`, I tried to take advantage of `cuda`.
 For `numpy`, I implemented `naive` and `faster` approaches for learning purposes.
 Developing _faster_ `c++` and `pytorch` approaches are __WIP__.
 
-See [here](panolib/grid_sample/README.md) for more info on implementations.
+See [here](equilib/grid_sample/README.md) for more info on implementations.
 
-## Pano2Pers
+## equi2Pers
 
-Panorama to perspective transformation
+equirectangular to perspective transformation
 
 I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch`.
 
 ```Python
-class SomePano2Pers(BasePano2Pers):
+class SomeEqui2Pers(BaseEqui2Pers):
     def __init__(self, ...):
         ...
     def __call__(self, ...):
@@ -56,22 +56,22 @@ __WIP__
 ### Numpy
 
 ```Python
-from panolib.pano2pers import NumpyPano2Pers
+from equilib.equi2pers import NumpyEqui2Pers
 ```
 
 ### PyTorch
 
 ```Python
-from panolib.pano2pers import TorchPano2Pers
+from equilib.equi2pers import TorchEqui2Pers
 ```
 
 ### TODO:
 
-- [ ] Pano2Pers for `c++`/`cuda` is still messy, WIP
-- [ ] Pano2Pers outputs for `numpy` and `torch` differs a little bit. Need to figure out why this happens. The outputs are the same regardless of the sampling method, so it must be the preprocessing (where the rotation matrix is set).
+- [ ] equi2Pers for `c++`/`cuda` is still messy, WIP
+- [ ] equi2Pers outputs for `numpy` and `torch` differs a little bit. Need to figure out why this happens. The outputs are the same regardless of the sampling method, so it must be the preprocessing (where the rotation matrix is set).
 
 
-## Pano2Pano
+## equi2equi
 
 
 ### TODO:
@@ -84,7 +84,7 @@ from panolib.pano2pers import TorchPano2Pers
 
 ## Develop:
 
-Test files for `panolib` is included under `tests`.
+Test files for `equilib` is included under `tests`.
 
 Running tests:
 ```Bash

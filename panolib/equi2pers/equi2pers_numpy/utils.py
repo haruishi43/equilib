@@ -123,7 +123,7 @@ def create_rot_mat(
 
 
 def pixel_wise_rot(M: np.ndarray) -> Tuple[np.ndarray]:
-    r"""Rotation coordinates to phi/theta of the panorama image
+    r"""Rotation coordinates to phi/theta of the equirectangular image
 
     params:
         M: np.ndarray

@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple, Union
 import math
 import torch
 
-from panolib.grid_sample import torch_func
+from equilib.grid_sample import torch_func
 
 from .utils import (
     create_rotation_matrix,
@@ -13,15 +13,15 @@ from .utils import (
     get_device,
     sizeof,
 )
-from ..base import BasePano2Pers
+from ..base import BaseEqui2Pers
 
-__all___ = ["Pano2Pers"]
+__all___ = ["Equi2Pers"]
 
 
-class Pano2Pers(BasePano2Pers):
+class Equi2Pers(BaseEqui2Pers):
 
     def __init__(self, **kwargs):
-        r"""Pano2Pers PyTorch
+        r"""Equi2Pers PyTorch
         """
         super().__init__(**kwargs)
 
@@ -108,16 +108,16 @@ class Pano2Pers(BasePano2Pers):
 
     def __call__(
         self,
-        pano: torch.Tensor,
+        equi: torch.Tensor,
         rot: Union[Dict[str, float], List[Dict[str, float]]],
         sampling_method: str = "torch",
         mode: str = "bilinear",
         debug: bool = False
     ) -> torch.Tensor:
-        r"""Run Pano2Pers
+        r"""Run Equi2Pers
 
         params:
-            pano: panorama image torch.Tensor[(B), C, H, W]
+            equi: equirectangular image torch.Tensor[(B), C, H, W]
             rot: Dict[str, float] or List[Dict[str, float]]
             sampling_method: str (default="torch")
             mode: str (default="bilinear")
@@ -128,24 +128,24 @@ class Pano2Pers(BasePano2Pers):
         NOTE: input can be batched [B, C, H, W] or single [C, H, W]
         NOTE: when using batches, the output types match
         """
-        assert type(pano) == torch.Tensor, \
+        assert type(equi) == torch.Tensor, \
             (
-                "ERR: input pano expected to be `torch.Tensor` "
-                f"but got {type(pano)}"
+                "ERR: input equi expected to be `torch.Tensor` "
+                f"but got {type(equi)}"
             )
-        _original_shape_len = len(pano.shape)
+        _original_shape_len = len(equi.shape)
         assert _original_shape_len >= 3, \
-            f"ERR: got {_original_shape_len} for input pano"
+            f"ERR: got {_original_shape_len} for input equi"
         if _original_shape_len == 3:
-            pano = pano.unsqueeze(dim=0)
+            equi = equi.unsqueeze(dim=0)
             rot = [rot]
 
-        h_pano, w_pano = self._get_img_size(pano)
+        h_equi, w_equi = self._get_img_size(equi)
         if debug:
-            print("Pano: ", sizeof(pano)/10e6, "mb")
+            print("equi: ", sizeof(equi)/10e6, "mb")
 
         # get device
-        device = get_device(pano)
+        device = get_device(equi)
 
         # define variables
         M = []
@@ -165,13 +165,13 @@ class Pano2Pers(BasePano2Pers):
         phi = torch.asin(M[:, :, :, 1] / norms)
 
         # center the image and convert to pixel locatio
-        ui = (theta - math.pi) * w_pano / (2 * math.pi)
-        uj = (phi - math.pi / 2) * h_pano / math.pi
+        ui = (theta - math.pi) * w_equi / (2 * math.pi)
+        uj = (phi - math.pi / 2) * h_equi / math.pi
         # out-of-bounds calculations
-        ui = torch.where(ui < 0, ui + w_pano, ui)
-        ui = torch.where(ui >= w_pano, ui - w_pano, ui)
-        uj = torch.where(uj < 0, uj + h_pano, uj)
-        uj = torch.where(uj >= h_pano, uj - h_pano, uj)
+        ui = torch.where(ui < 0, ui + w_equi, ui)
+        ui = torch.where(ui >= w_equi, ui - w_equi, ui)
+        uj = torch.where(uj < 0, uj + h_equi, uj)
+        uj = torch.where(uj >= h_equi, uj - h_equi, uj)
         grid = torch.stack((uj, ui), axis=-3)  # 3rd to last
 
         # grid sample
@@ -180,7 +180,7 @@ class Pano2Pers(BasePano2Pers):
             sampling_method,
             "torch"
         )
-        samples = grid_sample(pano, grid, mode=mode)
+        samples = grid_sample(equi, grid, mode=mode)
 
         if _original_shape_len == 3:
             samples = samples.squeeze(axis=0)
