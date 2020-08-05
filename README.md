@@ -35,7 +35,7 @@ Developing _faster_ `c++` and `pytorch` approaches are __WIP__.
 
 See [here](equilib/grid_sample/README.md) for more info on implementations.
 
-## equi2Pers
+## equi2pers
 
 equirectangular to perspective transformation
 
@@ -65,12 +65,10 @@ from equilib.equi2pers import TorchEqui2Pers
 
 __WIP__
 
-
 ### TODO:
 
 - [ ] equi2Pers for `c++`/`cuda` is still messy, WIP
 - [ ] equi2Pers outputs for `numpy` and `torch` differs a little bit. Need to figure out why this happens. The outputs are the same regardless of the sampling method, so it must be the preprocessing (where the rotation matrix is set).
-
 
 ## equi2equi
 
@@ -106,7 +104,6 @@ from equilib.equi2equi import TorchEqui2Equi
 - [ ] Fix rotation axis
 - [ ] Implement `c++` with `cuda`
 
-
 ## Develop:
 
 Test files for `equilib` is included under `tests`.
@@ -115,3 +112,7 @@ Running tests:
 ```Bash
 pytest tests
 ```
+
+### TODO:
+
+- [ ] Keeping `.vscode` for my development
