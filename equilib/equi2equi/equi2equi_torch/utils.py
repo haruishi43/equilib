@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+
+from typing import Tuple
+
+import numpy as np
+import torch
+
+pi = torch.Tensor([3.14159265358979323846])
+
+
+def sizeof(tensor: torch.Tensor) -> float:
+    r"""Get the size of a tensor
+    """
+    assert torch.is_tensor(tensor), "ERR: is not tensor"
+    return tensor.element_size() * tensor.nelement()
+
+
+def get_device(a: torch.Tensor) -> torch.device:
+    r"""Get device of a Tensor
+    """
+    return torch.device(
+        a.get_device() if a.get_device() >= 0 else 'cpu'
+    )
+
+
+def deg2rad(tensor: torch.Tensor) -> torch.Tensor:
+    r"""Function that converts angles from degrees to radians.
+    """
+    if not torch.is_tensor(tensor):
+        return tensor * float(pi) / 180.
+    return tensor * pi.to(tensor.device).type(tensor.dtype) / 180.
+
+
+def create_coord(
+    height: int,
+    width: int,
+) -> torch.tensor:
+    r"""Create mesh coordinate grid
+    """
+    _xs = torch.linspace(0, width-1, width)
+    _ys = torch.linspace(0, height-1, height)
+    # NOTE: https://github.com/pytorch/pytorch/issues/15301
+    # Torch meshgrid behaves differently than numpy
+    ys, xs = torch.meshgrid([_ys, _xs])
+    zs = torch.ones_like(xs)
+    coord = torch.stack((xs, ys, zs), dim=2)
+    return coord
+
+
+def create_rotation_matrix(
+    x: float,
+    y: float,
+    z: float,
+) -> torch.Tensor:
+    r"""Create Rotation Matrix
+
+    params:
+        x: x-axis rotation float
+        y: y-axis rotation float
+        z: z-axis rotation float
+
+    return:
+        rotation matrix: torch.Tensor
+    """
+    # calculate rotation about the x-axis
+    R_x = torch.tensor([
+        [1., 0., 0.],
+        [0., np.cos(x), -np.sin(x)],
+        [0., np.sin(x), np.cos(x)]])
+    # calculate rotation about the y-axis
+    R_y = torch.tensor([
+        [np.cos(y), 0., np.sin(y)],
+        [0., 1., 0.],
+        [-np.sin(y), 0., np.cos(y)]])
+    # calculate rotation about the z-axis
+    R_z = torch.tensor([
+        [np.cos(z), -np.sin(z), 0.],
+        [np.sin(z), np.cos(z), 0.],
+        [0., 0., 1.]])
+
+    return R_z @ R_y @ R_x
+
+
+def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
+    r"""Rotation coordinates to phi/theta of the equirectangular image
+
+    params:
+        M: torch.Tensor
+
+    return:
+        phis: torch.Tensor
+        thetas: torch.Tensor
+    """
+    if len(M.shape) == 3:
+        M = M.unsqueeze(0)
+
+    norms = torch.norm(M, dim=-1)
+    thetas = torch.atan2(M[:, :, :, 0], M[:, :, :, 2])
+    phis = torch.asin(M[:, :, :, 1] / norms)
+
+    if thetas.shape[0] == phis.shape[0] == 1:
+        thetas = thetas.squeeze(0)
+        phis = phis.squeeze(0)
+    return phis, thetas

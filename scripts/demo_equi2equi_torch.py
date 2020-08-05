@@ -10,9 +10,11 @@ import cv2
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from torchvision import transforms
 from PIL import Image
 
-from equilib.equi2equi import NumpyEqui2Equi
+from equilib.equi2equi import TorchEqui2Equi
 
 matplotlib.use('Agg')
 
@@ -20,7 +22,7 @@ matplotlib.use('Agg')
 def preprocess(
     img: Union[np.ndarray, Image.Image],
     is_cv2: bool = False,
-) -> np.ndarray:
+) -> torch.Tensor:
     r"""Preprocesses image
     """
     if isinstance(img, np.ndarray) and is_cv2:
@@ -28,11 +30,32 @@ def preprocess(
     if isinstance(img, Image.Image):
         # Sometimes images are RGBA
         img = img.convert('RGB')
-        img = np.asarray(img)
+
+    to_tensor = transforms.Compose([
+        transforms.ToTensor(),
+    ])
+    img = to_tensor(img)
     assert len(img.shape) == 3, "input must be dim=3"
-    assert img.shape[-1] == 3, "input must be HWC"
-    img = np.transpose(img, (2, 0, 1))
+    assert img.shape[0] == 3, "input must be HWC"
     return img
+
+
+def postprocess(
+    img: torch.Tensor,
+    to_cv2: bool = False,
+) -> Union[np.ndarray, Image.Image]:
+    if to_cv2:
+        img = np.asarray(img.to('cpu').numpy() * 255, dtype=np.uint8)
+        img = np.transpose(img, (1, 2, 0))
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        return img
+    else:
+        to_PIL = transforms.Compose([
+            transforms.ToPILImage(),
+        ])
+        img = img.to('cpu')
+        img = to_PIL(img)
+        return img
 
 
 def test_video(path: str) -> None:
@@ -46,7 +69,8 @@ def test_video(path: str) -> None:
     yaw = 0
 
     # Initialize equi2equi
-    equi2equi = NumpyEqui2Equi(h_out=320, w_out=640)
+    equi2equi = TorchEqui2Equi(h_out=320, w_out=640)
+    device = torch.device('cuda')
 
     times = []
     cap = cv2.VideoCapture(path)
@@ -64,15 +88,14 @@ def test_video(path: str) -> None:
             break
 
         s = time.time()
-        src_img = preprocess(frame, is_cv2=True)
+        src_img = preprocess(frame, is_cv2=True).to(device)
         out_img = equi2equi(
             src=src_img,
             rot=rot,
-            sampling_method="faster",
+            sampling_method="torch",
             mode="bilinear",
         )
-        out_img = np.transpose(out_img, (1, 2, 0))
-        out_img = cv2.cvtColor(out_img, cv2.COLOR_RGB2BGR)
+        out_img = postprocess(out_img, to_cv2=True)
         e = time.time()
         times.append(e - s)
 
@@ -97,7 +120,7 @@ def test_video(path: str) -> None:
     print(sum(times)/len(times))
     x_axis = [i for i in range(len(times))]
     plt.plot(x_axis, times)
-    save_path = osp.join('./results', 'times_equi2equi_numpy_video.png')
+    save_path = osp.join('./results', 'times_equi2equi_torch_video.png')
     plt.savefig(save_path)
 
 
@@ -112,23 +135,22 @@ def test_image(path: str) -> None:
     }
 
     # Initialize equi2equi
-    equi2equi = NumpyEqui2Equi(h_out=320, w_out=640)
+    equi2equi = TorchEqui2Equi(h_out=320, w_out=640)
+    device = torch.device('cuda')
 
     # Open Image
     src_img = Image.open(path)
-    src_img = preprocess(src_img)
+    src_img = preprocess(src_img).to(device)
 
     out_img = equi2equi(
         src=src_img,
         rot=rot,
-        sampling_method="faster",
+        sampling_method="torch",
         mode="bilinear",
     )
+    out_img = postprocess(out_img)
 
-    out_img = np.transpose(out_img, (1, 2, 0))
-    out_img = Image.fromarray(out_img)
-
-    out_path = osp.join('./results', 'output_equi2equi_numpy_image.jpg')
+    out_path = osp.join('./results', 'output_equi2equi_torch_image.jpg')
     out_img.save(out_path)
 
 

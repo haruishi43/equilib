@@ -19,17 +19,16 @@ class Equi2Equi(BaseEqui2Equi):
         """
         super().__init__(**kwargs)
 
-    @property
-    def coordinate(self) -> np.ndarray:
+    def create_coordinate(self, h_out: int, w_out: int) -> np.ndarray:
         r"""Create mesh coordinate grid with height and width
 
         return:
             coordinate: numpy.ndarray
         """
-        xs = np.linspace(0, self.w_equi-1, self.w_equi)
-        theta = xs * 2 * np.pi / self.w_equi - np.pi
-        ys = np.linspace(0, self.h_equi-1, self.h_equi)
-        phi = ys * np.pi / self.h_equi - np.pi / 2
+        xs = np.linspace(0, w_out-1, w_out)
+        theta = xs * 2 * np.pi / w_out - np.pi
+        ys = np.linspace(0, h_out-1, h_out)
+        phi = ys * np.pi / h_out - np.pi / 2
         theta, phi = np.meshgrid(theta, phi)
         coord = np.stack((theta, phi), axis=-1)
         return coord
@@ -69,11 +68,11 @@ class Equi2Equi(BaseEqui2Equi):
     ) -> np.ndarray:
         # define variables
         h_equi, w_equi = self._get_img_size(src)
+        if self.h_out is None and self.w_out is None:
+            self.h_out = h_equi
+            self.w_out = w_equi
 
-        assert h_equi == self.h_equi and w_equi == self.w_equi, \
-            "ERR: size doesn't match for input and output"
-
-        a = self.coordinate  # (theta, phi)s
+        a = self.create_coordinate(self.h_out, self.w_out)  # (theta, phi)s
         norm_A = 1
         x = norm_A * np.cos(a[:, :, 1]) * np.cos(a[:, :, 0])
         y = norm_A * np.cos(a[:, :, 1]) * np.sin(a[:, :, 0])

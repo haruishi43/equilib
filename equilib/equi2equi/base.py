@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from typing import Optional
+
 
 class BaseEqui2Equi(object):
     r"""Base Equi2Equi class to build off of
@@ -7,21 +9,16 @@ class BaseEqui2Equi(object):
 
     def __init__(
         self,
-        h_equi: int,
-        w_equi: int,
-        **kwargs
+        h_out: Optional[int] = None,
+        w_out: Optional[int] = None,
+        **kwargs,
     ) -> None:
         r"""
         """
-        self.h_equi = h_equi
-        self.w_equi = w_equi
+        self.h_out = h_out
+        self.w_out = w_out
 
-    @property
-    def coordinate(self):
-        raise NotImplementedError
-
-    @property
-    def global2camera_rotation_matrix(self):
+    def create_coordinate(self, h_out: int, w_out: int):
         raise NotImplementedError
 
     def rotation_matrix(self, roll: float, pitch: float, yaw: float):
