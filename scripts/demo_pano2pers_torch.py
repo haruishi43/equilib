@@ -110,7 +110,7 @@ def test_video(
 
         # cv2.imshow("video", pers_img)
 
-        # change direction `wsad` or exit with `q`
+        # change direction `wasd` or exit with `q`
         k = cv2.waitKey(1)
         if k == ord('q'):
             break
