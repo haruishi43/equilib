@@ -19,9 +19,6 @@ class Equi2Equi(BaseEqui2Equi):
         """
         super().__init__(**kwargs)
 
-        # initialize global to camera rotation matrix
-        _ = self.global2camera_rotation_matrix
-
     @property
     def coordinate(self) -> np.ndarray:
         r"""Create mesh coordinate grid with height and width
@@ -29,23 +26,13 @@ class Equi2Equi(BaseEqui2Equi):
         return:
             coordinate: numpy.ndarray
         """
-        _xs = np.linspace(0, self.w_equi-1, self.w_equi)
-        _ys = np.linspace(0, self.h_equi-1, self.h_equi)
-        xs, ys = np.meshgrid(_xs, _ys)
-        zs = np.ones_like(xs)
-        coord = np.stack((xs, ys, zs), axis=2)
+        xs = np.linspace(0, self.w_equi-1, self.w_equi)
+        theta = xs * 2 * np.pi / self.w_equi - np.pi
+        ys = np.linspace(0, self.h_equi-1, self.h_equi)
+        phi = ys * np.pi / self.h_equi - np.pi / 2
+        theta, phi = np.meshgrid(theta, phi)
+        coord = np.stack((theta, phi), axis=-1)
         return coord
-
-    @property
-    def global2camera_rotation_matrix(self) -> np.ndarray:
-        r"""Default rotation that changes global to camera coordinates
-        """
-        if not hasattr(self, '_g2c_rot'):
-            x = np.pi
-            y = np.pi
-            z = np.pi
-            self._g2c_rot = create_rotation_matrix(x=x, y=y, z=z)
-        return self._g2c_rot
 
     def rotation_matrix(
         self,
@@ -65,9 +52,7 @@ class Equi2Equi(BaseEqui2Equi):
 
         Global coordinates -> x-axis points forward, z-axis points upward
         """
-        R_g2c = self.global2camera_rotation_matrix
         R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-        R = R_g2c @ R
         return R
 
     @staticmethod
@@ -88,7 +73,13 @@ class Equi2Equi(BaseEqui2Equi):
         assert h_equi == self.h_equi and w_equi == self.w_equi, \
             "ERR: size doesn't match for input and output"
 
-        A = self.coordinate
+        a = self.coordinate  # (theta, phi)s
+        norm_A = 1
+        x = norm_A * np.cos(a[:, :, 1]) * np.cos(a[:, :, 0])
+        y = norm_A * np.cos(a[:, :, 1]) * np.sin(a[:, :, 0])
+        z = norm_A * np.sin(a[:, :, 1])
+        A = np.stack((x, y, z), axis=-1)
+
         R = self.rotation_matrix(**rot)
 
         # conversion:
@@ -98,8 +89,8 @@ class Equi2Equi(BaseEqui2Equi):
         B = B.squeeze(3)
 
         # calculate rotations per perspective coordinates
-        phi = np.arcsin(B[:, :, 1] / np.linalg.norm(B, axis=-1))
-        theta = np.arctan2(B[:, :, 0], B[:, :, 2])
+        phi = np.arcsin(B[:, :, 2] / np.linalg.norm(B, axis=-1))
+        theta = np.arctan2(B[:, :, 1], B[:, :, 0])
 
         # center the image and convert to pixel location
         ui = (theta - np.pi) * w_equi / (2 * np.pi)
