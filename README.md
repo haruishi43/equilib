@@ -51,6 +51,13 @@ rot = {
 pers_img = equi2pers(equi_img, rot, sampling_method="faster")
 ```
 
+### Coordinate System:
+
+Right-handed rule XYZ global coordinate system. `x-axis` faces forward and `z-axis` faces up.
+- `roll`: counter-clockwise rotation about the `x-axis`
+- `pitch`: counter-clockwise rotation about the `y-axis`
+- `yaw`: counter-clockwise rotation about the `z-axis`
+
 See demo scripts under `scripts`.
 
 ## Grid Sampling
