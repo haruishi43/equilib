@@ -6,7 +6,7 @@ import time
 import numpy as np
 from PIL import Image
 
-from equilib.equi2pers import NumpyEqui2Pers
+from equilib.equi2equi import NumpyEqui2Equi
 
 
 def run(equi, rot):
@@ -14,23 +14,20 @@ def run(equi, rot):
     print('equirectangular image size:')
     print(h_equi, w_equi)
 
-    # Variables:
-    h_pers = 480
-    w_pers = 640
-    fov_x = 90
+    h_out = 320
+    w_out = 640
 
     tic = time.perf_counter()
-    equi2pers = NumpyEqui2Pers(
-        w_pers=w_pers,
-        h_pers=h_pers,
-        fov_x=fov_x
+    equi2equi = NumpyEqui2Equi(
+        w_out=w_out,
+        h_out=h_out,
     )
     toc = time.perf_counter()
-    print(f"Init Equi2Pers: {toc - tic:0.4f} seconds")
+    print(f"Init Equi2Equi: {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
-    sample = equi2pers(
-        equi=equi,
+    sample = equi2equi(
+        src=equi,
         rot=rot,
         sampling_method="faster",
         mode="bilinear",
@@ -64,13 +61,13 @@ def test_numpy_single():
     sample = run(equi, rot)
 
     tic = time.perf_counter()
-    pers = np.transpose(sample, (1, 2, 0))
-    pers_img = Image.fromarray(pers)
+    out = np.transpose(sample, (1, 2, 0))
+    out_img = Image.fromarray(out)
     toc = time.perf_counter()
     print(f"post process: {toc - tic:0.4f} seconds")
 
-    pers_path = osp.join(result_path, 'equi2pers_numpy_single.jpg')
-    pers_img.save(pers_path)
+    out_path = osp.join(result_path, 'equi2equi_numpy_single.jpg')
+    out_img.save(out_path)
 
 
 def test_numpy_batch():
@@ -105,14 +102,14 @@ def test_numpy_batch():
     batched_sample = run(batched_equi, batched_rot)
 
     tic = time.perf_counter()
-    batched_pers = []
+    batched_out = []
     for i in range(batch_size):
         sample = batched_sample[i]
-        pers = np.transpose(sample, (1, 2, 0))
-        pers_img = Image.fromarray(pers)
-        batched_pers.append(pers_img)
+        out = np.transpose(sample, (1, 2, 0))
+        out_img = Image.fromarray(out)
+        batched_out.append(out_img)
     toc = time.perf_counter()
 
-    for i, pers in enumerate(batched_pers):
-        pers_path = osp.join(result_path, f'equi2pers_numpy_batch_{i}.jpg')
-        pers.save(pers_path)
+    for i, out in enumerate(batched_out):
+        out_path = osp.join(result_path, f'equi2equi_numpy_batch_{i}.jpg')
+        out.save(out_path)
