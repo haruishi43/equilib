@@ -70,10 +70,17 @@ class Equi2Pers(BaseEqui2Pers):
         r"""Default rotation that changes global to camera coordinates
         """
         if not hasattr(self, '_g2c_rot'):
-            x = math.pi
-            y = math.pi
-            z = math.pi
-            self._g2c_rot = create_rotation_matrix(x=x, y=y, z=z)
+            R_XY = torch.tensor([  # X <-> Y
+                [0., 1., 0.],
+                [1., 0., 0.],
+                [0., 0., 1.],
+                ])
+            R_YZ = torch.tensor([  # Y <-> Z
+                [1., 0., 0.],
+                [0., 0., 1.],
+                [0., 1., 0.],
+            ])
+            self._g2c_rot = R_XY @ R_YZ
         return self._g2c_rot
 
     def rotation_matrix(
@@ -95,9 +102,7 @@ class Equi2Pers(BaseEqui2Pers):
         Camera coordinates -> z-axis points forward, y-axis points upward
         Global coordinates -> x-axis points forward, z-axis poitns upward
         """
-        R_g2c = self.global2camera_rotation_matrix
         R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-        R = R_g2c @ R
         return R
 
     @staticmethod
@@ -154,15 +159,15 @@ class Equi2Pers(BaseEqui2Pers):
             m = self.perspective_coordinate
             K = self.intrinsic_matrix
             R = self.rotation_matrix(**r)
-            _M = R.inverse() @ K.inverse() @ m.unsqueeze(3)
+            _M = R @ self._g2c_rot @ K.inverse() @ m.unsqueeze(3)
             _M = _M.squeeze(3)
             M.append(_M)
         M = torch.stack(M, dim=0).to(device)
 
         # calculate rotations per perspective coordinates
         norms = torch.norm(M, dim=-1)
-        theta = torch.atan2(M[:, :, :, 0], M[:, :, :, 2])
-        phi = torch.asin(M[:, :, :, 1] / norms)
+        phi = torch.asin(M[:, :, :, 2] / norms)
+        theta = torch.atan2(M[:, :, :, 1], M[:, :, :, 0])
 
         # center the image and convert to pixel locatio
         ui = (theta - math.pi) * w_equi / (2 * math.pi)

@@ -63,10 +63,18 @@ class Equi2Pers(BaseEqui2Pers):
         r"""Default rotation that changes global to camera coordinates
         """
         if not hasattr(self, '_g2c_rot'):
-            x = np.pi
-            y = np.pi
-            z = np.pi
-            self._g2c_rot = create_rotation_matrix(x=x, y=y, z=z)
+            R_XY = np.array([  # X <-> Y
+                [0., 1., 0.],
+                [1., 0., 0.],
+                [0., 0., 1.],
+                ])
+            R_YZ = np.array([  # Y <-> Z
+                [1., 0., 0.],
+                [0., 0., 1.],
+                [0., 1., 0.],
+            ])
+            self._g2c_rot = R_XY @ R_YZ
+
         return self._g2c_rot
 
     def rotation_matrix(
@@ -88,9 +96,7 @@ class Equi2Pers(BaseEqui2Pers):
         Camera coordinates -> z-axis points forward, y-axis points upward
         Global coordinates -> x-axis points forward, z-axis points upward
         """
-        R_g2c = self.global2camera_rotation_matrix
         R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-        R = R_g2c @ R
         return R
 
     @staticmethod
@@ -112,18 +118,16 @@ class Equi2Pers(BaseEqui2Pers):
         R = self.rotation_matrix(**rot)
 
         # conversion:
-        # m = P @ M
-        # P = K @ [R | t] = K @ R (in this case)
-        # M = R^-1 @ K^-1 @ m
         K_inv = np.linalg.inv(K)
-        R_inv = np.linalg.inv(R)
         m = m[:, :, :, np.newaxis]
-        M = R_inv @ K_inv @ m
+        M = R @ self._g2c_rot @ K_inv @ m
         M = M.squeeze(3)
 
         # calculate rotations per perspective coordinates
-        phi = np.arcsin(M[:, :, 1] / np.linalg.norm(M, axis=-1))
-        theta = np.arctan2(M[:, :, 0], M[:, :, 2])
+        # phi = np.arcsin(M[:, :, 1] / np.linalg.norm(M, axis=-1))
+        # theta = np.arctan2(M[:, :, 0], M[:, :, 2])
+        phi = np.arcsin(M[:, :, 2] / np.linalg.norm(M, axis=-1))
+        theta = np.arctan2(M[:, :, 1], M[:, :, 0])
 
         # center the image and convert to pixel location
         ui = (theta - np.pi) * w_equi / (2 * np.pi)

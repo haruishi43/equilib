@@ -106,9 +106,9 @@ def test_image(path: str) -> None:
     """
     # Rotation:
     rot = {
-        'roll': 0,
-        'pitch': 0,
-        'yaw': 0,
+        'roll': 0,  #
+        'pitch': 0,  # vertical
+        'yaw': np.pi/4,  # horizontal
     }
 
     # Initialize equi2equi
