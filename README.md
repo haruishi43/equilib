@@ -24,6 +24,35 @@ Common image sizes:
 - `2160s`: `3840x1920`
 - `2880s`: `5760x2880`
 
+## How to use:
+
+Initialize `equi2pers`:
+
+```Python
+import numpy as np
+from PIL import Image
+from equilib.equi2pers import NumpyEqui2Pers
+
+# Intialize equi2pers
+equi2pers = NumpyEqui2Pers(w_pers=640, h_pers=480, fov_x=90)
+
+equi_img = Image.open("./some_image.jpg")
+equi_img = np.asarray(equi_img)
+equi_img = np.transpose(equi_img, (2, 0, 1))
+
+# rotations
+rot = {
+    'roll': 0.,
+    'pitch': np.pi/4,  # rotate vertical
+    'yaw': np.pi/4,  # rotate horizontal
+}
+
+# obtain perspective image
+pers_img = equi2pers(equi_img, rot, sampling_method="faster")
+```
+
+See demo scripts under `scripts`.
+
 ## Grid Sampling
 
 In order to process equirectangular images fast, whether to crop perspective images from the equirectangular image, the library takes advantage from grid sampling techniques.
