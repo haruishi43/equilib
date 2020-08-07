@@ -5,10 +5,9 @@ import numpy as np
 from scipy.ndimage import map_coordinates
 
 
-def xyzcube(face_w):
-    '''
-    Return the xyz cordinates of the unit cube in [F R B L U D] format.
-    '''
+def xyzcube(face_w: int):
+    r"""Return the xyz cordinates of the unit cube in [F R B L U D] format.
+    """
     out = np.zeros((face_w, face_w * 6, 3), np.float32)
     rng = np.linspace(-0.5, 0.5, num=face_w, dtype=np.float32)
     grid = np.stack(np.meshgrid(rng, -rng), -1)
@@ -83,8 +82,10 @@ def cube_h2list(cube_h):
 
 def cube_h2dict(cube_h):
     cube_list = cube_h2list(cube_h)
-    return dict([(k, cube_list[i])
-                 for i, k in enumerate(['F', 'R', 'B', 'L', 'U', 'D'])])
+    return dict(
+        [(k, cube_list[i])
+            for i, k in enumerate(['F', 'R', 'B', 'L', 'U', 'D'])]
+    )
 
 
 def cube_h2dice(cube_h):

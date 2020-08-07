@@ -21,9 +21,19 @@ class Equi2Cube(BaseEqui2Cube):
     def __init__(self, *kwargs):
         super().__init__(**kwargs)
 
-    def __call__(self, e_img, mode, cube_format):
+    def __call__(
+        self,
+        equi: np.ndarray,
+        cube_format: str,
+        mode: str = "bilinear",
+    ) -> np.ndarray:
+        r"""Call Equi2Cube
+        """
+
+
+
         assert len(e_img.shape) == 3
-        h, w = e_img.shape[:2]
+        h, w = e_img.shape[-2:]
         if mode == 'bilinear':
             order = 1
         elif mode == 'nearest':
@@ -31,7 +41,7 @@ class Equi2Cube(BaseEqui2Cube):
         else:
             raise NotImplementedError('unknown mode')
 
-        xyz = xyzcube(self.face_w)
+        xyz = xyzcube(self.w_face)
         uv = xyz2uv(xyz)
         coor_xy = uv2coor(uv, h, w)
 
