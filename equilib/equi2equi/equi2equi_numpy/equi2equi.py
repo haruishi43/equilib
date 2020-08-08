@@ -110,7 +110,7 @@ class Equi2Equi(BaseEqui2Equi):
         sampled = grid_sample(src, grid, mode=mode)
         return sampled
 
-    def __call__(
+    def run(
         self,
         src: Union[np.ndarray, List[np.ndarray]],
         rot: Union[Dict[str, float], List[Dict[str, float]]],

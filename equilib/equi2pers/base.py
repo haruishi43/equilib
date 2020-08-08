@@ -37,6 +37,9 @@ class BaseEqui2Pers(object):
         self.fov_x = fov_x
         self.skew = skew  # skew intrinsic parameter
 
+    def __call__(self, **kwargs):
+        return self.run(**kwargs)
+
     @property
     def intrinsic_matrix(self):
         raise NotImplementedError
@@ -56,5 +59,5 @@ class BaseEqui2Pers(object):
     def _get_img_size(img):
         raise NotImplementedError
 
-    def __call__(self, equi, rot, **kwargs):
+    def run(self, **kwargs):
         raise NotImplementedError

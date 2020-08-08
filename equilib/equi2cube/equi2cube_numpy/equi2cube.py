@@ -16,7 +16,8 @@ from ..base import BaseEqui2Cube
 
 
 class Equi2Cube(BaseEqui2Cube):
-
+    r"""Equi2Cube Numpy
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -151,7 +152,7 @@ class Equi2Cube(BaseEqui2Cube):
 
         return cubemap
 
-    def __call__(
+    def run(
         self,
         equi: Union[np.ndarray, List[np.ndarray]],
         rot: Union[Dict[str, float], List[Dict[str, float]]],

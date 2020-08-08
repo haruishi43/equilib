@@ -19,7 +19,8 @@ from ..base import BaseEqui2Cube
 
 
 class Equi2Cube(BaseEqui2Cube):
-
+    r"""Equi2Cube PyTorch
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -98,7 +99,7 @@ class Equi2Cube(BaseEqui2Cube):
         theta = torch.atan2(xyz[:, :, :, 1], xyz[:, :, :, 0])
         return theta, phi
 
-    def __call__(
+    def run(
         self,
         equi: Union[torch.Tensor, List[torch.Tensor]],
         rot: Union[Dict[str, float], List[Dict[str, float]]],

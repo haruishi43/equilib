@@ -111,7 +111,7 @@ class Equi2Pers(BaseEqui2Pers):
         # batch, channel, height, width
         return img.shape[-2:]
 
-    def __call__(
+    def run(
         self,
         equi: torch.Tensor,
         rot: Union[Dict[str, float], List[Dict[str, float]]],

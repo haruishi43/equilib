@@ -18,6 +18,9 @@ class BaseEqui2Equi(object):
         self.h_out = h_out
         self.w_out = w_out
 
+    def __call__(self, **kwargs):
+        return self.run(**kwargs)
+
     def create_coordinate(self, h_out: int, w_out: int):
         raise NotImplementedError
 
@@ -28,5 +31,5 @@ class BaseEqui2Equi(object):
     def _get_img_size(img):
         raise NotImplementedError
 
-    def __call__(self, src, rot, **kwargs):
+    def run(self, **kwargs):
         raise NotImplementedError

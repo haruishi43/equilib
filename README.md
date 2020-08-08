@@ -81,7 +81,7 @@ I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch
 class SomeEqui2Pers(BaseEqui2Pers):
     def __init__(self, w_pers, h_pers, fov_x):
         ...
-    def __call__(self, equi, rot):
+    def run(self, equi, rot, **kwargs):
         ...
 ```
 
@@ -117,7 +117,7 @@ I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch
 class SomeEqui2Equi(BaseEqui2Equi):
     def __init__(self, h_out: int, w_out: int):
         ...
-    def __call__(self, src, rot):
+    def run(self, src, rot, **kwargs):
         ...
 ```
 
@@ -141,6 +141,50 @@ from equilib.equi2equi import TorchEqui2Equi
 - [x] Fix rotation axis
 - [ ] Implement `c++` with `cuda`
 
+## equi2cube
+
+equirectangular to cubemap transformation
+
+```Python
+class SomeEqui2Cube(BaseEqui2Cube):
+    def __init__(self, w_face: int):
+        ...
+    def run(self, equi, rot, **kwargs):
+        ...
+```
+
+### Numpy
+
+```Python
+from equilib.equi2cube import NumpyEqui2Cube
+```
+
+### PyTorch
+
+```Python
+from equilib.equi2cube import TorchEqui2Cube
+```
+
+### TODO:
+
+- [x] Implement `numpy`
+- [x] Implement `torch`
+- [x] Implement `torch` with batches
+- [x] Fix rotation axis
+- [ ] Implement `c++` with `cuda`
+
+## cube2equi
+
+cubemap to equirectangular transformation
+
+```Python
+class SomeCube2Equi(BaseCube2Equi):
+    def __init__(self, w_face: int):
+        ...
+    def run(self, equi, rot, **kwargs):
+        ...
+```
+
 ## Develop:
 
 Test files for `equilib` is included under `tests`.
@@ -153,3 +197,9 @@ pytest tests
 ### TODO:
 
 - [ ] Keeping `.vscode` for my development
+
+
+## Acknowledgements:
+
+- [py360convert](https://github.com/sunset1995/py360convert)
+- [Perspective-and-Equirectangular](https://github.com/timy90022/Perspective-and-Equirectangular/tree/master/lib)
