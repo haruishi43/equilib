@@ -5,31 +5,38 @@ import numpy as np
 from scipy.ndimage import map_coordinates
 
 
-def equirect_uvgrid(h, w):
-    u = np.linspace(-np.pi, np.pi, num=w, dtype=np.float32)
-    v = np.linspace(np.pi, -np.pi, num=h, dtype=np.float32) / 2
+def create_rotation_matrix(
+    x: float,
+    y: float,
+    z: float,
+) -> np.ndarray:
+    r"""Create Rotation Matrix
 
-    return np.stack(np.meshgrid(u, v), axis=-1)
+    params:
+        x: x-axis rotation float
+        y: y-axis rotation float
+        z: z-axis rotation float
 
+    return:
+        rotation matrix: numpy.ndarray
+    """
+    # calculate rotation about the x-axis
+    R_x = np.array([
+        [1., 0., 0.],
+        [0., np.cos(x), -np.sin(x)],
+        [0., np.sin(x), np.cos(x)]])
+    # calculate rotation about the y-axis
+    R_y = np.array([
+        [np.cos(y), 0., np.sin(y)],
+        [0., 1., 0.],
+        [-np.sin(y), 0., np.cos(y)]])
+    # calculate rotation about the z-axis
+    R_z = np.array([
+        [np.cos(z), -np.sin(z), 0.],
+        [np.sin(z), np.cos(z), 0.],
+        [0., 0., 1.]])
 
-def equirect_facetype(h, w):
-    '''
-    0F 1R 2B 3L 4U 5D
-    '''
-    tp = np.roll(np.arange(4).repeat(w // 4)[None, :].repeat(h, 0), 3 * w // 8, 1)
-
-    # Prepare ceil mask
-    mask = np.zeros((h, w // 4), np.bool)
-    idx = np.linspace(-np.pi, np.pi, w // 4) / 4
-    idx = h // 2 - np.round(np.arctan(np.cos(idx)) * h / np.pi).astype(int)
-    for i, j in enumerate(idx):
-        mask[:j, i] = 1
-    mask = np.roll(np.concatenate([mask] * 4, 1), 3 * w // 8, 1)
-
-    tp[mask] = 4
-    tp[np.flip(mask, 0)] = 5
-
-    return tp.astype(np.int32)
+    return R_z @ R_y @ R_x
 
 
 def sample_cubefaces(cube_faces, tp, coor_y, coor_x, order):
