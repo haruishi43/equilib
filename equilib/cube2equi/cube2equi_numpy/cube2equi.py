@@ -20,7 +20,7 @@ class Cube2Equi(BaseCube2Equi):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def __call__(self, cubemap, h, w, mode='bilinear', cube_format='dice'):
+    def run(self, cubemap, h, w, mode='bilinear', cube_format='dice'):
         if mode == 'bilinear':
             order = 1
         elif mode == 'nearest':
