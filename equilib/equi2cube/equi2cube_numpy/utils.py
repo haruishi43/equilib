@@ -5,6 +5,40 @@ import numpy as np
 from scipy.ndimage import map_coordinates
 
 
+def create_rotation_matrix(
+    x: float,
+    y: float,
+    z: float,
+) -> np.ndarray:
+    r"""Create Rotation Matrix
+
+    params:
+        x: x-axis rotation float
+        y: y-axis rotation float
+        z: z-axis rotation float
+
+    return:
+        rotation matrix: numpy.ndarray
+    """
+    # calculate rotation about the x-axis
+    R_x = np.array([
+        [1., 0., 0.],
+        [0., np.cos(x), -np.sin(x)],
+        [0., np.sin(x), np.cos(x)]])
+    # calculate rotation about the y-axis
+    R_y = np.array([
+        [np.cos(y), 0., np.sin(y)],
+        [0., 1., 0.],
+        [-np.sin(y), 0., np.cos(y)]])
+    # calculate rotation about the z-axis
+    R_z = np.array([
+        [np.cos(z), -np.sin(z), 0.],
+        [np.sin(z), np.cos(z), 0.],
+        [0., 0., 1.]])
+
+    return R_z @ R_y @ R_x
+
+
 def xyzcube(face_w: int):
     r"""Return the xyz cordinates of the unit cube in [F R B L U D] format.
     """
@@ -40,9 +74,8 @@ def xyzcube(face_w: int):
 
 
 def xyz2uv(xyz):
-    '''
-    xyz: ndarray in shape of [..., 3]
-    '''
+    r"""xyz: ndarray in shape of [..., 3]
+    """
     x, y, z = np.split(xyz, 3, axis=-1)
     u = np.arctan2(x, z)
     c = np.sqrt(x**2 + z**2)
@@ -52,11 +85,11 @@ def xyz2uv(xyz):
 
 
 def uv2coor(uv, h, w):
-    '''
+    r"""
     uv: ndarray in shape of [..., 2]
     h: int, height of the equirectangular image
     w: int, width of the equirectangular image
-    '''
+    """
     u, v = np.split(uv, 2, axis=-1)
     coor_x = (u / (2 * np.pi) + 0.5) * w - 0.5
     coor_y = (-v / np.pi + 0.5) * h - 0.5
@@ -65,6 +98,8 @@ def uv2coor(uv, h, w):
 
 
 def sample_equirec(e_img, coor_xy, order):
+    r"""Sample from equirectangular image
+    """
     w = e_img.shape[1]
     coor_x, coor_y = np.split(coor_xy, 2, axis=-1)
     pad_u = np.roll(e_img[[0]], w // 2, 1)
@@ -76,8 +111,8 @@ def sample_equirec(e_img, coor_xy, order):
 
 
 def cube_h2list(cube_h):
-    assert cube_h.shape[0] * 6 == cube_h.shape[1]
-    return np.split(cube_h, 6, axis=1)
+    assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
+    return np.split(cube_h, 6, axis=-1)
 
 
 def cube_h2dict(cube_h):
@@ -89,9 +124,9 @@ def cube_h2dict(cube_h):
 
 
 def cube_h2dice(cube_h):
-    assert cube_h.shape[0] * 6 == cube_h.shape[1]
-    w = cube_h.shape[0]
-    cube_dice = np.zeros((w * 3, w * 4, cube_h.shape[2]), dtype=cube_h.dtype)
+    assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
+    w = cube_h.shape[-2]
+    cube_dice = np.zeros((w * 3, w * 4, cube_h.shape[0]), dtype=cube_h.dtype)
     cube_list = cube_h2list(cube_h)
     # Order: F R B L U D
     sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
