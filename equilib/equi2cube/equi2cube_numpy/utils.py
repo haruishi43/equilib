@@ -53,7 +53,10 @@ def cube_h2dict(cube_h):
 def cube_h2dice(cube_h):
     assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
     w = cube_h.shape[-2]
-    cube_dice = np.zeros((cube_h.shape[0], w * 3, w * 4), dtype=cube_h.dtype)
+    cube_dice = np.zeros(
+        (cube_h.shape[0], w * 3, w * 4),
+        dtype=cube_h.dtype
+    )
     cube_list = cube_h2list(cube_h)
     # Order: F R B L U D
     sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
