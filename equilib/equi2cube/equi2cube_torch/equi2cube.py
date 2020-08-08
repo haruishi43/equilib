@@ -93,21 +93,22 @@ class Equi2Cube(BaseEqui2Cube):
         theta = np.arctan2(xyz[:, :, 1], xyz[:, :, 0])
         return theta, phi
 
-    def _run_single(
+    def __call__(
         self,
-        equi: np.ndarray,
-        rot: Dict[str, float],
+        equi: Union[np.ndarray, List[np.ndarray]],
+        rot: Union[Dict[str, float], List[Dict[str, float]]],
         cube_format: str,
-        sampling_method: str = "faster",
+        sampling_method: str = 'faster',
         mode: str = "bilinear",
-    ):
-        r"""Call a single run
+    ) -> Union[np.ndarray, List[np.ndarray]]:
+        r"""Call Equi2Cube
 
         params:
-            equi: np.ndarray
-            rot: Dict[str, float]
-            cube_format: str (default = "faster")
-            mode: str (default = "bilinear")
+            equi: Union[np.ndarray, List[np.ndarray]]
+            rot: Union[Dict[str, float], List[Dict[str, float]]]
+            cube_format: str ('list', 'dict', 'dice')
+            sampling_method: str (default = 'faster')
+            mode: str (default = 'bilinear')
         """
 
         assert len(equi.shape) == 3, f"ERR: {equi.shape} is not a valid array"
@@ -147,58 +148,6 @@ class Equi2Cube(BaseEqui2Cube):
         elif cube_format == 'dice':
             cubemap = cube_h2dice(cubemap)
         else:
-            raise NotImplementedError(f"{cube_format} is not supported")
+            raise NotImplementedError()
 
         return cubemap
-
-    def __call__(
-        self,
-        equi: Union[np.ndarray, List[np.ndarray]],
-        rot: Union[Dict[str, float], List[Dict[str, float]]],
-        cube_format: str,
-        sampling_method: str = 'faster',
-        mode: str = "bilinear",
-    ) -> Union[np.ndarray, List[np.ndarray], List[dict]]:
-        r"""Call Equi2Cube
-
-        params:
-            equi: Union[np.ndarray, List[np.ndarray]]
-            rot: Union[Dict[str, float], List[Dict[str, float]]]
-            cube_format: str ('list', 'dict', 'dice')
-            sampling_method: str (default = 'faster')
-            mode: str (default = 'bilinear')
-        """
-
-        _return_type = type(equi)
-        _original_shape_len = len(equi.shape)
-        if _return_type == np.ndarray:
-            assert _original_shape_len >= 3, \
-                f"ERR: got {_original_shape_len} for input equi"
-            if _original_shape_len == 3:
-                equi = equi[np.newaxis, :, :, :]
-                rot = [rot]
-
-        assert len(equi) == len(rot), \
-            f"ERR: length of input and rot differs {len(equi)} vs {len(rot)}"
-
-        cubemaps = []
-        for e, r in zip(equi, rot):
-            # iterate through batches
-            # TODO: batch implementation
-            cubemap = self._run_single(
-                equi=e,
-                rot=r,
-                cube_format=cube_format,
-                sampling_method=sampling_method,
-                mode=mode,
-            )
-            cubemaps.append(cubemap)
-
-        if _return_type == np.ndarray:
-            if cube_format in ['horizon', 'dice']:
-                cubemaps = np.stack(cubemaps, axis=0)
-
-        if _original_shape_len == 3:
-            cubemaps = cubemaps[0]
-
-        return cubemaps
