@@ -69,7 +69,7 @@ def test_torch_single():
         'yaw': 0,
     }
 
-    cube_format = "dice"
+    cube_format = "dict"
 
     cube = run(equi, rot, cube_format=cube_format)
 
@@ -142,7 +142,7 @@ def test_torch_batch():
         }
         batched_rot.append(rot)
 
-    cube_format = "list"
+    cube_format = "dict"
 
     batched_cubes = run(batched_equi, batched_rot, cube_format=cube_format)
 

@@ -62,21 +62,22 @@ def cube_h2list(cube_h):
 
 def cube_h2dict(cube_h):
     cube_list = cube_h2list(cube_h)
-    if len(cube_list.shape) == 3:
+    if len(cube_h.shape) == 3:
         return dict(
             [(k, cube_list[i])
                 for i, k in enumerate(['F', 'R', 'B', 'L', 'U', 'D'])]
         )
     else:
-        batches = cube_list.shape[0]
+        batches = cube_h.shape[0]
         ret = []
         for b in range(batches):
             ret.append(
                 dict(
-                    [(k, cube_list[i])
+                    [(k, cube_list[i][b])
                         for i, k in enumerate(['F', 'R', 'B', 'L', 'U', 'D'])]
                 )
             )
+        return ret
 
 
 def cube_h2dice(cube_h):
