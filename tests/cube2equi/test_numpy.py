@@ -35,8 +35,8 @@ def run(cube, rot, cube_format):
 
     tic = time.perf_counter()
     cube2equi = NumpyCube2Equi(
-        w_out=400,
-        h_out=200,
+        w_out=4000,
+        h_out=2000,
     )
     toc = time.perf_counter()
     print(f"Init Cube2Equi: {toc - tic:0.4f} seconds")
@@ -72,13 +72,13 @@ def test_numpy_single():
         img_paths = osp.join(data_path, "test_{cube_format}_{k}.jpg")
         cube = {}
         for k in ['F', 'R', 'B', 'L', 'U', 'D']:
-            _cube = Image.open(
+            face = Image.open(
                 img_paths.format(cube_format=cube_format, k=k)
             )
-            _cube = _cube.convert('RGB')
-            _cube = np.asarray(_cube)
-            _cube = np.transpose(_cube, (2, 0, 1))
-            cube[k] = _cube
+            face = face.convert('RGB')
+            face = np.asarray(face)
+            face = np.transpose(face, (2, 0, 1))
+            cube[k] = face
         if cube_format == 'list':
             cube = list(cube.values())
     toc = time.perf_counter()
