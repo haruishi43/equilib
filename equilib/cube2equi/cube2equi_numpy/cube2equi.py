@@ -14,9 +14,6 @@ from .utils import (
 )
 from ..base import BaseCube2Equi
 
-# FIXME: delete
-from scipy.ndimage import map_coordinates
-
 
 class Cube2Equi(BaseCube2Equi):
 
@@ -79,65 +76,6 @@ class Cube2Equi(BaseCube2Equi):
         coord = np.stack(np.meshgrid(theta, phi), axis=-1)
         return coord
 
-    def convert_cubefaces(self, cube_faces, tp, coor_x, coor_y):
-        # 0F 1R 2B 3L 4U 5D
-        cf = cube_faces.copy()
-
-        # FIXME: what's going on here
-
-        # cf[1] = np.flip(cube_faces[1], 1)
-        # cf[2] = np.flip(cube_faces[2], 1)
-        # cf[4] = np.flip(cube_faces[4], 0)
-
-        # Pad up down
-        # pad_ud = np.zeros((6, 2, cf.shape[2]))
-        # print('pad_ud:', pad_ud.shape)
-        # print(cf[5, 0, :].shape)
-        # pad_ud[0, 0] = cf[5, 0, :]
-        # pad_ud[0, 1] = cf[4, -1, :]
-        # pad_ud[1, 0] = cf[5, :, -1]
-        # pad_ud[1, 1] = cf[4, ::-1, -1]
-        # pad_ud[2, 0] = cf[5, -1, ::-1]
-        # pad_ud[2, 1] = cf[4, 0, ::-1]
-        # pad_ud[3, 0] = cf[5, ::-1, 0]
-        # pad_ud[3, 1] = cf[0, :, 4]
-        # pad_ud[4, 0] = cf[0, 0, :]
-        # pad_ud[4, 1] = cf[2, 0, ::-1]
-        # pad_ud[5, 0] = cf[2, -1, ::-1]
-        # pad_ud[5, 1] = cf[0, -1, :]
-        # cf = np.concatenate([cf, pad_ud], 1)
-
-        # # Pad left right
-        # pad_lr = np.zeros((6, cf.shape[1], 2))
-        # pad_lr[0, :, 0] = cf[1, :, 0]
-        # pad_lr[0, :, 1] = cf[3, :, -1]
-        # pad_lr[1, :, 0] = cf[2, :, 0]
-        # pad_lr[1, :, 1] = cf[0, :, -1]
-        # pad_lr[2, :, 0] = cf[3, :, 0]
-        # pad_lr[2, :, 1] = cf[1, :, -1]
-        # pad_lr[3, :, 0] = cf[0, :, 0]
-        # pad_lr[3, :, 1] = cf[2, :, -1]
-        # pad_lr[4, 1:-1, 0] = cf[1, 0, ::-1]
-        # pad_lr[4, 1:-1, 1] = cf[3, 0, :]
-        # pad_lr[5, 1:-1, 0] = cf[1, -2, :]
-        # pad_lr[5, 1:-1, 1] = cf[3, -2, ::-1]
-        # cf = np.concatenate([cf, pad_lr], 2)
-        print('---------------------------------------------')
-        print('cf', cf.shape)
-        print('tp:', tp.shape)
-        print('coor_y:', coor_y.shape)
-        print('coor_x:', coor_x.shape)
-
-        stacked = np.stack([tp, coor_y, coor_x], axis=0)
-        print('stacked:', stacked.shape)  # (face, x, y), h_equi, w_equi
-
-        return map_coordinates(
-            cf,
-            stacked,
-            order=1,
-            mode='wrap'
-        )
-
     def rotation_matrix(
         self,
         roll: float,
@@ -177,14 +115,7 @@ class Cube2Equi(BaseCube2Equi):
         """
 
         cubemap = self._convert_cubemap_to_horizon(cubemap, cube_format)
-        print('cubemap:', cubemap.shape)
-        cube_faces = np.split(cubemap, 6, -1)
-        cube_faces = np.stack(cube_faces, 0)  # (6, 3, h, w)
         w_face = cubemap.shape[-2]
-
-        # convert to (F, H, W, C)
-        cube_faces = np.transpose(cube_faces, (0, 2, 3, 1))
-        print("cube_faces:", cube_faces.shape)
 
         rot_coord = self.create_equi_grid(self.h_out, self.w_out)
         theta, phi = np.split(rot_coord, 2, axis=-1)
@@ -222,25 +153,11 @@ class Cube2Equi(BaseCube2Equi):
             mask = (tp == i)
             coor_x[mask] = coor_x[mask] + w_face * i
 
-        # equi = np.stack(
-        #     [
-        #         self.convert_cubefaces(
-        #             cube_faces[..., i], tp, coor_x, coor_y,
-        #         ) for i in range(cube_faces.shape[-1])
-        #     ],
-        #     axis=0,
-        # )
-        # print('cube_faces:', cube_faces.shape)
         grid = np.stack((coor_y, coor_x), axis=0)
-
-        print('grid:', grid.shape)
-
         grid_sample = getattr(
             numpy_func,
             sampling_method
         )
         equi = grid_sample(cubemap, grid, mode=mode)
-
-        print('equi', equi.shape)
 
         return equi
