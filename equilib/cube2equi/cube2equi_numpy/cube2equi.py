@@ -149,9 +149,37 @@ class Cube2Equi(BaseCube2Equi):
         coor_x = np.where(coor_x >= w_face, coor_x - w_face, coor_x)
         coor_y = np.where(coor_y >= w_face, coor_y - w_face, coor_y)
 
+        # FIXME: there are stiching marks in the equirectangular image
         for i in range(6):
             mask = (tp == i)
             coor_x[mask] = coor_x[mask] + w_face * i
+
+            # exceptions
+            if i == 3:
+                coor_x[mask] = np.where(
+                    coor_x[mask] >= w_face*(i+1) - 1,
+                    0,
+                    coor_x[mask]
+                )
+
+            if i < 4:
+                coor_y[mask] = np.where(
+                    coor_y[mask] == 0,
+                    w_face-1,
+                    coor_y[mask]
+                )
+                coor_y[mask] = np.where(
+                    coor_y[mask] == w_face - 1,
+                    0,
+                    coor_y[mask]
+                )
+
+        # cube_faces = np.stack(np.split(cubemap, 6, -1), 0)
+        # tmp = cube_faces[4][:, -1, :].copy()
+        # cube_faces[4][:, -1, :] = cube_faces[5][:, 0, :]
+        # cube_faces[5][:, 0, :] = tmp
+        # cubemap[:, :, w_face*4:w_face*5] = cube_faces[4]
+        # cubemap[:, :, w_face*5:w_face*6] = cube_faces[5]
 
         grid = np.stack((coor_y, coor_x), axis=0)
         grid_sample = getattr(
