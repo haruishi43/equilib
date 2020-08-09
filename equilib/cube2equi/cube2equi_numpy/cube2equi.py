@@ -85,11 +85,9 @@ class Cube2Equi(BaseCube2Equi):
 
         # FIXME: what's going on here
 
-        print('cf', cf.shape)
-
-        cf[1] = np.flip(cube_faces[1], 1)
-        cf[2] = np.flip(cube_faces[2], 1)
-        cf[4] = np.flip(cube_faces[4], 0)
+        # cf[1] = np.flip(cube_faces[1], 1)
+        # cf[2] = np.flip(cube_faces[2], 1)
+        # cf[4] = np.flip(cube_faces[4], 0)
 
         # Pad up down
         # pad_ud = np.zeros((6, 2, cf.shape[2]))
@@ -124,12 +122,20 @@ class Cube2Equi(BaseCube2Equi):
         # pad_lr[5, 1:-1, 0] = cf[1, -2, :]
         # pad_lr[5, 1:-1, 1] = cf[3, -2, ::-1]
         # cf = np.concatenate([cf, pad_lr], 2)
+        print('---------------------------------------------')
+        print('cf', cf.shape)
+        print('tp:', tp.shape)
+        print('coor_y:', coor_y.shape)
+        print('coor_x:', coor_x.shape)
+
+        stacked = np.stack([tp, coor_y, coor_x], axis=0)
+        print('stacked:', stacked.shape)  # (face, x, y), h_equi, w_equi
 
         return map_coordinates(
-            cube_faces,
-            [tp, coor_y, coor_x],
+            cf,
+            stacked,
             order=1,
-            mode='nearest'
+            mode='wrap'
         )
 
     def rotation_matrix(
@@ -171,6 +177,7 @@ class Cube2Equi(BaseCube2Equi):
         """
 
         cubemap = self._convert_cubemap_to_horizon(cubemap, cube_format)
+        print('cubemap:', cubemap.shape)
         cube_faces = np.split(cubemap, 6, -1)
         cube_faces = np.stack(cube_faces, 0)  # (6, 3, h, w)
         w_face = cubemap.shape[-2]
@@ -184,15 +191,10 @@ class Cube2Equi(BaseCube2Equi):
         theta = theta[..., 0]  # shape(h, w)
         phi = phi[..., 0]  # shape(h, w)
 
-        print('theta:', theta.shape)
-        print('phi:', phi.shape)
-
         # Get face id to each pixel: 0F 1R 2B 3L 4U 5D
         tp = self.equirect_facetype(self.h_out, self.w_out)
         coor_x = np.zeros((self.h_out, self.w_out))
         coor_y = np.zeros((self.h_out, self.w_out))
-
-        print('tp:', tp.shape)
 
         for i in range(4):
             mask = (tp == i)
@@ -213,24 +215,31 @@ class Cube2Equi(BaseCube2Equi):
         coor_x = (np.clip(coor_x, -0.5, 0.5) + 0.5) * w_face
         coor_y = (np.clip(coor_y, -0.5, 0.5) + 0.5) * w_face
 
-        equi = np.stack(
-            [
-                self.convert_cubefaces(
-                    cube_faces[..., i], tp, coor_x, coor_y,
-                ) for i in range(cube_faces.shape[-1])
-            ],
-            axis=0,
-        )
-        # print('cube_faces:', cube_faces.shape)
-        # grid = np.stack((coor_y, coor_x), axis=0)
+        coor_x = np.where(coor_x >= w_face, coor_x - w_face, coor_x)
+        coor_y = np.where(coor_y >= w_face, coor_y - w_face, coor_y)
 
-        # print('grid:', grid.shape)
+        for i in range(6):
+            mask = (tp == i)
+            coor_x[mask] = coor_x[mask] + w_face * i
 
-        # grid_sample = getattr(
-        #     numpy_func,
-        #     sampling_method
+        # equi = np.stack(
+        #     [
+        #         self.convert_cubefaces(
+        #             cube_faces[..., i], tp, coor_x, coor_y,
+        #         ) for i in range(cube_faces.shape[-1])
+        #     ],
+        #     axis=0,
         # )
-        # equi = grid_sample(cube_faces, grid, mode=mode)
+        # print('cube_faces:', cube_faces.shape)
+        grid = np.stack((coor_y, coor_x), axis=0)
+
+        print('grid:', grid.shape)
+
+        grid_sample = getattr(
+            numpy_func,
+            sampling_method
+        )
+        equi = grid_sample(cubemap, grid, mode=mode)
 
         print('equi', equi.shape)
 
