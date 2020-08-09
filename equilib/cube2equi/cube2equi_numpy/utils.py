@@ -80,28 +80,31 @@ def sample_cubefaces(cube_faces, tp, coor_y, coor_x, order):
     return map_coordinates(cube_faces, [tp, coor_y, coor_x], order=order, mode='wrap')
 
 
-def cube_list2h(cube_list):
+def cube_list2h(cube_list: list):
     assert len(cube_list) == 6
     assert sum(face.shape == cube_list[0].shape for face in cube_list) == 6
-    return np.concatenate(cube_list, axis=1)
+    return np.concatenate(cube_list, axis=-1)
 
 
-def cube_dict2h(cube_dict, face_k=['F', 'R', 'B', 'L', 'U', 'D']):
+def cube_dict2h(cube_dict: dict, face_k=['F', 'R', 'B', 'L', 'U', 'D']):
     assert len(face_k) == 6
     return cube_list2h([cube_dict[k] for k in face_k])
 
 
-def cube_dice2h(cube_dice):
-    w = cube_dice.shape[0] // 3
-    assert cube_dice.shape[0] == w * 3 and cube_dice.shape[1] == w * 4
-    cube_h = np.zeros((w, w * 6, cube_dice.shape[2]), dtype=cube_dice.dtype)
+def cube_dice2h(cube_dice: np.ndarray):
+    r"""dice to horizion
+    params:
+    cube_dice: (C, H, W)
+    """
     # Order: F R B L U D
     sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
+    w = cube_dice.shape[-2] // 3
+    assert cube_dice.shape[-2] == w * 3 and cube_dice.shape[-1] == w * 4
+    cube_h = np.zeros(
+        (cube_dice.shape[2], w, w * 6),
+        dtype=cube_dice.dtype
+    )
     for i, (sx, sy) in enumerate(sxy):
-        face = cube_dice[sy*w:(sy+1)*w, sx*w:(sx+1)*w]
-        if i in [1, 2]:
-            face = np.flip(face, axis=1)
-        if i == 4:
-            face = np.flip(face, axis=0)
-        cube_h[:, i*w:(i+1)*w] = face
+        face = cube_dice[:, sy*w:(sy+1)*w, sx*w:(sx+1)*w]
+        cube_h[:, :, i*w:(i+1)*w] = face
     return cube_h
