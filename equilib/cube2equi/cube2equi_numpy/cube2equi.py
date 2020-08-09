@@ -214,9 +214,12 @@ class Cube2Equi(BaseCube2Equi):
         coor_y = (np.clip(coor_y, -0.5, 0.5) + 0.5) * w_face
 
         equi = np.stack(
-            self.convert_cubefaces(
-                cube_faces[..., i], tp, coor_x, coor_y,
-            ) for i in range(cube_faces.shape[-1])
+            [
+                self.convert_cubefaces(
+                    cube_faces[..., i], tp, coor_x, coor_y,
+                ) for i in range(cube_faces.shape[-1])
+            ],
+            axis=0,
         )
         # print('cube_faces:', cube_faces.shape)
         # grid = np.stack((coor_y, coor_x), axis=0)
