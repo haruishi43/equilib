@@ -2,8 +2,6 @@
 
 import numpy as np
 
-from scipy.ndimage import map_coordinates
-
 
 def create_rotation_matrix(
     x: float,
@@ -37,47 +35,6 @@ def create_rotation_matrix(
         [0., 0., 1.]])
 
     return R_z @ R_y @ R_x
-
-
-def sample_cubefaces(cube_faces, tp, coor_y, coor_x, order):
-    cube_faces = cube_faces.copy()
-    cube_faces[1] = np.flip(cube_faces[1], 1)
-    cube_faces[2] = np.flip(cube_faces[2], 1)
-    cube_faces[4] = np.flip(cube_faces[4], 0)
-
-    # Pad up down
-    pad_ud = np.zeros((6, 2, cube_faces.shape[2]))
-    pad_ud[0, 0] = cube_faces[5, 0, :]
-    pad_ud[0, 1] = cube_faces[4, -1, :]
-    pad_ud[1, 0] = cube_faces[5, :, -1]
-    pad_ud[1, 1] = cube_faces[4, ::-1, -1]
-    pad_ud[2, 0] = cube_faces[5, -1, ::-1]
-    pad_ud[2, 1] = cube_faces[4, 0, ::-1]
-    pad_ud[3, 0] = cube_faces[5, ::-1, 0]
-    pad_ud[3, 1] = cube_faces[4, :, 0]
-    pad_ud[4, 0] = cube_faces[0, 0, :]
-    pad_ud[4, 1] = cube_faces[2, 0, ::-1]
-    pad_ud[5, 0] = cube_faces[2, -1, ::-1]
-    pad_ud[5, 1] = cube_faces[0, -1, :]
-    cube_faces = np.concatenate([cube_faces, pad_ud], 1)
-
-    # Pad left right
-    pad_lr = np.zeros((6, cube_faces.shape[1], 2))
-    pad_lr[0, :, 0] = cube_faces[1, :, 0]
-    pad_lr[0, :, 1] = cube_faces[3, :, -1]
-    pad_lr[1, :, 0] = cube_faces[2, :, 0]
-    pad_lr[1, :, 1] = cube_faces[0, :, -1]
-    pad_lr[2, :, 0] = cube_faces[3, :, 0]
-    pad_lr[2, :, 1] = cube_faces[1, :, -1]
-    pad_lr[3, :, 0] = cube_faces[0, :, 0]
-    pad_lr[3, :, 1] = cube_faces[2, :, -1]
-    pad_lr[4, 1:-1, 0] = cube_faces[1, 0, ::-1]
-    pad_lr[4, 1:-1, 1] = cube_faces[3, 0, :]
-    pad_lr[5, 1:-1, 0] = cube_faces[1, -2, :]
-    pad_lr[5, 1:-1, 1] = cube_faces[3, -2, ::-1]
-    cube_faces = np.concatenate([cube_faces, pad_lr], 2)
-
-    return map_coordinates(cube_faces, [tp, coor_y, coor_x], order=order, mode='wrap')
 
 
 def cube_list2h(cube_list: list):
