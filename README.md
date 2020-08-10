@@ -8,6 +8,9 @@
 - No need for other dependencies except for `numpy` and `pytorch`.
 - Added functionality like rotation matrix and batched processing.
 
+_NOTE_:
+- `cube2equi` is _sort of_ working on `numpy`, but needs more work to improve the quality. Using other implementation that uses `scipy` or `cv2` is recommended.
+
 ## Installation:
 
 ```Bash
@@ -30,9 +33,7 @@ Common image sizes:
 - `2160s`: `3840x1920`
 - `2880s`: `5760x2880`
 
-## How to use:
-
-Initialize `equi2pers`:
+## Basic Usage:
 
 ```Python
 import numpy as np
@@ -57,6 +58,8 @@ rot = {
 pers_img = equi2pers(equi_img, rot, sampling_method="faster")
 ```
 
+The API for each module is pretty similar. Documentation is WIP.
+
 ### Coordinate System:
 
 Right-handed rule XYZ global coordinate system. `x-axis` faces forward and `z-axis` faces up.
@@ -69,6 +72,8 @@ See demo scripts under `scripts`.
 ## Grid Sampling
 
 In order to process equirectangular images fast, whether to crop perspective images from the equirectangular image, the library takes advantage from grid sampling techniques.
+There are some sampling techniques already implemented such as `scipy.ndimage.map_coordiantes` and `cv2.remap`.
+The goal of this project was reduce these dependencies.
 In this library we implement varieties of methods using `c++`, `numpy`, and `pytorch`.
 This part of the code needs `cuda` acceleration because grid sampling is parallizable.
 For `c++` and `pytorch`, I tried to take advantage of `cuda`.
