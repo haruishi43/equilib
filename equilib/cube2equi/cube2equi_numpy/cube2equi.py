@@ -97,8 +97,8 @@ class Cube2Equi(BaseCube2Equi):
         _dtype = np.float32
         theta = np.linspace(-np.pi, np.pi, num=w_out, dtype=_dtype)
         phi = np.linspace(np.pi, -np.pi, num=h_out, dtype=_dtype) / 2
-        coord = np.stack(np.meshgrid(theta, phi), axis=-1)
-        return coord
+        theta, phi = np.meshgrid(theta, phi)
+        return theta, phi
 
     def _run_single(
         self,
@@ -110,10 +110,7 @@ class Cube2Equi(BaseCube2Equi):
         """
         w_face = cubemap.shape[-2]
 
-        rot_coord = self.create_equi_grid(self.h_out, self.w_out)
-        theta, phi = np.split(rot_coord, 2, axis=-1)
-        theta = theta[..., 0]  # shape(h, w)
-        phi = phi[..., 0]  # shape(h, w)
+        theta, phi = self.create_equi_grid(self.h_out, self.w_out)
 
         # Get face id to each pixel: 0F 1R 2B 3L 4U 5D
         tp = self._equirect_facetype(self.h_out, self.w_out)

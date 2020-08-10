@@ -3,14 +3,15 @@
 import os.path as osp
 import time
 
-import numpy as np
 from PIL import Image
+import torch
+from torchvision import transforms
 
-from equilib.cube2equi import NumpyCube2Equi
+from equilib.cube2equi import TorchCube2Equi
 
 
 def run(cube, cube_format):
-    print(f"Input is {cube_format}:")
+    print(f"Input is {cube_format}")
     if isinstance(cube, list):
         c = cube[0]  # get the first of the batch
         if isinstance(c, list):
@@ -19,7 +20,7 @@ def run(cube, cube_format):
         elif isinstance(c, dict):
             assert cube_format == 'dict'
             print(f"one: {c['F'].shape}")
-        elif isinstance(c, np.ndarray):
+        elif isinstance(c, torch.Tensor):
             assert cube_format in ['horizon', 'dice', 'list']
             # can be single list
             if cube_format == 'list':
@@ -34,7 +35,7 @@ def run(cube, cube_format):
         print(f'one: {cube.shape}')
 
     tic = time.perf_counter()
-    cube2equi = NumpyCube2Equi(
+    cube2equi = TorchCube2Equi(
         w_out=2000,
         h_out=1000,
     )
@@ -45,7 +46,7 @@ def run(cube, cube_format):
     samples = cube2equi(
         cubemap=cube,
         cube_format=cube_format,
-        sampling_method="faster",
+        sampling_method="torch",
         mode="bilinear",
     )
     toc = time.perf_counter()
@@ -54,19 +55,28 @@ def run(cube, cube_format):
     return samples
 
 
-def test_numpy_single():
+def test_torch_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
 
-    cube_format = "dict"
+    cube_format = "horizon"
+    device = torch.device('cuda')
+
+    # Transforms
+    to_tensor = transforms.Compose([
+        transforms.ToTensor(),
+    ])
+
+    to_PIL = transforms.Compose([
+        transforms.ToPILImage(),
+    ])
 
     tic = time.perf_counter()
     if cube_format in ['horizon', 'dice']:
         img_path = osp.join(data_path, f'test_{cube_format}.jpg')
         cube = Image.open(img_path)
         cube = cube.convert('RGB')
-        cube = np.asarray(cube)
-        cube = np.transpose(cube, (2, 0, 1))
+        cube = to_tensor(cube).to(device)
     elif cube_format in ['dict', 'list']:
         img_paths = osp.join(data_path, "test_dict_{k}.jpg")
         cube = {}
@@ -75,8 +85,7 @@ def test_numpy_single():
                 img_paths.format(cube_format=cube_format, k=k)
             )
             face = face.convert('RGB')
-            face = np.asarray(face)
-            face = np.transpose(face, (2, 0, 1))
+            face = to_tensor(face).to(device)
             cube[k] = face
         if cube_format == 'list':
             cube = list(cube.values())
@@ -88,62 +97,11 @@ def test_numpy_single():
     equi = run(cube, cube_format=cube_format)
 
     tic = time.perf_counter()
-    equi = np.transpose(equi, (1, 2, 0))
-    equi_img = Image.fromarray(equi)
+    equi_img = to_PIL(equi.to('cpu'))
     out_path = osp.join(
         result_path,
-        f'cube2equi_numpy_single_{cube_format}.jpg'
+        f'cube2equi_torch_single_{cube_format}.jpg'
     )
     equi_img.save(out_path)
-    toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
-
-
-def test_numpy_batch():
-    data_path = osp.join('.', 'tests', 'data')
-    result_path = osp.join('.', 'tests', 'results')
-    batch_size = 4
-    cube_format = "dict"
-
-    tic = time.perf_counter()
-    batched_cube = []
-    for _ in range(batch_size):
-        if cube_format in ['horizon', 'dice']:
-            img_path = osp.join(data_path, f'test_{cube_format}.jpg')
-            cube = Image.open(img_path)
-            cube = cube.convert('RGB')
-            cube = np.asarray(cube)
-            cube = np.transpose(cube, (2, 0, 1))
-        elif cube_format in ['dict', 'list']:
-            img_paths = osp.join(data_path, "test_dict_{k}.jpg")
-            cube = {}
-            for k in ['F', 'R', 'B', 'L', 'U', 'D']:
-                face = Image.open(
-                    img_paths.format(cube_format=cube_format, k=k)
-                )
-                face = face.convert('RGB')
-                face = np.asarray(face)
-                face = np.transpose(face, (2, 0, 1))
-                cube[k] = face
-            if cube_format == 'list':
-                cube = list(cube.values())
-        else:
-            raise ValueError
-
-        batched_cube.append(cube)
-    toc = time.perf_counter()
-    print(f"Process Cube Image: {toc - tic:0.4f} seconds")
-
-    batched_equi = run(batched_cube, cube_format=cube_format)
-
-    tic = time.perf_counter()
-    for i, equi in enumerate(batched_equi):
-        equi = np.transpose(equi, (1, 2, 0))
-        equi_img = Image.fromarray(equi)
-        out_path = osp.join(
-            result_path,
-            f'cube2equi_numpy_batched_{cube_format}_{i}.jpg'
-        )
-        equi_img.save(out_path)
     toc = time.perf_counter()
     print(f"post process: {toc - tic:0.4f} seconds")

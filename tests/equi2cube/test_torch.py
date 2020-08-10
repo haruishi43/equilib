@@ -69,7 +69,7 @@ def test_torch_single():
         'yaw': 0,
     }
 
-    cube_format = "dict"
+    cube_format = "dice"
 
     cube = run(equi, rot, cube_format=cube_format)
 
