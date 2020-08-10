@@ -61,8 +61,6 @@ def cube_dice2h(cube_dice: np.ndarray):
         (cube_dice.shape[-3], w, w * 6),
         dtype=cube_dice.dtype
     )
-    print(cube_dice.shape)
-    print(cube_h.shape)
     for i, (sx, sy) in enumerate(sxy):
         face = cube_dice[:, sy*w:(sy+1)*w, sx*w:(sx+1)*w]
         cube_h[:, :, i*w:(i+1)*w] = face
