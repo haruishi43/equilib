@@ -59,7 +59,7 @@ def test_numpy_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
 
-    cube_format = "dice"
+    cube_format = "list"
 
     tic = time.perf_counter()
     if cube_format in ['horizon', 'dice']:
@@ -69,7 +69,7 @@ def test_numpy_single():
         cube = np.asarray(cube)
         cube = np.transpose(cube, (2, 0, 1))
     elif cube_format in ['dict', 'list']:
-        img_paths = osp.join(data_path, "test_{cube_format}_{k}.jpg")
+        img_paths = osp.join(data_path, "test_dict_{k}.jpg")
         cube = {}
         for k in ['F', 'R', 'B', 'L', 'U', 'D']:
             face = Image.open(
