@@ -1,5 +1,7 @@
 # equilib
 
+<img src=".img/equilib.png" alt="equilib" width="480"/>
+
 - A library for processing equirectangular image that runs on Python.
 - Developed using `numpy`, `pytorch`, and `c++`.
 - Able to use GPU for faster processing.
@@ -204,7 +206,7 @@ pytest tests
 
 ### TODO:
 
-- [ ] Keeping `.vscode` for my development
+- [x] Keeping `.vscode` for my development
 - [ ] Document better @ `README`
 
 
