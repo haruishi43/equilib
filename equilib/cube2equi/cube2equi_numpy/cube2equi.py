@@ -175,11 +175,19 @@ class Cube2Equi(BaseCube2Equi):
                 )
 
         # cube_faces = np.stack(np.split(cubemap, 6, -1), 0)
-        # tmp = cube_faces[4][:, -1, :].copy()
-        # cube_faces[4][:, -1, :] = cube_faces[5][:, 0, :]
-        # cube_faces[5][:, 0, :] = tmp
+
+        # Switcing top/bottom of U/D image
+        # tmp = cube_faces[5][:, :1, :].copy()
+        # cube_faces[5][:, :1, :] = cube_faces[4][:, :1, :]
+        # cube_faces[4][:, :1, :] = tmp
         # cubemap[:, :, w_face*4:w_face*5] = cube_faces[4]
         # cubemap[:, :, w_face*5:w_face*6] = cube_faces[5]
+
+        # Switching top/bottom of F image makes it worse
+        # tmp = cube_faces[0][:, :1, :].copy()
+        # cube_faces[0][:, :1, :] = cube_faces[0][:, -1:, :]
+        # cube_faces[0][:, -1:, :] = tmp
+        # cubemap[:, :, 0:w_face] = cube_faces[0]
 
         grid = np.stack((coor_y, coor_x), axis=0)
         grid_sample = getattr(
