@@ -6,6 +6,7 @@
 - Developed using `numpy`, `pytorch`, and `c++`.
 - Able to use GPU for faster processing.
 - No need for other dependencies except for `numpy` and `pytorch`.
+- Added functionality like rotation matrix and batched processing.
 
 ## Installation:
 
