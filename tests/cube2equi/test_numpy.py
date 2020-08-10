@@ -9,7 +9,7 @@ from PIL import Image
 from equilib.cube2equi import NumpyCube2Equi
 
 
-def run(cube, rot, cube_format):
+def run(cube, cube_format):
     print(f"Input is {cube_format}:")
     if isinstance(cube, list):
         c = cube[0]  # get the first of the batch
@@ -44,7 +44,6 @@ def run(cube, rot, cube_format):
     tic = time.perf_counter()
     samples = cube2equi(
         cubemap=cube,
-        rot=rot,
         cube_format=cube_format,
         sampling_method="faster",
         mode="bilinear",
@@ -59,7 +58,7 @@ def test_numpy_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
 
-    cube_format = "list"
+    cube_format = "horizon"
 
     tic = time.perf_counter()
     if cube_format in ['horizon', 'dice']:
@@ -84,13 +83,7 @@ def test_numpy_single():
     toc = time.perf_counter()
     print(f"Process Cube Image: {toc - tic:0.4f} seconds")
 
-    rot = {
-        'roll': np.pi/4,
-        'pitch': 0,
-        'yaw': 0,
-    }
-
-    equi = run(cube, rot, cube_format=cube_format)
+    equi = run(cube, cube_format=cube_format)
 
     tic = time.perf_counter()
     equi = np.transpose(equi, (1, 2, 0))

@@ -6,13 +6,37 @@ import numpy as np
 
 from equilib.grid_sample import numpy_func
 
-from .utils import (
-    create_rotation_matrix,
-    cube_list2h,
-    cube_dict2h,
-    cube_dice2h,
-)
 from ..base import BaseCube2Equi
+
+
+def cube_list2h(cube_list: list):
+    assert len(cube_list) == 6
+    assert sum(face.shape == cube_list[0].shape for face in cube_list) == 6
+    return np.concatenate(cube_list, axis=-1)
+
+
+def cube_dict2h(cube_dict: dict, face_k=['F', 'R', 'B', 'L', 'U', 'D']):
+    assert len(face_k) == 6
+    return cube_list2h([cube_dict[k] for k in face_k])
+
+
+def cube_dice2h(cube_dice: np.ndarray):
+    r"""dice to horizion
+    params:
+    cube_dice: (C, H, W)
+    """
+    # Order: F R B L U D
+    sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
+    w = cube_dice.shape[-2] // 3
+    assert cube_dice.shape[-2] == w * 3 and cube_dice.shape[-1] == w * 4
+    cube_h = np.zeros(
+        (cube_dice.shape[-3], w, w * 6),
+        dtype=cube_dice.dtype
+    )
+    for i, (sx, sy) in enumerate(sxy):
+        face = cube_dice[:, sy*w:(sy+1)*w, sx*w:(sx+1)*w]
+        cube_h[:, :, i*w:(i+1)*w] = face
+    return cube_h
 
 
 class Cube2Equi(BaseCube2Equi):
@@ -76,31 +100,9 @@ class Cube2Equi(BaseCube2Equi):
         coord = np.stack(np.meshgrid(theta, phi), axis=-1)
         return coord
 
-    def rotation_matrix(
-        self,
-        roll: float,
-        pitch: float,
-        yaw: float,
-    ) -> np.ndarray:
-        r"""Create Rotation Matrix
-
-        params:
-            roll: x-axis rotation float
-            pitch: y-axis rotation float
-            yaw: z-axis rotation float
-
-        return:
-            rotation matrix: numpy.ndarray
-
-        Global coordinates -> x-axis points forward, z-axis points upward
-        """
-        R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-        return R
-
     def run(
         self,
         cubemap: Union[np.ndarray, dict, list],
-        rot: Union[dict, List[dict]],  # FIXME: don't really need
         cube_format: str = 'dice',
         sampling_method: str = 'faster',
         mode: str = 'bilinear',
@@ -152,6 +154,18 @@ class Cube2Equi(BaseCube2Equi):
         # FIXME: there are stiching marks in the equirectangular image
         for i in range(6):
             mask = (tp == i)
+
+            if i == 4:
+                coor_x[mask] += 1
+                coor_x[mask] = np.where(
+                    coor_x[mask] > w_face-1, w_face-1, coor_x[mask])
+
+            if i == 5:
+                coor_x[mask] -= 1
+                coor_x[mask] = np.where(
+                    coor_x[mask] < 0, 0, coor_x[mask]
+                )
+
             coor_x[mask] = coor_x[mask] + w_face * i
 
             # exceptions
@@ -163,16 +177,27 @@ class Cube2Equi(BaseCube2Equi):
                 )
 
             if i < 4:
+                coor_y[mask] -= 1
+                coor_y[mask] = np.where(coor_y[mask] < 0, 0, coor_y[mask])
+
+            if i == 4:
+                coor_y[mask] -= 1
+                coor_y[mask] = np.where(coor_y[mask] < 0, 0, coor_y[mask])
+            if i == 5:
+                coor_y[mask] += 1
                 coor_y[mask] = np.where(
-                    coor_y[mask] == 0,
-                    w_face-1,
-                    coor_y[mask]
-                )
-                coor_y[mask] = np.where(
-                    coor_y[mask] == w_face - 1,
-                    0,
-                    coor_y[mask]
-                )
+                    coor_y[mask] > w_face-1, w_face-1, coor_y[mask])
+
+            # coor_y[mask] = np.where(
+            #     coor_y[mask] == 0,
+            #     fp_coor_y[mask],
+            #     coor_y[mask]
+            # )
+            # coor_y[mask] = np.where(
+            #     coor_y[mask] == w_face - 1,
+            #     fp_coor_y[mask],
+            #     coor_y[mask]
+            # )
 
         # cube_faces = np.stack(np.split(cubemap, 6, -1), 0)
 
