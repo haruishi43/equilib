@@ -215,6 +215,7 @@ pytest tests
 
 - [x] Keeping `.vscode` for my development
 - [ ] Document better @ `README`
+- [ ] Add graphs and statistics for speed improvements
 
 
 ## Acknowledgements:
