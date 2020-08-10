@@ -73,7 +73,8 @@ See demo scripts under `scripts`.
 
 In order to process equirectangular images fast, whether to crop perspective images from the equirectangular image, the library takes advantage from grid sampling techniques.
 There are some sampling techniques already implemented such as `scipy.ndimage.map_coordiantes` and `cv2.remap`.
-The goal of this project was reduce these dependencies.
+The goal of this project was reduce these dependencies and use `cuda` processing with `pytorch` and `c++` for a faster processing of equirectangular images.
+There was not many projects online for these purposes.
 In this library we implement varieties of methods using `c++`, `numpy`, and `pytorch`.
 This part of the code needs `cuda` acceleration because grid sampling is parallizable.
 For `c++` and `pytorch`, I tried to take advantage of `cuda`.
