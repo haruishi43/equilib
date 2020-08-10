@@ -59,7 +59,7 @@ def test_numpy_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
 
-    cube_format = "dict"
+    cube_format = "dice"
 
     tic = time.perf_counter()
     if cube_format in ['horizon', 'dice']:

@@ -100,7 +100,7 @@ class Cube2Equi(BaseCube2Equi):
     def run(
         self,
         cubemap: Union[np.ndarray, dict, list],
-        rot: Union[List[dict], dict],  # FIXME: don't really need
+        rot: Union[dict, List[dict]],  # FIXME: don't really need
         cube_format: str = 'dice',
         sampling_method: str = 'faster',
         mode: str = 'bilinear',
