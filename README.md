@@ -152,7 +152,7 @@ equirectangular to cubemap transformation
 class SomeEqui2Cube(BaseEqui2Cube):
     def __init__(self, w_face: int):
         ...
-    def run(self, equi, rot, **kwargs):
+    def run(self, equi, rot, cube_format, **kwargs):
         ...
 ```
 
@@ -184,9 +184,14 @@ cubemap to equirectangular transformation
 class SomeCube2Equi(BaseCube2Equi):
     def __init__(self, w_face: int):
         ...
-    def run(self, equi, rot, **kwargs):
+    def run(self, cubemap, cube_format, **kwargs):
         ...
 ```
+
+## TODO:
+
+- [x] Implement `numpy`
+- [ ] Implement `torch`
 
 ## Develop:
 
@@ -200,6 +205,7 @@ pytest tests
 ### TODO:
 
 - [ ] Keeping `.vscode` for my development
+- [ ] Document better @ `README`
 
 
 ## Acknowledgements:
