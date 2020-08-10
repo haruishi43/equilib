@@ -58,7 +58,7 @@ def test_numpy_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
 
-    cube_format = "horizon"
+    cube_format = "dict"
 
     tic = time.perf_counter()
     if cube_format in ['horizon', 'dice']:
@@ -80,6 +80,8 @@ def test_numpy_single():
             cube[k] = face
         if cube_format == 'list':
             cube = list(cube.values())
+    else:
+        raise ValueError
     toc = time.perf_counter()
     print(f"Process Cube Image: {toc - tic:0.4f} seconds")
 
@@ -97,68 +99,51 @@ def test_numpy_single():
     print(f"post process: {toc - tic:0.4f} seconds")
 
 
-# def test_numpy_batch():
-#     data_path = osp.join('.', 'tests', 'data')
-#     result_path = osp.join('.', 'tests', 'results')
-#     equi_path = osp.join(data_path, 'test.jpg')
-#     batch_size = 4
+def test_numpy_batch():
+    data_path = osp.join('.', 'tests', 'data')
+    result_path = osp.join('.', 'tests', 'results')
+    batch_size = 4
+    cube_format = "dict"
 
-#     tic = time.perf_counter()
-#     batched_equi = []
-#     for _ in range(batch_size):
-#         equi_img = Image.open(equi_path)
-#         # Sometimes images are RGBA
-#         equi_img = equi_img.convert('RGB')
-#         equi = np.asarray(equi_img)
-#         equi = np.transpose(equi, (2, 0, 1))
-#         batched_equi.append(equi)
-#     batched_equi = np.stack(batched_equi, axis=0)
-#     toc = time.perf_counter()
-#     print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
+    tic = time.perf_counter()
+    batched_cube = []
+    for _ in range(batch_size):
+        if cube_format in ['horizon', 'dice']:
+            img_path = osp.join(data_path, f'test_{cube_format}.jpg')
+            cube = Image.open(img_path)
+            cube = cube.convert('RGB')
+            cube = np.asarray(cube)
+            cube = np.transpose(cube, (2, 0, 1))
+        elif cube_format in ['dict', 'list']:
+            img_paths = osp.join(data_path, "test_dict_{k}.jpg")
+            cube = {}
+            for k in ['F', 'R', 'B', 'L', 'U', 'D']:
+                face = Image.open(
+                    img_paths.format(cube_format=cube_format, k=k)
+                )
+                face = face.convert('RGB')
+                face = np.asarray(face)
+                face = np.transpose(face, (2, 0, 1))
+                cube[k] = face
+            if cube_format == 'list':
+                cube = list(cube.values())
+        else:
+            raise ValueError
 
-#     batched_rot = []
-#     inc = np.pi/8
-#     for i in range(batch_size):
-#         rot = {
-#             'roll': 0,
-#             'pitch': i * inc,
-#             'yaw': 0,
-#         }
-#         batched_rot.append(rot)
+        batched_cube.append(cube)
+    toc = time.perf_counter()
+    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
 
-#     cube_format = "dice"
+    batched_equi = run(batched_cube, cube_format=cube_format)
 
-#     batched_cubes = run(batched_equi, batched_rot, cube_format=cube_format)
-
-#     tic = time.perf_counter()
-#     if cube_format == "dict":
-#         print('output: dict')
-#         for i in range(batch_size):
-#             for k, c in batched_cubes[i].items():
-#                 out = np.transpose(c, (1, 2, 0))
-#                 out_img = Image.fromarray(out)
-#                 out_path = osp.join(
-#                     result_path,
-#                     f'equi2cube_numpy_batched_dict_{i}_{k}.jpg')
-#                 out_img.save(out_path)
-#     elif cube_format == "list":
-#         print('output: list')
-#         for i in range(batch_size):
-#             for k, c in zip(['F', 'R', 'B', 'L', 'U', 'D'], batched_cubes[i]):
-#                 out = np.transpose(c, (1, 2, 0))
-#                 out_img = Image.fromarray(out)
-#                 out_path = osp.join(
-#                     result_path,
-#                     f'equi2cube_numpy_batched_list_{i}_{k}.jpg')
-#                 out_img.save(out_path)
-#     elif cube_format in ["horizon", "dice"]:
-#         print(f'output: {cube_format}')
-#         for i in range(batch_size):
-#             out = np.transpose(batched_cubes[i], (1, 2, 0))
-#             out_img = Image.fromarray(out)
-#             out_path = osp.join(
-#                 result_path,
-#                 f'equi2cube_numpy_batched_{cube_format}_{i}.jpg')
-#             out_img.save(out_path)
-#     toc = time.perf_counter()
-#     print(f"post process: {toc - tic:0.4f} seconds")
+    tic = time.perf_counter()
+    for i, equi in enumerate(batched_equi):
+        equi = np.transpose(equi, (1, 2, 0))
+        equi_img = Image.fromarray(equi)
+        out_path = osp.join(
+            result_path,
+            f'cube2equi_numpy_batched_{cube_format}_{i}.jpg'
+        )
+        equi_img.save(out_path)
+    toc = time.perf_counter()
+    print(f"post process: {toc - tic:0.4f} seconds")
