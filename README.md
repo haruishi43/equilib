@@ -22,7 +22,6 @@ pip install -r requirements.txt
 python setup.py develop
 ```
 
-
 ## What is a equirectangular image
 
 <img src="data/equi.jpg" alt="equi" width="480"/>
@@ -82,125 +81,6 @@ For `numpy`, I implemented `naive` and `faster` approaches for learning purposes
 Developing _faster_ `c++` and `pytorch` approaches are __WIP__.
 
 See [here](equilib/grid_sample/README.md) for more info on implementations.
-
-## equi2pers
-
-equirectangular to perspective transformation
-
-I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch`.
-
-```Python
-class SomeEqui2Pers(BaseEqui2Pers):
-    def __init__(self, w_pers, h_pers, fov_x):
-        ...
-    def run(self, equi, rot, **kwargs):
-        ...
-```
-
-### Numpy
-
-```Python
-from equilib.equi2pers import NumpyEqui2Pers
-```
-
-### PyTorch
-
-```Python
-from equilib.equi2pers import TorchEqui2Pers
-```
-
-### C++
-
-__WIP__
-
-### TODO:
-
-- [ ] Crop is slightly different `numpy` and `torch`
-- [ ] equi2Pers for `c++`/`cuda` is still messy, WIP
-- [ ] equi2Pers outputs for `numpy` and `torch` differs a little bit. Need to figure out why this happens. The outputs are the same regardless of the sampling method, so it must be the preprocessing (where the rotation matrix is set).
-
-## equi2equi
-
-equirectangular to equirectangular transformation
-
-I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch`.
-
-```Python
-class SomeEqui2Equi(BaseEqui2Equi):
-    def __init__(self, h_out: int, w_out: int):
-        ...
-    def run(self, src, rot, **kwargs):
-        ...
-```
-
-### Numpy
-
-```Python
-from equilib.equi2equi import NumpyEqui2Equi
-```
-
-### PyTorch
-
-```Python
-from equilib.equi2equi import TorchEqui2Equi
-```
-
-### TODO:
-
-- [x] Implement `numpy`
-- [x] Implement `torch`
-- [x] Implement `torch` with batches
-- [x] Fix rotation axis
-- [ ] Implement `c++` with `cuda`
-
-## equi2cube
-
-equirectangular to cubemap transformation
-
-```Python
-class SomeEqui2Cube(BaseEqui2Cube):
-    def __init__(self, w_face: int):
-        ...
-    def run(self, equi, rot, cube_format, **kwargs):
-        ...
-```
-
-### Numpy
-
-```Python
-from equilib.equi2cube import NumpyEqui2Cube
-```
-
-### PyTorch
-
-```Python
-from equilib.equi2cube import TorchEqui2Cube
-```
-
-### TODO:
-
-- [x] Implement `numpy`
-- [x] Implement `torch`
-- [x] Implement `torch` with batches
-- [x] Fix rotation axis
-- [ ] Implement `c++` with `cuda`
-
-## cube2equi
-
-cubemap to equirectangular transformation
-
-```Python
-class SomeCube2Equi(BaseCube2Equi):
-    def __init__(self, w_face: int):
-        ...
-    def run(self, cubemap, cube_format, **kwargs):
-        ...
-```
-
-## TODO:
-
-- [x] Implement `numpy`
-- [ ] Implement `torch`
 
 ## Develop:
 
