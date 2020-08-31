@@ -143,7 +143,7 @@ def grid_sample(
         #     x_d,
         #     mode=mode,
         # ).reshape(channels, batches, h_out, w_out).permute(1, 0, 2, 3)
-    
+
     elif mode == 'nearest':
         round_grid = torch.round(grid).type(torch.int64)
         y = round_grid[:, 0, :, :]

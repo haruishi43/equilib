@@ -14,7 +14,7 @@ from equilib.equi2pers import TorchEqui2Pers
 
 
 SAMPLING_METHOD = 'torch'
-SAMPLING_MODE = 'nearest'
+SAMPLING_MODE = 'bilinear'
 
 
 def run(equi, rot):
