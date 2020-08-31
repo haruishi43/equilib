@@ -21,22 +21,6 @@ def interp2d(
         f0 = linear_interp(q00, q01, dx, 1)
         f1 = linear_interp(q10, q11, dx, 1)
         return linear_interp(f0, f1, dy, 1)
-    elif mode == 'nearest':
-        pixels = dy.shape[0]
-        out = np.zeros_like(q00)
-        # FIXME: smarter, faster ways
-        for pixel in range(pixels):
-            if dx[pixel] < 0.5:
-                if dy[pixel] < 0.5:
-                    out[:, pixel] = q00[:, pixel]
-                else:
-                    out[:, pixel] = q11[:, pixel]
-            else:
-                if dy[pixel] < 0.5:
-                    out[:, pixel] = q01[:, pixel]
-                else:
-                    out[:, pixel] = q11[:, pixel]
-        return out
     else:
         raise NotImplementedError
 
@@ -67,44 +51,57 @@ def grid_sample(
     # Initialize output image
     out = np.zeros((channels, h_out, w_out), dtype=_dtype)
 
-    min_grid = np.floor(grid).astype(np.uint64)
-    # NOTE: uint8 convertion causes truncation, so use uint64
-    max_grid = min_grid + 1
-    d_grid = grid - min_grid
+    print(mode)
+    if mode == 'bilinear':
+        # NOTE: uint8 convertion causes truncation, so use uint64
+        min_grid = np.floor(grid).astype(np.uint64)
+        max_grid = min_grid + 1
+        d_grid = grid - min_grid
 
-    max_grid[0, :, :] = np.where(
-        max_grid[0, :, :] >= h_in,
-        max_grid[0, :, :] - h_in,
-        max_grid[0, :, :])
-    max_grid[1, :, :] = np.where(
-        max_grid[1, :, :] >= w_in,
-        max_grid[1, :, :] - w_in,
-        max_grid[1, :, :])
+        y_d = d_grid[0, :, :]
+        x_d = d_grid[1, :, :]
+        y_d = y_d.flatten()
+        x_d = x_d.flatten()
 
-    y_mins = min_grid[0, :, :]
-    x_mins = min_grid[1, :, :]
-    y_mins = y_mins.flatten()
-    x_mins = x_mins.flatten()
+        max_grid[0, :, :] = np.where(
+            max_grid[0, :, :] >= h_in,
+            max_grid[0, :, :] - h_in,
+            max_grid[0, :, :])
+        max_grid[1, :, :] = np.where(
+            max_grid[1, :, :] >= w_in,
+            max_grid[1, :, :] - w_in,
+            max_grid[1, :, :])
 
-    y_maxs = max_grid[0, :, :]
-    x_maxs = max_grid[1, :, :]
-    y_maxs = y_maxs.flatten()
-    x_maxs = x_maxs.flatten()
+        y_mins = min_grid[0, :, :]
+        x_mins = min_grid[1, :, :]
+        y_mins = y_mins.flatten()
+        x_mins = x_mins.flatten()
 
-    y_d = d_grid[0, :, :]
-    x_d = d_grid[1, :, :]
-    y_d = y_d.flatten()
-    x_d = x_d.flatten()
+        y_maxs = max_grid[0, :, :]
+        x_maxs = max_grid[1, :, :]
+        y_maxs = y_maxs.flatten()
+        x_maxs = x_maxs.flatten()
 
-    Q00 = img[:, y_mins, x_mins]
-    Q10 = img[:, y_maxs, x_mins]
-    Q01 = img[:, y_mins, x_maxs]
-    Q11 = img[:, y_maxs, x_maxs]
+        Q00 = img[:, y_mins, x_mins]
+        Q10 = img[:, y_maxs, x_mins]
+        Q01 = img[:, y_mins, x_maxs]
+        Q11 = img[:, y_maxs, x_maxs]
+        out = interp2d(
+            [Q00, Q10, Q01, Q11],
+            y_d, x_d,
+            mode=mode)
 
-    out = interp2d(
-        [Q00, Q10, Q01, Q11],
-        y_d, x_d,
-        mode='bilinear')
+    elif mode == 'nearest':
+        round_grid = np.rint(grid).astype(np.uint64)
+        y = round_grid[0, :, :]
+        x = round_grid[1, :, :]
+        y = y.flatten()
+        x = x.flatten()
+
+        out = img[:, y, x]
+
+    else:
+        raise ValueError(f'{mode} is not available')
 
     out = np.where(out >= _max, _max, out)
     out = np.where(out < _min, _min, out)

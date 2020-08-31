@@ -13,6 +13,10 @@ from torchvision import transforms
 from equilib.equi2pers import TorchEqui2Pers
 
 
+SAMPLING_METHOD = 'torch'
+SAMPLING_MODE = 'nearest'
+
+
 def run(equi, rot):
     h_equi, w_equi = equi.shape[-2:]
     print('equirectangular image size:')
@@ -36,8 +40,8 @@ def run(equi, rot):
     sample = equi2pers(
         equi=equi,
         rot=rot,
-        sampling_method="torch",
-        mode="bilinear",
+        sampling_method=SAMPLING_METHOD,
+        mode=SAMPLING_MODE,
         debug=True,
     )
     toc = time.perf_counter()

@@ -8,6 +8,9 @@ from PIL import Image
 
 from equilib.equi2pers import NumpyEqui2Pers
 
+SAMPLING_METHOD = 'faster'
+SAMPLING_MODE = 'bilinear'
+
 
 def run(equi, rot):
     h_equi, w_equi = equi.shape[-2:]
@@ -32,8 +35,8 @@ def run(equi, rot):
     sample = equi2pers(
         equi=equi,
         rot=rot,
-        sampling_method="faster",
-        mode="bilinear",
+        sampling_method=SAMPLING_METHOD,
+        mode=SAMPLING_MODE,
     )
     toc = time.perf_counter()
     print(f"Sample: {toc - tic:0.4f} seconds")
