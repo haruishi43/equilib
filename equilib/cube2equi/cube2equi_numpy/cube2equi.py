@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Dict, List, Union
+from typing import Union
 
 import numpy as np
 

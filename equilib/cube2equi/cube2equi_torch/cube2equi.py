@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 
-from typing import Dict, List, Union
+from typing import Union
 
 import math
 import torch
 
 from equilib.grid_sample import torch_func
 
-from .utils import (
-    get_device,
-    sizeof
-)
+from .utils import get_device
 from ..base import BaseCube2Equi
 
 
@@ -75,7 +72,7 @@ class Cube2Equi(BaseCube2Equi):
         """
         tp = torch.roll(
             torch.arange(4)
-            .repeat(w // 4)
+            .repeat_interleave(w // 4)  # same as np.repeat
             .unsqueeze(0)
             .transpose(0, 1)
             .repeat(1, h).view(-1, h)
@@ -136,61 +133,38 @@ class Cube2Equi(BaseCube2Equi):
         coor_x = torch.zeros((self.h_out, self.w_out))
         coor_y = torch.zeros((self.h_out, self.w_out))
 
-        for i in range(4):
+        for i in range(6):
             mask = (tp == i)
-            coor_x[mask] = 0.5 * torch.tan(theta[mask] - math.pi * i / 2)
-            coor_y[mask] = -0.5 * torch.tan(
-                phi[mask]) / torch.cos(theta[mask] - math.pi * i / 2)
 
-        mask = (tp == 4)
-        c = 0.5 * torch.tan(math.pi / 2 - phi[mask])
-        coor_x[mask] = c * torch.sin(theta[mask])
-        coor_y[mask] = c * torch.cos(theta[mask])
+            if i < 4:
+                coor_x[mask] = 0.5 * torch.tan(
+                    theta[mask] - math.pi * i / 2
+                )
+                coor_y[mask] = -0.5 * torch.tan(phi[mask]) \
+                    / torch.cos(theta[mask] - math.pi * i / 2)
+            elif i == 4:
+                c = 0.5 * torch.tan(math.pi / 2 - phi[mask])
+                coor_x[mask] = c * torch.sin(theta[mask])
+                coor_y[mask] = c * torch.cos(theta[mask])
+            elif i == 5:
+                c = 0.5 * torch.tan(math.pi / 2 - torch.abs(phi[mask]))
+                coor_x[mask] = c * torch.sin(theta[mask])
+                coor_y[mask] = -c * torch.cos(theta[mask])
 
         # Final renormalize
-        coor_x = (torch.clamp(coor_x, -0.5, 0.5) + 0.5) * w_face
-        coor_y = (torch.clamp(coor_y, -0.5, 0.5) + 0.5) * w_face
+        coor_x = torch.clamp(
+            torch.clamp(coor_x + 0.5, 0, 1) * w_face,
+            0, w_face - 1)
+        coor_y = torch.clamp(
+            torch.clamp(coor_y + 0.5, 0, 1) * w_face,
+            0, w_face - 1)
 
         coor_x = torch.where(coor_x >= w_face, coor_x - w_face, coor_x)
         coor_y = torch.where(coor_y >= w_face, coor_y - w_face, coor_y)
 
-        # FIXME: there are stiching marks in the equirectangular image
-        # zero = torch.tensor(0, dtype=torch.float)
-        # edge = torch.tensor(w_face-1, dtype=torch.float)
-        # for i in range(6):
-        #     mask = (tp == i)
-        #     if i == 4:
-        #         coor_x[mask] += 1
-        #         coor_x[mask] = torch.where(
-        #             coor_x[mask] > edge, edge, coor_x[mask])
-
-        #     if i == 5:
-        #         coor_x[mask] -= 1
-        #         coor_x[mask] = torch.where(
-        #             coor_x[mask] < zero, zero, coor_x[mask]
-        #         )
-
-        #     coor_x[mask] = coor_x[mask] + w_face * i
-
-        #     # exceptions
-        #     if i == 3:
-        #         coor_x[mask] = torch.where(
-        #             coor_x[mask] >= w_face*(i+1) - 1,
-        #             zero,
-        #             coor_x[mask]
-        #         )
-
-        #     if i < 4:
-        #         coor_y[mask] -= 1
-        #         coor_y[mask] = torch.where(coor_y[mask] < zero, zero, coor_y[mask])
-
-        #     if i == 4:
-        #         coor_y[mask] -= 1
-        #         coor_y[mask] = torch.where(coor_y[mask] < zero, zero, coor_y[mask])
-        #     if i == 5:
-        #         coor_y[mask] += 1
-        #         coor_y[mask] = torch.where(
-        #             coor_y[mask] > edge, edge, coor_y[mask])
+        for i in range(6):
+            mask = (tp == i)
+            coor_x[mask] = coor_x[mask] + w_face * i
 
         grid = torch.stack((coor_y, coor_x), axis=0).to(device)
         grid_sample = getattr(
