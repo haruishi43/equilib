@@ -8,7 +8,7 @@ def grid_sample(
     img: torch.Tensor,
     grid: torch.Tensor,
     mode: str = "bilinear",
-    **kwargs,
+    **kwargs
 ) -> torch.Tensor:
     r"""Torch Grid Sample (default)
         Uses `torch.nn.functional.grid_sample`

@@ -9,7 +9,7 @@ class BaseEqui2Pers(object):
         w_pers: int,
         h_pers: int,
         fov_x: float,
-        **kwargs,
+        **kwargs
     ) -> None:
         r"""
         params:

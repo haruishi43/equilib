@@ -10,7 +10,7 @@ class BaseEqui2Equi(object):
         self,
         h_out: Optional[int] = None,
         w_out: Optional[int] = None,
-        **kwargs,
+        **kwargs
     ) -> None:
         r""""""
         self.h_out = h_out
