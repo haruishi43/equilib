@@ -68,6 +68,7 @@ class Cube2Equi(BaseCube2Equi):
     def _equirect_facetype(self, h: int, w: int):
         r"""0F 1R 2B 3L 4U 5D
         """
+
         tp = np.roll(
             np.arange(4).repeat(w // 4)[None, :].repeat(h, 0),
             3 * w // 8,
@@ -77,12 +78,16 @@ class Cube2Equi(BaseCube2Equi):
         # Prepare ceil mask
         mask = np.zeros((h, w // 4), np.bool)
         idx = np.linspace(-np.pi, np.pi, w // 4) / 4
-        idx = h // 2 - np.round(np.arctan(np.cos(idx)) * h / np.pi).astype(int)
+        idx = h // 2 - \
+            np.around(
+                np.arctan(np.cos(idx)) * h / np.pi
+            ).astype(int)
         for i, j in enumerate(idx):
             mask[:j, i] = 1
         mask = np.roll(
             np.concatenate(
-                [mask] * 4, 1
+                [mask] * 4,
+                1
             ),
             3 * w // 8,
             1
@@ -114,94 +119,37 @@ class Cube2Equi(BaseCube2Equi):
 
         # Get face id to each pixel: 0F 1R 2B 3L 4U 5D
         tp = self._equirect_facetype(self.h_out, self.w_out)
+
+        # xy coordinate map
         coor_x = np.zeros((self.h_out, self.w_out))
         coor_y = np.zeros((self.h_out, self.w_out))
 
-        for i in range(4):
-            mask = (tp == i)
-            coor_x[mask] = 0.5 * np.tan(theta[mask] - np.pi * i / 2)
-            coor_y[mask] = -0.5 * np.tan(
-                phi[mask]) / np.cos(theta[mask] - np.pi * i / 2)
-
-        mask = (tp == 4)
-        c = 0.5 * np.tan(np.pi / 2 - phi[mask])
-        coor_x[mask] = c * np.sin(theta[mask])
-        coor_y[mask] = c * np.cos(theta[mask])
-
-        mask = (tp == 5)
-        c = 0.5 * np.tan(np.pi / 2 - np.abs(phi[mask]))
-        coor_x[mask] = c * np.sin(theta[mask])
-        coor_y[mask] = -c * np.cos(theta[mask])
-
-        # Final renormalize
-        coor_x = (np.clip(coor_x, -0.5, 0.5) + 0.5) * w_face
-        coor_y = (np.clip(coor_y, -0.5, 0.5) + 0.5) * w_face
-
-        coor_x = np.where(coor_x >= w_face, coor_x - w_face, coor_x)
-        coor_y = np.where(coor_y >= w_face, coor_y - w_face, coor_y)
-
-        # FIXME: there are stiching marks in the equirectangular image
         for i in range(6):
             mask = (tp == i)
 
-            if i == 4:
-                coor_x[mask] += 1
-                coor_x[mask] = np.where(
-                    coor_x[mask] > w_face-1, w_face-1, coor_x[mask])
-
-            if i == 5:
-                coor_x[mask] -= 1
-                coor_x[mask] = np.where(
-                    coor_x[mask] < 0, 0, coor_x[mask]
-                )
-
-            coor_x[mask] = coor_x[mask] + w_face * i
-
-            # exceptions
-            if i == 3:
-                coor_x[mask] = np.where(
-                    coor_x[mask] >= w_face*(i+1) - 1,
-                    0,
-                    coor_x[mask]
-                )
-
             if i < 4:
-                coor_y[mask] -= 1
-                coor_y[mask] = np.where(coor_y[mask] < 0, 0, coor_y[mask])
+                coor_x[mask] = 0.5 * np.tan(
+                    theta[mask] - np.pi * i / 2
+                )
+                coor_y[mask] = -0.5 * np.tan(phi[mask]) \
+                    / np.cos(theta[mask] - np.pi * i / 2)
+            elif i == 4:
+                c = 0.5 * np.tan(np.pi / 2 - phi[mask])
+                coor_x[mask] = c * np.sin(theta[mask])
+                coor_y[mask] = c * np.cos(theta[mask])
+            elif i == 5:
+                c = 0.5 * np.tan(np.pi / 2 - np.abs(phi[mask]))
+                coor_x[mask] = c * np.sin(theta[mask])
+                coor_y[mask] = -c * np.cos(theta[mask])
 
-            if i == 4:
-                coor_y[mask] -= 1
-                coor_y[mask] = np.where(coor_y[mask] < 0, 0, coor_y[mask])
-            if i == 5:
-                coor_y[mask] += 1
-                coor_y[mask] = np.where(
-                    coor_y[mask] > w_face-1, w_face-1, coor_y[mask])
+        # Final renormalize
+        coor_x = np.clip(np.clip(coor_x + 0.5, 0, 1) * w_face, 0, w_face - 1)
+        coor_y = np.clip(np.clip(coor_y + 0.5, 0, 1) * w_face, 0, w_face - 1)
 
-            # coor_y[mask] = np.where(
-            #     coor_y[mask] == 0,
-            #     fp_coor_y[mask],
-            #     coor_y[mask]
-            # )
-            # coor_y[mask] = np.where(
-            #     coor_y[mask] == w_face - 1,
-            #     fp_coor_y[mask],
-            #     coor_y[mask]
-            # )
-
-        # cube_faces = np.stack(np.split(cubemap, 6, -1), 0)
-
-        # Switcing top/bottom of U/D image
-        # tmp = cube_faces[5][:, :1, :].copy()
-        # cube_faces[5][:, :1, :] = cube_faces[4][:, :1, :]
-        # cube_faces[4][:, :1, :] = tmp
-        # cubemap[:, :, w_face*4:w_face*5] = cube_faces[4]
-        # cubemap[:, :, w_face*5:w_face*6] = cube_faces[5]
-
-        # Switching top/bottom of F image makes it worse
-        # tmp = cube_faces[0][:, :1, :].copy()
-        # cube_faces[0][:, :1, :] = cube_faces[0][:, -1:, :]
-        # cube_faces[0][:, -1:, :] = tmp
-        # cubemap[:, :, 0:w_face] = cube_faces[0]
+        # change x axis of the x coordinate map
+        for i in range(6):
+            mask = (tp == i)
+            coor_x[mask] = coor_x[mask] + w_face * i
 
         grid = np.stack((coor_y, coor_x), axis=0)
         grid_sample = getattr(

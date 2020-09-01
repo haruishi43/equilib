@@ -51,7 +51,6 @@ def grid_sample(
     # Initialize output image
     out = np.zeros((channels, h_out, w_out), dtype=_dtype)
 
-    print(mode)
     if mode == 'bilinear':
         # NOTE: uint8 convertion causes truncation, so use uint64
         min_grid = np.floor(grid).astype(np.uint64)

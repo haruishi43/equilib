@@ -8,6 +8,9 @@ from PIL import Image
 
 from equilib.cube2equi import NumpyCube2Equi
 
+OUT_W = 4000
+OUT_H = 2000
+
 
 def run(cube, cube_format):
     print(f"Input is {cube_format}:")
@@ -35,8 +38,8 @@ def run(cube, cube_format):
 
     tic = time.perf_counter()
     cube2equi = NumpyCube2Equi(
-        w_out=2000,
-        h_out=1000,
+        w_out=OUT_W,
+        h_out=OUT_H,
     )
     toc = time.perf_counter()
     print(f"Init Cube2Equi: {toc - tic:0.4f} seconds")
