@@ -1,7 +1,3 @@
-echo "Running isort"
-isort -y -sp .
-echo "Done"
-
 echo "Running black"
 black .
 echo "Done"

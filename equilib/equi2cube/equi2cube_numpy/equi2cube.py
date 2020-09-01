@@ -104,8 +104,12 @@ class Equi2Cube(BaseEqui2Cube):
             mode: str (default = "bilinear")
         """
 
-        assert len(equi.shape) == 3, f"ERR: {equi.shape} is not a valid array"
-        assert equi.shape[0] == 3, f"ERR: got {equi.shape[0]} for channel size"
+        assert len(equi.shape) == 3, "ERR: {} is not a valid array".format(
+            equi.shape
+        )
+        assert equi.shape[0] == 3, "ERR: got {} for channel size".format(
+            equi.shape[0]
+        )
         h_equi, w_equi = equi.shape[-2:]
 
         xyz = self.create_xyz(self.w_face)
@@ -137,7 +141,7 @@ class Equi2Cube(BaseEqui2Cube):
         elif cube_format == "dice":
             cubemap = cube_h2dice(cubemap)
         else:
-            raise NotImplementedError(f"{cube_format} is not supported")
+            raise NotImplementedError("{} is not supported".format(cube_format))
 
         return cubemap
 
@@ -164,14 +168,16 @@ class Equi2Cube(BaseEqui2Cube):
         if _return_type == np.ndarray:
             assert (
                 _original_shape_len >= 3
-            ), f"ERR: got {_original_shape_len} for input equi"
+            ), "ERR: got {} for input equi".format(_original_shape_len)
             if _original_shape_len == 3:
                 equi = equi[np.newaxis, :, :, :]
                 rot = [rot]
 
         assert len(equi) == len(
             rot
-        ), f"ERR: length of input and rot differs {len(equi)} vs {len(rot)}"
+        ), "ERR: length of input and rot differs {} vs {}".format(
+            len(equi), len(rot)
+        )
 
         cubemaps = []
         for e, r in zip(equi, rot):

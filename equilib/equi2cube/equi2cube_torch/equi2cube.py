@@ -118,12 +118,12 @@ class Equi2Cube(BaseEqui2Cube):
 
         assert type(equi) == torch.Tensor, (
             "ERR: input equi expected to be `torch.Tensor` "
-            f"but got {type(equi)}"
+            "but got {}".format(type(equi))
         )
         _original_shape_len = len(equi.shape)
-        assert (
-            _original_shape_len >= 3
-        ), f"ERR: got {_original_shape_len} for input equi"
+        assert _original_shape_len >= 3, "ERR: got {} for input equi".format(
+            _original_shape_len
+        )
         if _original_shape_len == 3:
             equi = equi.unsqueeze(dim=0)
             rot = [rot]

@@ -29,7 +29,7 @@ def run(equi, rot, cube_format):
         w_face=w_face,
     )
     toc = time.perf_counter()
-    print(f"Init Equi2Cube: {toc - tic:0.4f} seconds")
+    print("Init Equi2Cube: {:0.4f} seconds".format(toc - tic))
 
     tic = time.perf_counter()
     samples = equi2cube(
@@ -40,7 +40,7 @@ def run(equi, rot, cube_format):
         mode="bilinear",
     )
     toc = time.perf_counter()
-    print(f"Sample: {toc - tic:0.4f} seconds")
+    print("Sample: {:0.4f} seconds".format(toc - tic))
 
     return samples
 
@@ -71,7 +71,7 @@ def test_torch_single():
     equi = to_tensor(equi_img)
     equi = equi.to(device)
     toc = time.perf_counter()
-    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
+    print("Process Equirectangular Image: {:0.4f} seconds".format(toc - tic))
 
     rot = {
         "roll": 0,
@@ -90,7 +90,7 @@ def test_torch_single():
             out = c.to("cpu")
             out_img = to_PIL(out)
             out_path = osp.join(
-                result_path, f"equi2cube_torch_single_dict_{k}.jpg"
+                result_path, "equi2cube_torch_single_dict_{}.jpg".format(k)
             )
             out_img.save(out_path)
     elif cube_format == "list":
@@ -99,19 +99,19 @@ def test_torch_single():
             out = c.to("cpu")
             out_img = to_PIL(out)
             out_path = osp.join(
-                result_path, f"equi2cube_torch_single_list_{k}.jpg"
+                result_path, "equi2cube_torch_single_list_{}.jpg".format(k)
             )
             out_img.save(out_path)
     elif cube_format in ["horizon", "dice"]:
-        print(f"output: {cube_format}")
+        print("output: {}".format(cube_format))
         out = cube.to("cpu")
         out_img = to_PIL(out)
         out_path = osp.join(
-            result_path, f"equi2cube_torch_single_{cube_format}.jpg"
+            result_path, "equi2cube_torch_single_{}.jpg".format(cube_format)
         )
         out_img.save(out_path)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))
 
 
 def test_torch_batch():
@@ -144,7 +144,7 @@ def test_torch_batch():
     batched_equi = torch.stack(batched_equi, axis=0)
     batched_equi = batched_equi.to(device)
     toc = time.perf_counter()
-    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
+    print("Process Equirectangular Image: {:0.4f} seconds".format(toc - tic))
 
     batched_rot = []
     inc = np.pi / 8
@@ -168,7 +168,8 @@ def test_torch_batch():
                 out = c.to("cpu")
                 out_img = to_PIL(out)
                 out_path = osp.join(
-                    result_path, f"equi2cube_torch_batched_dict_{i}_{k}.jpg"
+                    result_path,
+                    "equi2cube_torch_batched_dict_{}_{}.jpg".format(i, k),
                 )
                 out_img.save(out_path)
     elif cube_format == "list":
@@ -178,17 +179,19 @@ def test_torch_batch():
                 out = c.to("cpu")
                 out_img = to_PIL(out)
                 out_path = osp.join(
-                    result_path, f"equi2cube_torch_batched_list_{i}_{k}.jpg"
+                    result_path,
+                    "equi2cube_torch_batched_list_{}_{}.jpg".format(i, k),
                 )
                 out_img.save(out_path)
     elif cube_format in ["horizon", "dice"]:
-        print(f"output: {cube_format}")
+        print("output: {}".format(cube_format))
         for i in range(batch_size):
             out = batched_cubes[i].to("cpu")
             out_img = to_PIL(out)
             out_path = osp.join(
-                result_path, f"equi2cube_torch_batched_{cube_format}_{i}.jpg"
+                result_path,
+                "equi2cube_torch_batched_{}_{}.jpg".format(cube_format, i),
             )
             out_img.save(out_path)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))

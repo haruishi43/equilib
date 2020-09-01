@@ -160,7 +160,7 @@ class Cube2Equi(BaseCube2Equi):
                 # could be single or batched
                 assert (
                     len(cubemap.shape) >= 3
-                ), f"input shape {cubemap.shape} is not valid"
+                ), "input shape {} is not valid".format(cubemap.shape)
                 if len(cubemap.shape) == 4:
                     # batch
                     cubemap = [

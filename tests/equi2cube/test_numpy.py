@@ -24,7 +24,7 @@ def run(equi, rot, cube_format):
         w_face=w_face,
     )
     toc = time.perf_counter()
-    print(f"Init Equi2Cube: {toc - tic:0.4f} seconds")
+    print("Init Equi2Cube: {:0.4f} seconds".format(toc - tic))
 
     tic = time.perf_counter()
     samples = equi2cube(
@@ -35,7 +35,7 @@ def run(equi, rot, cube_format):
         mode="bilinear",
     )
     toc = time.perf_counter()
-    print(f"Sample: {toc - tic:0.4f} seconds")
+    print("Sample: {:0.4f} seconds".format(toc - tic))
 
     return samples
 
@@ -52,7 +52,7 @@ def test_numpy_single():
     equi = np.asarray(equi_img)
     equi = np.transpose(equi, (2, 0, 1))
     toc = time.perf_counter()
-    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
+    print("Process Equirectangular Image: {:0.4f} seconds".format(toc - tic))
 
     rot = {
         "roll": np.pi / 4,
@@ -71,7 +71,7 @@ def test_numpy_single():
             out = np.transpose(c, (1, 2, 0))
             out_img = Image.fromarray(out)
             out_path = osp.join(
-                result_path, f"equi2cube_numpy_single_dict_{k}.jpg"
+                result_path, "equi2cube_numpy_single_dict_{}.jpg".format(k)
             )
             out_img.save(out_path)
     elif cube_format == "list":
@@ -80,19 +80,19 @@ def test_numpy_single():
             out = np.transpose(c, (1, 2, 0))
             out_img = Image.fromarray(out)
             out_path = osp.join(
-                result_path, f"equi2cube_numpy_single_list_{k}.jpg"
+                result_path, "equi2cube_numpy_single_list_{}.jpg".format(k)
             )
             out_img.save(out_path)
     elif cube_format in ["horizon", "dice"]:
-        print(f"output: {cube_format}")
+        print("output: {}".format(cube_format))
         out = np.transpose(cube, (1, 2, 0))
         out_img = Image.fromarray(out)
         out_path = osp.join(
-            result_path, f"equi2cube_numpy_single_{cube_format}.jpg"
+            result_path, "equi2cube_numpy_single_{}.jpg".format(cube_format)
         )
         out_img.save(out_path)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))
 
 
 def test_numpy_batch():
@@ -112,7 +112,7 @@ def test_numpy_batch():
         batched_equi.append(equi)
     batched_equi = np.stack(batched_equi, axis=0)
     toc = time.perf_counter()
-    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
+    print("Process Equirectangular Image: {:0.4f} seconds".format(toc - tic))
 
     batched_rot = []
     inc = np.pi / 8
@@ -136,7 +136,8 @@ def test_numpy_batch():
                 out = np.transpose(c, (1, 2, 0))
                 out_img = Image.fromarray(out)
                 out_path = osp.join(
-                    result_path, f"equi2cube_numpy_batched_dict_{i}_{k}.jpg"
+                    result_path,
+                    "equi2cube_numpy_batched_dict_{}_{}.jpg".format(i, k),
                 )
                 out_img.save(out_path)
     elif cube_format == "list":
@@ -146,17 +147,19 @@ def test_numpy_batch():
                 out = np.transpose(c, (1, 2, 0))
                 out_img = Image.fromarray(out)
                 out_path = osp.join(
-                    result_path, f"equi2cube_numpy_batched_list_{i}_{k}.jpg"
+                    result_path,
+                    "equi2cube_numpy_batched_list_{}_{}.jpg".format(i, k),
                 )
                 out_img.save(out_path)
     elif cube_format in ["horizon", "dice"]:
-        print(f"output: {cube_format}")
+        print("output: {}".format(cube_format))
         for i in range(batch_size):
             out = np.transpose(batched_cubes[i], (1, 2, 0))
             out_img = Image.fromarray(out)
             out_path = osp.join(
-                result_path, f"equi2cube_numpy_batched_{cube_format}_{i}.jpg"
+                result_path,
+                "equi2cube_numpy_batched_{}_{}.jpg".format(cube_format, i),
             )
             out_img.save(out_path)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))

@@ -30,7 +30,7 @@ def run(equi, rot):
         h_out=HEIGHT,
     )
     toc = time.perf_counter()
-    print(f"Init Equi2Equi: {toc - tic:0.4f} seconds")
+    print("Init Equi2Equi: {:0.4f} seconds".format(toc - tic))
 
     tic = time.perf_counter()
     sample = equi2equi(
@@ -41,7 +41,7 @@ def run(equi, rot):
         debug=True,
     )
     toc = time.perf_counter()
-    print(f"Sample: {toc - tic:0.4f} seconds")
+    print("Sample: {:0.4f} seconds".format(toc - tic))
 
     return sample
 
@@ -72,7 +72,7 @@ def test_torch_single():
     equi = to_tensor(equi_img)
     equi = equi.to(device)
     toc = time.perf_counter()
-    print(f"Process equirectangular image: {toc - tic:0.4f} seconds")
+    print("Process equirectangular image: {:0.4f} seconds".format(toc - tic))
 
     rot = {
         "roll": 0.0,
@@ -86,7 +86,7 @@ def test_torch_single():
     out = sample.to("cpu")
     out_img = to_PIL(out)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))
 
     out_path = osp.join(result_path, "equi2equi_torch_single.jpg")
     out_img.save(out_path)
@@ -123,7 +123,7 @@ def test_torch_batch():
     batched_equi = torch.stack(batched_equi, dim=0)
     batched_equi = batched_equi.to(device)
     toc = time.perf_counter()
-    print(f"Process equirectangular image: {toc - tic:0.4f} seconds")
+    print("Process equirectangular image: {:0.4f} seconds".format(toc - tic))
 
     batched_rot = []
     inc = np.pi / 8
@@ -144,8 +144,10 @@ def test_torch_batch():
         out_img = to_PIL(sample)
         batched_out.append(out_img)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))
 
     for i, out in enumerate(batched_out):
-        out_path = osp.join(result_path, f"equi2equi_torch_batch_{i}.jpg")
+        out_path = osp.join(
+            result_path, "equi2equi_torch_batch_{}.jpg".format(i)
+        )
         out.save(out_path)

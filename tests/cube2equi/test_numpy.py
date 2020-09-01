@@ -14,28 +14,28 @@ OUT_H = 240
 
 
 def run(cube, cube_format):
-    print(f"Input is {cube_format}:")
+    print("Input is {}:".format(cube_format))
     if isinstance(cube, list):
         c = cube[0]  # get the first of the batch
         if isinstance(c, list):
             assert cube_format == "list"
-            print(f"one: {c[0].shape}")
+            print("one: {}".format(c[0].shape))
         elif isinstance(c, dict):
             assert cube_format == "dict"
-            print(f"one: {c['F'].shape}")
+            print("one: {}".format(c["F"].shape))
         elif isinstance(c, np.ndarray):
             assert cube_format in ["horizon", "dice", "list"]
             # can be single list
             if cube_format == "list":
-                print(f"one: {c.shape}")
+                print("one: {}".format(c.shape))
             else:
-                print(f"one: {c[0].shape}")
+                print("one: {}".format(c[0].shape))
     elif isinstance(cube, dict):
         assert cube_format == "dict"
-        print(f"one: {cube['F'].shape}")
+        print("one: {}".format(cube["F"].shape))
     else:
         assert cube_format in ["horizon", "dice"]
-        print(f"one: {cube.shape}")
+        print("one: {}".format(cube.shape))
 
     tic = time.perf_counter()
     cube2equi = NumpyCube2Equi(
@@ -43,7 +43,7 @@ def run(cube, cube_format):
         h_out=OUT_H,
     )
     toc = time.perf_counter()
-    print(f"Init Cube2Equi: {toc - tic:0.4f} seconds")
+    print("Init Cube2Equi: {:0.4f} seconds".format(toc - tic))
 
     tic = time.perf_counter()
     samples = cube2equi(
@@ -53,7 +53,7 @@ def run(cube, cube_format):
         mode="bilinear",
     )
     toc = time.perf_counter()
-    print(f"Sample: {toc - tic:0.4f} seconds")
+    print("Sample: {:0.4f} seconds".format(toc - tic))
 
     return samples
 
@@ -66,7 +66,7 @@ def test_numpy_single():
 
     tic = time.perf_counter()
     if cube_format in ["horizon", "dice"]:
-        img_path = osp.join(data_path, f"test_{cube_format}.jpg")
+        img_path = osp.join(data_path, "test_{}.jpg".format(cube_format))
         cube = Image.open(img_path)
         cube = cube.convert("RGB")
         cube = np.asarray(cube)
@@ -85,7 +85,7 @@ def test_numpy_single():
     else:
         raise ValueError
     toc = time.perf_counter()
-    print(f"Process Cube Image: {toc - tic:0.4f} seconds")
+    print("Process Cube Image: {:0.4f} seconds".format(toc - tic))
 
     equi = run(cube, cube_format=cube_format)
 
@@ -93,11 +93,11 @@ def test_numpy_single():
     equi = np.transpose(equi, (1, 2, 0))
     equi_img = Image.fromarray(equi)
     out_path = osp.join(
-        result_path, f"cube2equi_numpy_single_{cube_format}.jpg"
+        result_path, "cube2equi_numpy_single_{}.jpg".format(cube_format)
     )
     equi_img.save(out_path)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))
 
 
 def test_numpy_batch():
@@ -110,7 +110,7 @@ def test_numpy_batch():
     batched_cube = []
     for _ in range(batch_size):
         if cube_format in ["horizon", "dice"]:
-            img_path = osp.join(data_path, f"test_{cube_format}.jpg")
+            img_path = osp.join(data_path, "test_{}.jpg".format(cube_format))
             cube = Image.open(img_path)
             cube = cube.convert("RGB")
             cube = np.asarray(cube)
@@ -133,7 +133,7 @@ def test_numpy_batch():
 
         batched_cube.append(cube)
     toc = time.perf_counter()
-    print(f"Process Cube Image: {toc - tic:0.4f} seconds")
+    print("Process Cube Image: {:0.4f} seconds".format(toc - tic))
 
     batched_equi = run(batched_cube, cube_format=cube_format)
 
@@ -142,8 +142,9 @@ def test_numpy_batch():
         equi = np.transpose(equi, (1, 2, 0))
         equi_img = Image.fromarray(equi)
         out_path = osp.join(
-            result_path, f"cube2equi_numpy_batched_{cube_format}_{i}.jpg"
+            result_path,
+            "cube2equi_numpy_batched_{}_{}.jpg".format(cube_format, i),
         )
         equi_img.save(out_path)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))

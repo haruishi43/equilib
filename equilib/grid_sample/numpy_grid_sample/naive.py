@@ -45,7 +45,7 @@ def grid_sample(
         _max = 1.0
         _dtype = np.float64
     else:
-        raise ValueError(f"{img.dtype} is not supported")
+        raise ValueError("{} is not supported".format(img.dtype))
 
     # Initialize output image
     out = np.zeros((channels, h_out, w_out), dtype=_dtype)
@@ -89,7 +89,7 @@ def grid_sample(
                 out[:, y, x] = img[:, _y, _x]
 
     else:
-        raise ValueError(f"{mode} is not available")
+        raise ValueError("{} is not available".format(mode))
 
     out = np.where(out >= _max, _max, out)
     out = np.where(out < _min, _min, out)

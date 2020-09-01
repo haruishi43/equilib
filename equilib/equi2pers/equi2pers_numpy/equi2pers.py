@@ -174,14 +174,16 @@ class Equi2Pers(BaseEqui2Pers):
         if _return_type == np.ndarray:
             assert (
                 _original_shape_len >= 3
-            ), f"ERR: got {_original_shape_len} for input equi"
+            ), "ERR: got {} for input equi".format(_original_shape_len)
             if _original_shape_len == 3:
                 equi = equi[np.newaxis, :, :, :]
                 rot = [rot]
 
         assert len(equi) == len(
             rot
-        ), f"ERR: length of equi and rot differs {len(equi)} vs {len(rot)}"
+        ), "ERR: length of equi and rot differs {} vs {}".format(
+            len(equi), len(rot)
+        )
 
         samples = []
         for p, r in zip(equi, rot):

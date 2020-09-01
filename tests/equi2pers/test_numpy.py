@@ -29,7 +29,7 @@ def run(equi, rot):
         fov_x=FOV,
     )
     toc = time.perf_counter()
-    print(f"Init Equi2Pers: {toc - tic:0.4f} seconds")
+    print("Init Equi2Pers: {:0.4f} seconds".format(toc - tic))
 
     tic = time.perf_counter()
     sample = equi2pers(
@@ -39,7 +39,7 @@ def run(equi, rot):
         mode=SAMPLING_MODE,
     )
     toc = time.perf_counter()
-    print(f"Sample: {toc - tic:0.4f} seconds")
+    print("Sample: {:0.4f} seconds".format(toc - tic))
 
     return sample
 
@@ -56,7 +56,7 @@ def test_numpy_single():
     equi = np.asarray(equi_img)
     equi = np.transpose(equi, (2, 0, 1))
     toc = time.perf_counter()
-    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
+    print("Process Equirectangular Image: {:0.4f} seconds".format(toc - tic))
 
     rot = {
         "roll": 0,
@@ -70,7 +70,7 @@ def test_numpy_single():
     pers = np.transpose(sample, (1, 2, 0))
     pers_img = Image.fromarray(pers)
     toc = time.perf_counter()
-    print(f"post process: {toc - tic:0.4f} seconds")
+    print("post process: {:0.4f} seconds".format(toc - tic))
 
     pers_path = osp.join(result_path, "equi2pers_numpy_single.jpg")
     pers_img.save(pers_path)
@@ -93,7 +93,7 @@ def test_numpy_batch():
         batched_equi.append(equi)
     batched_equi = np.stack(batched_equi, axis=0)
     toc = time.perf_counter()
-    print(f"Process Equirectangular Image: {toc - tic:0.4f} seconds")
+    print("Process Equirectangular Image: {:0.4f} seconds".format(toc - tic))
 
     batched_rot = []
     inc = np.pi / 8
@@ -117,5 +117,7 @@ def test_numpy_batch():
     toc = time.perf_counter()
 
     for i, pers in enumerate(batched_pers):
-        pers_path = osp.join(result_path, f"equi2pers_numpy_batch_{i}.jpg")
+        pers_path = osp.join(
+            result_path, "equi2pers_numpy_batch_{}.jpg".format(i)
+        )
         pers.save(pers_path)

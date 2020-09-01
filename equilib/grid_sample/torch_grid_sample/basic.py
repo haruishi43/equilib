@@ -51,9 +51,10 @@ def grid_sample(
     batches, channels, h_in, w_in = img.shape
     _, _, h_out, w_out = grid.shape
 
-    assert get_device(img) == get_device(grid), (
-        "ERR: img and grid does not match device "
-        f"{get_device(img)} vs {get_device(grid)}"
+    assert get_device(img) == get_device(
+        grid
+    ), "ERR: img and grid does not match device " "{} vs {}".format(
+        get_device(img), get_device(grid)
     )
     device = get_device(img)
 
@@ -153,7 +154,7 @@ def grid_sample(
             out[b] = img[b][: y[b], x[b]]
 
     else:
-        raise ValueError(f"{mode} is not available")
+        raise ValueError("{} is not available".format(mode))
 
     out = torch.where(out >= _max, _max, out)
     out = torch.where(out < _min, _min, out)
