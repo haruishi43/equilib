@@ -1,28 +1,21 @@
 #!/usr/bin/env python3
 
+import math
 from typing import Dict, List, Tuple, Union
 
-import math
 import torch
 
 from equilib.grid_sample import torch_func
 
-from .utils import (
-    create_rotation_matrix,
-    deg2rad,
-    get_device,
-    sizeof,
-)
 from ..base import BaseEqui2Pers
+from .utils import create_rotation_matrix, deg2rad, get_device, sizeof
 
 __all___ = ["Equi2Pers"]
 
 
 class Equi2Pers(BaseEqui2Pers):
-
     def __init__(self, **kwargs):
-        r"""Equi2Pers PyTorch
-        """
+        r"""Equi2Pers PyTorch"""
         super().__init__(**kwargs)
 
         # initialize intrinsic matrix
@@ -40,13 +33,16 @@ class Equi2Pers(BaseEqui2Pers):
         NOTE:
             ref: http://ksimek.github.io/2013/08/13/intrinsic/
         """
-        if not hasattr(self, '_K'):
+        if not hasattr(self, "_K"):
             fov_x = torch.tensor(self.fov_x)
             f = self.w_pers / (2 * torch.tan(deg2rad(fov_x) / 2))
-            self._K = torch.tensor([
-                [f, self.skew, self.w_pers/2],
-                [0., f, self.h_pers/2],
-                [0., 0., 1.]])
+            self._K = torch.tensor(
+                [
+                    [f, self.skew, self.w_pers / 2],
+                    [0.0, f, self.h_pers / 2],
+                    [0.0, 0.0, 1.0],
+                ]
+            )
         return self._K
 
     @property
@@ -56,8 +52,8 @@ class Equi2Pers(BaseEqui2Pers):
         return:
             coordinate: torch.Tensor
         """
-        _xs = torch.linspace(0, self.w_pers-1, self.w_pers)
-        _ys = torch.linspace(0, self.h_pers-1, self.h_pers)
+        _xs = torch.linspace(0, self.w_pers - 1, self.w_pers)
+        _ys = torch.linspace(0, self.h_pers - 1, self.h_pers)
         # NOTE: https://github.com/pytorch/pytorch/issues/15301
         # Torch meshgrid behaves differently than numpy
         ys, xs = torch.meshgrid([_ys, _xs])
@@ -67,19 +63,22 @@ class Equi2Pers(BaseEqui2Pers):
 
     @property
     def global2camera_rotation_matrix(self) -> torch.Tensor:
-        r"""Default rotation that changes global to camera coordinates
-        """
-        if not hasattr(self, '_g2c_rot'):
-            R_XY = torch.tensor([  # X <-> Y
-                [0., 1., 0.],
-                [1., 0., 0.],
-                [0., 0., 1.],
-                ])
-            R_YZ = torch.tensor([  # Y <-> Z
-                [1., 0., 0.],
-                [0., 0., 1.],
-                [0., 1., 0.],
-            ])
+        r"""Default rotation that changes global to camera coordinates"""
+        if not hasattr(self, "_g2c_rot"):
+            R_XY = torch.tensor(
+                [  # X <-> Y
+                    [0.0, 1.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                ]
+            )
+            R_YZ = torch.tensor(
+                [  # Y <-> Z
+                    [1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                    [0.0, 1.0, 0.0],
+                ]
+            )
             self._g2c_rot = R_XY @ R_YZ
         return self._g2c_rot
 
@@ -117,7 +116,7 @@ class Equi2Pers(BaseEqui2Pers):
         rot: Union[Dict[str, float], List[Dict[str, float]]],
         sampling_method: str = "torch",
         mode: str = "bilinear",
-        debug: bool = False
+        debug: bool = False,
     ) -> torch.Tensor:
         r"""Run Equi2Pers
 
@@ -133,21 +132,21 @@ class Equi2Pers(BaseEqui2Pers):
         NOTE: input can be batched [B, C, H, W] or single [C, H, W]
         NOTE: when using batches, the output types match
         """
-        assert type(equi) == torch.Tensor, \
-            (
-                "ERR: input equi expected to be `torch.Tensor` "
-                f"but got {type(equi)}"
-            )
+        assert type(equi) == torch.Tensor, (
+            "ERR: input equi expected to be `torch.Tensor` "
+            f"but got {type(equi)}"
+        )
         _original_shape_len = len(equi.shape)
-        assert _original_shape_len >= 3, \
-            f"ERR: got {_original_shape_len} for input equi"
+        assert (
+            _original_shape_len >= 3
+        ), f"ERR: got {_original_shape_len} for input equi"
         if _original_shape_len == 3:
             equi = equi.unsqueeze(dim=0)
             rot = [rot]
 
         h_equi, w_equi = self._get_img_size(equi)
         if debug:
-            print("equi: ", sizeof(equi)/10e6, "mb")
+            print("equi: ", sizeof(equi) / 10e6, "mb")
 
         # get device
         device = get_device(equi)
@@ -180,11 +179,7 @@ class Equi2Pers(BaseEqui2Pers):
         grid = torch.stack((uj, ui), axis=-3)  # 3rd to last
 
         # grid sample
-        grid_sample = getattr(
-            torch_func,
-            sampling_method,
-            "torch"
-        )
+        grid_sample = getattr(torch_func, sampling_method, "torch")
         samples = grid_sample(equi, grid, mode=mode)
 
         if _original_shape_len == 3:

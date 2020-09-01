@@ -9,15 +9,16 @@ from .interp import linear_interp
 
 def interp2d(
     Q: List[np.ndarray],
-    dy: np.ndarray, dx: np.ndarray,
-    mode: str = 'bilinear',
+    dy: np.ndarray,
+    dx: np.ndarray,
+    mode: str = "bilinear",
 ) -> np.ndarray:
     r"""Naive Interpolation
-        (y,x): target pixel
-        mode: interpolation mode
+    (y,x): target pixel
+    mode: interpolation mode
     """
     q00, q10, q01, q11 = Q
-    if mode == 'bilinear':
+    if mode == "bilinear":
         f0 = linear_interp(q00, q01, dx, 1)
         f1 = linear_interp(q10, q11, dx, 1)
         return linear_interp(f0, f1, dy, 1)
@@ -28,10 +29,9 @@ def interp2d(
 def grid_sample(
     img: np.ndarray,
     grid: np.ndarray,
-    mode: str = 'bilinear',
+    mode: str = "bilinear",
 ) -> np.ndarray:
-    r"""Numpy Grid Sample
-    """
+    r"""Numpy Grid Sample"""
     channels, h_in, w_in = img.shape
     _, h_out, w_out = grid.shape
 
@@ -51,7 +51,7 @@ def grid_sample(
     # Initialize output image
     out = np.zeros((channels, h_out, w_out), dtype=_dtype)
 
-    if mode == 'bilinear':
+    if mode == "bilinear":
         # NOTE: uint8 convertion causes truncation, so use uint64
         min_grid = np.floor(grid).astype(np.uint64)
         max_grid = min_grid + 1
@@ -65,11 +65,13 @@ def grid_sample(
         max_grid[0, :, :] = np.where(
             max_grid[0, :, :] >= h_in,
             max_grid[0, :, :] - h_in,
-            max_grid[0, :, :])
+            max_grid[0, :, :],
+        )
         max_grid[1, :, :] = np.where(
             max_grid[1, :, :] >= w_in,
             max_grid[1, :, :] - w_in,
-            max_grid[1, :, :])
+            max_grid[1, :, :],
+        )
 
         y_mins = min_grid[0, :, :]
         x_mins = min_grid[1, :, :]
@@ -85,12 +87,9 @@ def grid_sample(
         Q10 = img[:, y_maxs, x_mins]
         Q01 = img[:, y_mins, x_maxs]
         Q11 = img[:, y_maxs, x_maxs]
-        out = interp2d(
-            [Q00, Q10, Q01, Q11],
-            y_d, x_d,
-            mode=mode)
+        out = interp2d([Q00, Q10, Q01, Q11], y_d, x_d, mode=mode)
 
-    elif mode == 'nearest':
+    elif mode == "nearest":
         round_grid = np.rint(grid).astype(np.uint64)
         y = round_grid[0, :, :]
         x = round_grid[1, :, :]
@@ -100,7 +99,7 @@ def grid_sample(
         out = img[:, y, x]
 
     else:
-        raise ValueError(f'{mode} is not available')
+        raise ValueError(f"{mode} is not available")
 
     out = np.where(out >= _max, _max, out)
     out = np.where(out < _min, _min, out)

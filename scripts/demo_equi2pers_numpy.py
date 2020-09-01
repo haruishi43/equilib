@@ -1,33 +1,34 @@
 #!/usr/bin/env python3
 
-from typing import Union
-
 import argparse
 import os.path as osp
 import time
+from typing import Union
 
 import cv2
+
 import matplotlib
 import matplotlib.pyplot as plt
+
 import numpy as np
+
 from PIL import Image
 
 from equilib.equi2pers import NumpyEqui2Pers
 
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 
 
 def preprocess(
     img: Union[np.ndarray, Image.Image],
     is_cv2: bool = False,
 ) -> np.ndarray:
-    r"""Preprocesses image
-    """
+    r"""Preprocesses image"""
     if isinstance(img, np.ndarray) and is_cv2:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     if isinstance(img, Image.Image):
         # Sometimes images are RGBA
-        img = img.convert('RGB')
+        img = img.convert("RGB")
         img = np.asarray(img)
     assert len(img.shape) == 3, "input must be dim=3"
     assert img.shape[-1] == 3, "input must be HWC"
@@ -39,10 +40,9 @@ def test_video(
     path: str,
     h_pers: int = 480,
     w_pers: int = 640,
-    fov_x: float = 90.,
+    fov_x: float = 90.0,
 ) -> None:
-    r"""Test video
-    """
+    r"""Test video"""
     # Rotation:
     pi = np.pi
     inc = pi / 180
@@ -51,22 +51,18 @@ def test_video(
     yaw = 0
 
     # Initialize equi2pers
-    equi2pers = NumpyEqui2Pers(
-        w_pers=w_pers,
-        h_pers=h_pers,
-        fov_x=fov_x
-    )
+    equi2pers = NumpyEqui2Pers(w_pers=w_pers, h_pers=h_pers, fov_x=fov_x)
 
     times = []
     cap = cv2.VideoCapture(path)
 
-    while(cap.isOpened()):
+    while cap.isOpened():
         ret, frame = cap.read()
 
         rot = {
-            'roll': roll,
-            'pitch': pitch,
-            'yaw': yaw,
+            "roll": roll,
+            "pitch": pitch,
+            "yaw": yaw,
         }
 
         if not ret:
@@ -89,24 +85,24 @@ def test_video(
 
         # change direction `wasd` or exit with `q`
         k = cv2.waitKey(1)
-        if k == ord('q'):
+        if k == ord("q"):
             break
-        if k == ord('w'):
+        if k == ord("w"):
             roll -= inc
-        if k == ord('s'):
+        if k == ord("s"):
             roll += inc
-        if k == ord('a'):
+        if k == ord("a"):
             pitch += inc
-        if k == ord('d'):
+        if k == ord("d"):
             pitch -= inc
 
     cap.release()
     cv2.destroyAllWindows()
 
-    print(sum(times)/len(times))
+    print(sum(times) / len(times))
     x_axis = [i for i in range(len(times))]
     plt.plot(x_axis, times)
-    save_path = osp.join('./results', 'times_equi2pers_numpy_video.png')
+    save_path = osp.join("./results", "times_equi2pers_numpy_video.png")
     plt.savefig(save_path)
 
 
@@ -114,23 +110,18 @@ def test_image(
     path: str,
     h_pers: int = 480,
     w_pers: int = 640,
-    fov_x: float = 90.,
+    fov_x: float = 90.0,
 ) -> None:
-    r"""Test single image
-    """
+    r"""Test single image"""
     # Rotation:
     rot = {
-        'roll': 0,  #
-        'pitch': np.pi/4,  # vertical
-        'yaw': np.pi/4,  # horizontal
+        "roll": 0,  #
+        "pitch": np.pi / 4,  # vertical
+        "yaw": np.pi / 4,  # horizontal
     }
 
     # Initialize equi2pers
-    equi2pers = NumpyEqui2Pers(
-        w_pers=w_pers,
-        h_pers=h_pers,
-        fov_x=fov_x
-    )
+    equi2pers = NumpyEqui2Pers(w_pers=w_pers, h_pers=h_pers, fov_x=fov_x)
 
     # Open Image
     equi_img = Image.open(path)
@@ -146,14 +137,14 @@ def test_image(
     pers_img = np.transpose(pers_img, (1, 2, 0))
     pers_img = Image.fromarray(pers_img)
 
-    pers_path = osp.join('./results', 'output_equi2pers_numpy_image.jpg')
+    pers_path = osp.join("./results", "output_equi2pers_numpy_image.jpg")
     pers_img.save(pers_path)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video', action='store_true')
-    parser.add_argument('--data', nargs='?', default=None, type=str)
+    parser.add_argument("--video", action="store_true")
+    parser.add_argument("--data", nargs="?", default=None, type=str)
     args = parser.parse_args()
 
     # Variables:

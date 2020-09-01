@@ -6,17 +6,15 @@ import numpy as np
 
 from equilib.grid_sample import numpy_func
 
-from .utils import create_rotation_matrix
 from ..base import BaseEqui2Pers
+from .utils import create_rotation_matrix
 
 __all__ = ["Equi2Pers"]
 
 
 class Equi2Pers(BaseEqui2Pers):
-
     def __init__(self, **kwargs):
-        r"""Equi2Pers Numpy
-        """
+        r"""Equi2Pers Numpy"""
         super().__init__(**kwargs)
 
         # initialize intrinsic matrix
@@ -34,14 +32,17 @@ class Equi2Pers(BaseEqui2Pers):
         NOTE:
             ref: http://ksimek.github.io/2013/08/13/intrinsic/
         """
-        if not hasattr(self, '_K'):
+        if not hasattr(self, "_K"):
             # perspective projection (focal length)
-            f = self.w_pers / (2. * np.tan(np.radians(self.fov_x) / 2.))
+            f = self.w_pers / (2.0 * np.tan(np.radians(self.fov_x) / 2.0))
             # transform between camera frame and pixel coordinates
-            self._K = np.array([
-                [f, self.skew, self.w_pers/2],
-                [0., f, self.h_pers/2],
-                [0., 0., 1.]])
+            self._K = np.array(
+                [
+                    [f, self.skew, self.w_pers / 2],
+                    [0.0, f, self.h_pers / 2],
+                    [0.0, 0.0, 1.0],
+                ]
+            )
         return self._K
 
     @property
@@ -51,8 +52,8 @@ class Equi2Pers(BaseEqui2Pers):
         return:
             coordinate: numpy.ndarray
         """
-        _xs = np.linspace(0, self.w_pers-1, self.w_pers)
-        _ys = np.linspace(0, self.h_pers-1, self.h_pers)
+        _xs = np.linspace(0, self.w_pers - 1, self.w_pers)
+        _ys = np.linspace(0, self.h_pers - 1, self.h_pers)
         xs, ys = np.meshgrid(_xs, _ys)
         zs = np.ones_like(xs)
         coord = np.stack((xs, ys, zs), axis=2)
@@ -60,19 +61,22 @@ class Equi2Pers(BaseEqui2Pers):
 
     @property
     def global2camera_rotation_matrix(self) -> np.ndarray:
-        r"""Default rotation that changes global to camera coordinates
-        """
-        if not hasattr(self, '_g2c_rot'):
-            R_XY = np.array([  # X <-> Y
-                [0., 1., 0.],
-                [1., 0., 0.],
-                [0., 0., 1.],
-                ])
-            R_YZ = np.array([  # Y <-> Z
-                [1., 0., 0.],
-                [0., 0., 1.],
-                [0., 1., 0.],
-            ])
+        r"""Default rotation that changes global to camera coordinates"""
+        if not hasattr(self, "_g2c_rot"):
+            R_XY = np.array(
+                [  # X <-> Y
+                    [0.0, 1.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                ]
+            )
+            R_YZ = np.array(
+                [  # Y <-> Z
+                    [1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                    [0.0, 1.0, 0.0],
+                ]
+            )
             self._g2c_rot = R_XY @ R_YZ
 
         return self._g2c_rot
@@ -140,11 +144,7 @@ class Equi2Pers(BaseEqui2Pers):
         grid = np.stack((uj, ui), axis=0)
 
         # grid sample
-        grid_sample = getattr(
-            numpy_func,
-            sampling_method,
-            "faster"
-        )
+        grid_sample = getattr(numpy_func, sampling_method, "faster")
         sampled = grid_sample(equi, grid, mode=mode)
         return sampled
 
@@ -172,14 +172,16 @@ class Equi2Pers(BaseEqui2Pers):
         _return_type = type(equi)
         _original_shape_len = len(equi.shape)
         if _return_type == np.ndarray:
-            assert _original_shape_len >= 3, \
-                f"ERR: got {_original_shape_len} for input equi"
+            assert (
+                _original_shape_len >= 3
+            ), f"ERR: got {_original_shape_len} for input equi"
             if _original_shape_len == 3:
                 equi = equi[np.newaxis, :, :, :]
                 rot = [rot]
 
-        assert len(equi) == len(rot), \
-            f"ERR: length of equi and rot differs {len(equi)} vs {len(rot)}"
+        assert len(equi) == len(
+            rot
+        ), f"ERR: length of equi and rot differs {len(equi)} vs {len(rot)}"
 
         samples = []
         for p, r in zip(equi, rot):
@@ -191,9 +193,7 @@ class Equi2Pers(BaseEqui2Pers):
                 sampling_method=sampling_method,
                 mode=mode,
             )
-            samples.append(
-                sample
-            )
+            samples.append(sample)
 
         if _return_type == np.ndarray:
             samples = np.stack(samples, axis=0)

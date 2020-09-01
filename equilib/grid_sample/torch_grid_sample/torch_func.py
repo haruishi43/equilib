@@ -7,7 +7,7 @@ import torch.nn.functional as F
 def grid_sample(
     img: torch.Tensor,
     grid: torch.Tensor,
-    mode: str = 'bilinear',
+    mode: str = "bilinear",
     **kwargs,
 ) -> torch.Tensor:
     r"""Torch Grid Sample (default)
@@ -37,11 +37,11 @@ def grid_sample(
     # normalize grid -1~1
     grid = grid.permute(0, 2, 3, 1)
     norm_uj = torch.clamp(
-        2 * (grid[:, :, :, 0] - h_img/2 + 0.5) / h_img,
-        -1, 1)
+        2 * (grid[:, :, :, 0] - h_img / 2 + 0.5) / h_img, -1, 1
+    )
     norm_ui = torch.clamp(
-        2 * (grid[:, :, :, 1] - w_img/2 + 0.5) / w_img,
-        -1, 1)
+        2 * (grid[:, :, :, 1] - w_img / 2 + 0.5) / w_img, -1, 1
+    )
     # grid sample takes xy, not (height, width)
     grid[:, :, :, 0] = norm_ui
     grid[:, :, :, 1] = norm_uj

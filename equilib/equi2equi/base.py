@@ -4,8 +4,7 @@ from typing import Optional
 
 
 class BaseEqui2Equi(object):
-    r"""Base Equi2Equi class to build off of
-    """
+    r"""Base Equi2Equi class to build off of"""
 
     def __init__(
         self,
@@ -13,8 +12,7 @@ class BaseEqui2Equi(object):
         w_out: Optional[int] = None,
         **kwargs,
     ) -> None:
-        r"""
-        """
+        r""""""
         self.h_out = h_out
         self.w_out = w_out
 

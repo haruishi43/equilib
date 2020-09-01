@@ -2,15 +2,9 @@
 
 
 class BaseCube2Equi(object):
-    r"""Base Cube2Equi class to build off of
-    """
+    r"""Base Cube2Equi class to build off of"""
 
-    def __init__(
-        self,
-        w_out: int,
-        h_out: int,
-        **kwargs
-    ) -> None:
+    def __init__(self, w_out: int, h_out: int, **kwargs) -> None:
         r"""
         params:
             w_out, h_out: equirectangular image size

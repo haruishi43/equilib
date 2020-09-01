@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 
+import math
 from typing import Dict, List, Union
 
-import math
 import torch
 
 from equilib.grid_sample import torch_func
 
+from ..base import BaseEqui2Cube
 from .utils import (
     create_rotation_matrix,
     cube_h2dice,
     cube_h2dict,
     cube_h2list,
-    sizeof,
     get_device,
+    sizeof,
 )
-from ..base import BaseEqui2Cube
 
 
 class Equi2Cube(BaseEqui2Cube):
-    r"""Equi2Cube PyTorch
-    """
+    r"""Equi2Cube PyTorch"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -44,8 +44,7 @@ class Equi2Cube(BaseEqui2Cube):
         return R
 
     def create_xyz(self, w_face: int):
-        r"""xyz coordinates of the faces of the cube
-        """
+        r"""xyz coordinates of the faces of the cube"""
         _dtype = torch.float32
         out = torch.zeros((w_face, w_face * 6, 3), dtype=_dtype)
         rng = torch.linspace(-0.5, 0.5, w_face, dtype=_dtype)
@@ -54,46 +53,45 @@ class Equi2Cube(BaseEqui2Cube):
         # Torch meshgrid behaves differently than numpy
 
         # Front face (x = 0.5)
-        out[:, 0*w_face:1*w_face, [2, 1]] = torch.stack(
+        out[:, 0 * w_face : 1 * w_face, [2, 1]] = torch.stack(
             torch.meshgrid([-rng, rng]), -1
         )
-        out[:, 0*w_face:1*w_face, 0] = 0.5
+        out[:, 0 * w_face : 1 * w_face, 0] = 0.5
 
         # Right face (y = -0.5)
-        out[:, 1*w_face:2*w_face, [2, 0]] = torch.stack(
+        out[:, 1 * w_face : 2 * w_face, [2, 0]] = torch.stack(
             torch.meshgrid([-rng, -rng]), -1
         )
-        out[:, 1*w_face:2*w_face, 1] = 0.5
+        out[:, 1 * w_face : 2 * w_face, 1] = 0.5
 
         # Back face (x = -0.5)
-        out[:, 2*w_face:3*w_face, [2, 1]] = torch.stack(
+        out[:, 2 * w_face : 3 * w_face, [2, 1]] = torch.stack(
             torch.meshgrid([-rng, -rng]), -1
         )
-        out[:, 2*w_face:3*w_face, 0] = -0.5
+        out[:, 2 * w_face : 3 * w_face, 0] = -0.5
 
         # Left face (y = 0.5)
-        out[:, 3*w_face:4*w_face, [2, 0]] = torch.stack(
+        out[:, 3 * w_face : 4 * w_face, [2, 0]] = torch.stack(
             torch.meshgrid([-rng, rng]), -1
         )
-        out[:, 3*w_face:4*w_face, 1] = -0.5
+        out[:, 3 * w_face : 4 * w_face, 1] = -0.5
 
         # Up face (z = 0.5)
-        out[:, 4*w_face:5*w_face, [0, 1]] = torch.stack(
+        out[:, 4 * w_face : 5 * w_face, [0, 1]] = torch.stack(
             torch.meshgrid([rng, rng]), -1
         )
-        out[:, 4*w_face:5*w_face, 2] = 0.5
+        out[:, 4 * w_face : 5 * w_face, 2] = 0.5
 
         # Down face (z = -0.5)
-        out[:, 5*w_face:6*w_face, [0, 1]] = torch.stack(
+        out[:, 5 * w_face : 6 * w_face, [0, 1]] = torch.stack(
             torch.meshgrid([-rng, rng]), -1
         )
-        out[:, 5*w_face:6*w_face, 2] = -0.5
+        out[:, 5 * w_face : 6 * w_face, 2] = -0.5
 
         return out
 
     def xyz2rot(self, xyz):
-        r"""Return rotation (theta, phi) from xyz
-        """
+        r"""Return rotation (theta, phi) from xyz"""
         norm = torch.norm(xyz, dim=-1)
         phi = torch.asin(xyz[:, :, :, 2] / norm)
         theta = torch.atan2(xyz[:, :, :, 1], xyz[:, :, :, 0])
@@ -104,7 +102,7 @@ class Equi2Cube(BaseEqui2Cube):
         equi: Union[torch.Tensor, List[torch.Tensor]],
         rot: Union[Dict[str, float], List[Dict[str, float]]],
         cube_format: str,
-        sampling_method: str = 'torch',
+        sampling_method: str = "torch",
         mode: str = "bilinear",
         debug: bool = False,
     ) -> Union[torch.Tensor, List[torch.Tensor], List[dict]]:
@@ -118,21 +116,21 @@ class Equi2Cube(BaseEqui2Cube):
             mode: str (default = 'bilinear')
         """
 
-        assert type(equi) == torch.Tensor, \
-            (
-                "ERR: input equi expected to be `torch.Tensor` "
-                f"but got {type(equi)}"
-            )
+        assert type(equi) == torch.Tensor, (
+            "ERR: input equi expected to be `torch.Tensor` "
+            f"but got {type(equi)}"
+        )
         _original_shape_len = len(equi.shape)
-        assert _original_shape_len >= 3, \
-            f"ERR: got {_original_shape_len} for input equi"
+        assert (
+            _original_shape_len >= 3
+        ), f"ERR: got {_original_shape_len} for input equi"
         if _original_shape_len == 3:
             equi = equi.unsqueeze(dim=0)
             rot = [rot]
 
         h_equi, w_equi = equi.shape[-2:]
         if debug:
-            print("equi: ", sizeof(equi)/10e6, "mb")
+            print("equi: ", sizeof(equi) / 10e6, "mb")
 
         # get device
         device = get_device(equi)
@@ -166,13 +164,13 @@ class Equi2Cube(BaseEqui2Cube):
         )
         cubemap = grid_sample(equi, grid, mode=mode)
 
-        if cube_format == 'horizon':
+        if cube_format == "horizon":
             pass
-        elif cube_format == 'list':
+        elif cube_format == "list":
             cubemap = cube_h2list(cubemap)
-        elif cube_format == 'dict':
+        elif cube_format == "dict":
             cubemap = cube_h2dict(cubemap)
-        elif cube_format == 'dice':
+        elif cube_format == "dice":
             cubemap = cube_h2dice(cubemap)
         else:
             raise NotImplementedError()

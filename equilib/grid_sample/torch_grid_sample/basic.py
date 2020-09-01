@@ -4,25 +4,25 @@ from typing import List
 
 import torch
 
-from .interp import linear_interp
 from .utils import get_device
+from .interp import linear_interp
 
 
 def interp2d(
     Q: List[torch.Tensor],
     dy: torch.Tensor,
     dx: torch.Tensor,
-    mode: str = 'bilinear',
+    mode: str = "bilinear",
 ) -> torch.Tensor:
     r"""Naive Interpolation
-        (y,x): target pixel
-        mode: interpolation mode
+    (y,x): target pixel
+    mode: interpolation mode
     """
     q00, q10, q01, q11 = Q
-    if mode == 'bilinear':
-        f0 = linear_interp(q00, q01, dx, 1.)
-        f1 = linear_interp(q10, q11, dx, 1.)
-        return linear_interp(f0, f1, dy, 1.)
+    if mode == "bilinear":
+        f0 = linear_interp(q00, q01, dx, 1.0)
+        f1 = linear_interp(q10, q11, dx, 1.0)
+        return linear_interp(f0, f1, dy, 1.0)
     else:
         raise NotImplementedError
 
@@ -30,7 +30,7 @@ def interp2d(
 def grid_sample(
     img: torch.Tensor,
     grid: torch.Tensor,
-    mode: str = 'bilinear',
+    mode: str = "bilinear",
 ) -> torch.Tensor:
     r"""Torch Grid Sample (Custom)
 
@@ -43,35 +43,30 @@ def grid_sample(
         out: Tensor[B, C, H, W] or Tensor[C, H, W]
             where H, W are grid size
     """
-    assert len(img.shape) == len(grid.shape), \
-        "ERR: img and grid does not match"
-    assert len(img.shape) > 2, \
-        "ERR: dim needs to be 3 or 4"
+    assert len(img.shape) == len(grid.shape), "ERR: img and grid does not match"
+    assert len(img.shape) > 2, "ERR: dim needs to be 3 or 4"
     if len(img.shape) == len(grid.shape) == 3:
         img = img.unsqueeze(0)
         grid = grid.unsqueeze(0)
     batches, channels, h_in, w_in = img.shape
     _, _, h_out, w_out = grid.shape
 
-    assert get_device(img) == get_device(grid), \
-        (
-            "ERR: img and grid does not match device "
-            f"{get_device(img)} vs {get_device(grid)}"
-        )
+    assert get_device(img) == get_device(grid), (
+        "ERR: img and grid does not match device "
+        f"{get_device(img)} vs {get_device(grid)}"
+    )
     device = get_device(img)
 
     _dtype = img.dtype
-    _max = torch.tensor(1., device=device)
-    _min = torch.tensor(0., device=device)
+    _max = torch.tensor(1.0, device=device)
+    _min = torch.tensor(0.0, device=device)
 
     # Initialize output image
     out = torch.zeros(
-        (batches, channels, h_out, w_out),
-        dtype=_dtype,
-        device=device
+        (batches, channels, h_out, w_out), dtype=_dtype, device=device
     )
 
-    if mode == 'bilinear':
+    if mode == "bilinear":
         min_grid = torch.floor(grid).type(torch.int64)
         max_grid = min_grid + 1
         d_grid = grid - min_grid
@@ -79,11 +74,13 @@ def grid_sample(
         max_grid[:, 0, :, :] = torch.where(
             max_grid[:, 0, :, :] >= h_in,
             max_grid[:, 0, :, :] - h_in,
-            max_grid[:, 0, :, :])
+            max_grid[:, 0, :, :],
+        )
         max_grid[:, 1, :, :] = torch.where(
             max_grid[:, 1, :, :] >= w_in,
             max_grid[:, 1, :, :] - w_in,
-            max_grid[:, 1, :, :])
+            max_grid[:, 1, :, :],
+        )
 
         y_mins = min_grid[:, 0, :, :]
         x_mins = min_grid[:, 1, :, :]
@@ -113,7 +110,8 @@ def grid_sample(
 
             out[b] = interp2d(
                 [Q00, Q10, Q01, Q11],
-                y_d[b], x_d[b],
+                y_d[b],
+                x_d[b],
                 mode=mode,
             ).view(channels, h_out, w_out)
 
@@ -144,7 +142,7 @@ def grid_sample(
         #     mode=mode,
         # ).reshape(channels, batches, h_out, w_out).permute(1, 0, 2, 3)
 
-    elif mode == 'nearest':
+    elif mode == "nearest":
         round_grid = torch.round(grid).type(torch.int64)
         y = round_grid[:, 0, :, :]
         x = round_grid[:, 1, :, :]
@@ -155,7 +153,7 @@ def grid_sample(
             out[b] = img[b][: y[b], x[b]]
 
     else:
-        raise ValueError(f'{mode} is not available')
+        raise ValueError(f"{mode} is not available")
 
     out = torch.where(out >= _max, _max, out)
     out = torch.where(out < _min, _min, out)

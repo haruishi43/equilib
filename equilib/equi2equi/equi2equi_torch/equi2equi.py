@@ -1,28 +1,23 @@
 #!/usr/bin/env python3
 
+import math
 from typing import Dict, List, Tuple, Union
 
-import math
 import numpy as np
+
 import torch
 
 from equilib.grid_sample import torch_func
 
-from .utils import (
-    create_rotation_matrix,
-    get_device,
-    sizeof,
-)
 from ..base import BaseEqui2Equi
+from .utils import create_rotation_matrix, get_device, sizeof
 
 __all__ = ["Equi2Equi"]
 
 
 class Equi2Equi(BaseEqui2Equi):
-
     def __init__(self, **kwargs):
-        r"""Equi2Equi Numpy
-        """
+        r"""Equi2Equi Numpy"""
         super().__init__(**kwargs)
 
     def create_coordinate(self, h_out: int, w_out: int) -> np.ndarray:
@@ -31,9 +26,9 @@ class Equi2Equi(BaseEqui2Equi):
         return:
             coordinate: numpy.ndarray
         """
-        xs = torch.linspace(0, w_out-1, w_out)
+        xs = torch.linspace(0, w_out - 1, w_out)
         theta = xs * 2 * math.pi / w_out - math.pi
-        ys = torch.linspace(0, h_out-1, h_out)
+        ys = torch.linspace(0, h_out - 1, h_out)
         phi = ys * math.pi / h_out - math.pi / 2
         # NOTE: https://github.com/pytorch/pytorch/issues/15301
         # Torch meshgrid behaves differently than numpy
@@ -74,7 +69,7 @@ class Equi2Equi(BaseEqui2Equi):
         rot: Union[Dict[str, float], List[Dict[str, float]]],
         sampling_method: str = "torch",
         mode: str = "bilinear",
-        debug: bool = False
+        debug: bool = False,
     ) -> torch.Tensor:
         r"""Run Equi2Pers
 
@@ -90,14 +85,14 @@ class Equi2Equi(BaseEqui2Equi):
         NOTE: input can be batched [B, C, H, W] or single [C, H, W]
         NOTE: when using batches, the output types match
         """
-        assert type(src) == torch.Tensor, \
-            (
-                "ERR: input equi expected to be `torch.Tensor` "
-                f"but got {type(src)}"
-            )
+        assert type(src) == torch.Tensor, (
+            "ERR: input equi expected to be `torch.Tensor` "
+            f"but got {type(src)}"
+        )
         _original_shape_len = len(src.shape)
-        assert _original_shape_len >= 3, \
-            f"ERR: got {_original_shape_len} for input equi"
+        assert (
+            _original_shape_len >= 3
+        ), f"ERR: got {_original_shape_len} for input equi"
         if _original_shape_len == 3:
             src = src.unsqueeze(dim=0)
             rot = [rot]
@@ -108,7 +103,7 @@ class Equi2Equi(BaseEqui2Equi):
             self.w_out = w_equi
 
         if debug:
-            print("size of src: ", sizeof(src)/10e6, "mb")
+            print("size of src: ", sizeof(src) / 10e6, "mb")
 
         # get device
         device = get_device(src)
@@ -144,11 +139,7 @@ class Equi2Equi(BaseEqui2Equi):
         grid = torch.stack((uj, ui), axis=-3)  # 3rd to last
 
         # grid sample
-        grid_sample = getattr(
-            torch_func,
-            sampling_method,
-            "torch"
-        )
+        grid_sample = getattr(torch_func, sampling_method, "torch")
         samples = grid_sample(src, grid, mode=mode)
 
         if _original_shape_len == 3:

@@ -6,18 +6,13 @@ import numpy as np
 
 from equilib.grid_sample import numpy_func
 
-from .utils import (
-    create_rotation_matrix,
-    cube_h2dice,
-    cube_h2dict,
-    cube_h2list,
-)
 from ..base import BaseEqui2Cube
+from .utils import create_rotation_matrix, cube_h2dice, cube_h2dict, cube_h2list
 
 
 class Equi2Cube(BaseEqui2Cube):
-    r"""Equi2Cube Numpy
-    """
+    r"""Equi2Cube Numpy"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -43,52 +38,50 @@ class Equi2Cube(BaseEqui2Cube):
         return R
 
     def create_xyz(self, w_face: int):
-        r"""xyz coordinates of the faces of the cube
-        """
+        r"""xyz coordinates of the faces of the cube"""
         out = np.zeros((w_face, w_face * 6, 3), np.float32)
         rng = np.linspace(-0.5, 0.5, num=w_face, dtype=np.float32)
 
         # Front face (x = 0.5)
-        out[:, 0*w_face:1*w_face, [1, 2]] = np.stack(
+        out[:, 0 * w_face : 1 * w_face, [1, 2]] = np.stack(
             np.meshgrid(rng, -rng), -1
         )
-        out[:, 0*w_face:1*w_face, 0] = 0.5
+        out[:, 0 * w_face : 1 * w_face, 0] = 0.5
 
         # Right face (y = -0.5)
-        out[:, 1*w_face:2*w_face, [0, 2]] = np.stack(
+        out[:, 1 * w_face : 2 * w_face, [0, 2]] = np.stack(
             np.meshgrid(-rng, -rng), -1
         )
-        out[:, 1*w_face:2*w_face, 1] = 0.5
+        out[:, 1 * w_face : 2 * w_face, 1] = 0.5
 
         # Back face (x = -0.5)
-        out[:, 2*w_face:3*w_face, [1, 2]] = np.stack(
+        out[:, 2 * w_face : 3 * w_face, [1, 2]] = np.stack(
             np.meshgrid(-rng, -rng), -1
         )
-        out[:, 2*w_face:3*w_face, 0] = -0.5
+        out[:, 2 * w_face : 3 * w_face, 0] = -0.5
 
         # Left face (y = 0.5)
-        out[:, 3*w_face:4*w_face, [0, 2]] = np.stack(
+        out[:, 3 * w_face : 4 * w_face, [0, 2]] = np.stack(
             np.meshgrid(rng, -rng), -1
         )
-        out[:, 3*w_face:4*w_face, 1] = -0.5
+        out[:, 3 * w_face : 4 * w_face, 1] = -0.5
 
         # Up face (z = 0.5)
-        out[:, 4*w_face:5*w_face, [1, 0]] = np.stack(
+        out[:, 4 * w_face : 5 * w_face, [1, 0]] = np.stack(
             np.meshgrid(rng, rng), -1
         )
-        out[:, 4*w_face:5*w_face, 2] = 0.5
+        out[:, 4 * w_face : 5 * w_face, 2] = 0.5
 
         # Down face (z = -0.5)
-        out[:, 5*w_face:6*w_face, [1, 0]] = np.stack(
+        out[:, 5 * w_face : 6 * w_face, [1, 0]] = np.stack(
             np.meshgrid(rng, -rng), -1
         )
-        out[:, 5*w_face:6*w_face, 2] = -0.5
+        out[:, 5 * w_face : 6 * w_face, 2] = -0.5
 
         return out
 
     def xyz2rot(self, xyz):
-        r"""Return rotation (theta, phi) from xyz
-        """
+        r"""Return rotation (theta, phi) from xyz"""
         norm = np.linalg.norm(xyz, axis=-1)
         phi = np.arcsin(xyz[:, :, 2] / norm)
         theta = np.arctan2(xyz[:, :, 1], xyz[:, :, 0])
@@ -132,20 +125,16 @@ class Equi2Cube(BaseEqui2Cube):
         uj = np.where(uj >= h_equi, uj - h_equi, uj)
         grid = np.stack((uj, ui), axis=0)
 
-        grid_sample = getattr(
-            numpy_func,
-            sampling_method,
-            'faster'
-        )
+        grid_sample = getattr(numpy_func, sampling_method, "faster")
         cubemap = grid_sample(equi, grid, mode=mode)
 
-        if cube_format == 'horizon':
+        if cube_format == "horizon":
             pass
-        elif cube_format == 'list':
+        elif cube_format == "list":
             cubemap = cube_h2list(cubemap)
-        elif cube_format == 'dict':
+        elif cube_format == "dict":
             cubemap = cube_h2dict(cubemap)
-        elif cube_format == 'dice':
+        elif cube_format == "dice":
             cubemap = cube_h2dice(cubemap)
         else:
             raise NotImplementedError(f"{cube_format} is not supported")
@@ -157,7 +146,7 @@ class Equi2Cube(BaseEqui2Cube):
         equi: Union[np.ndarray, List[np.ndarray]],
         rot: Union[Dict[str, float], List[Dict[str, float]]],
         cube_format: str,
-        sampling_method: str = 'faster',
+        sampling_method: str = "faster",
         mode: str = "bilinear",
     ) -> Union[np.ndarray, List[np.ndarray], List[dict]]:
         r"""Call Equi2Cube
@@ -173,14 +162,16 @@ class Equi2Cube(BaseEqui2Cube):
         _return_type = type(equi)
         _original_shape_len = len(equi.shape)
         if _return_type == np.ndarray:
-            assert _original_shape_len >= 3, \
-                f"ERR: got {_original_shape_len} for input equi"
+            assert (
+                _original_shape_len >= 3
+            ), f"ERR: got {_original_shape_len} for input equi"
             if _original_shape_len == 3:
                 equi = equi[np.newaxis, :, :, :]
                 rot = [rot]
 
-        assert len(equi) == len(rot), \
-            f"ERR: length of input and rot differs {len(equi)} vs {len(rot)}"
+        assert len(equi) == len(
+            rot
+        ), f"ERR: length of input and rot differs {len(equi)} vs {len(rot)}"
 
         cubemaps = []
         for e, r in zip(equi, rot):
@@ -196,7 +187,7 @@ class Equi2Cube(BaseEqui2Cube):
             cubemaps.append(cubemap)
 
         if _return_type == np.ndarray:
-            if cube_format in ['horizon', 'dice']:
+            if cube_format in ["horizon", "dice"]:
                 cubemaps = np.stack(cubemaps, axis=0)
 
         if _original_shape_len == 3:

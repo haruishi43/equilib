@@ -2,8 +2,7 @@
 
 
 class BaseEqui2Pers(object):
-    r"""Base Equi2Pers class to build off of
-    """
+    r"""Base Equi2Pers class to build off of"""
 
     def __init__(
         self,
@@ -28,10 +27,9 @@ class BaseEqui2Pers(object):
         w_pers: int,
         h_pers: int,
         fov_x: float,
-        skew: float = 0.,
+        skew: float = 0.0,
     ) -> None:
-        r"""Initialize local `self` parameters
-        """
+        r"""Initialize local `self` parameters"""
         self.w_pers = w_pers
         self.h_pers = h_pers
         self.fov_x = fov_x

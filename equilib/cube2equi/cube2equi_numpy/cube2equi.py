@@ -15,13 +15,14 @@ def cube_list2h(cube_list: list):
     return np.concatenate(cube_list, axis=-1)
 
 
-def cube_dict2h(cube_dict: dict, face_k=['F', 'R', 'B', 'L', 'U', 'D']):
+def cube_dict2h(cube_dict: dict, face_k=["F", "R", "B", "L", "U", "D"]):
     assert len(face_k) == 6
     return cube_list2h([cube_dict[k] for k in face_k])
 
 
 def cube_dice2h(cube_dice: np.ndarray):
     r"""dice to horizion
+
     params:
     cube_dice: (C, H, W)
     """
@@ -29,36 +30,28 @@ def cube_dice2h(cube_dice: np.ndarray):
     sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
     w = cube_dice.shape[-2] // 3
     assert cube_dice.shape[-2] == w * 3 and cube_dice.shape[-1] == w * 4
-    cube_h = np.zeros(
-        (cube_dice.shape[-3], w, w * 6),
-        dtype=cube_dice.dtype
-    )
+    cube_h = np.zeros((cube_dice.shape[-3], w, w * 6), dtype=cube_dice.dtype)
     for i, (sx, sy) in enumerate(sxy):
-        face = cube_dice[:, sy*w:(sy+1)*w, sx*w:(sx+1)*w]
-        cube_h[:, :, i*w:(i+1)*w] = face
+        face = cube_dice[:, sy * w : (sy + 1) * w, sx * w : (sx + 1) * w]
+        cube_h[:, :, i * w : (i + 1) * w] = face
     return cube_h
 
 
 class Cube2Equi(BaseCube2Equi):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def _to_horizon(
-        self,
-        cubemap: np.ndarray,
-        cube_format: str
-    ) -> np.ndarray:
-        if cube_format == 'horizon':
+    def _to_horizon(self, cubemap: np.ndarray, cube_format: str) -> np.ndarray:
+        if cube_format == "horizon":
             pass
-        elif cube_format == 'list':
+        elif cube_format == "list":
             cubemap = cube_list2h(cubemap)
-        elif cube_format == 'dict':
+        elif cube_format == "dict":
             cubemap = cube_dict2h(cubemap)
-        elif cube_format == 'dice':
+        elif cube_format == "dice":
             cubemap = cube_dice2h(cubemap)
         else:
-            raise NotImplementedError('unknown cube_format')
+            raise NotImplementedError("unknown cube_format")
 
         assert len(cubemap.shape) == 3
         assert cubemap.shape[-2] * 6 == cubemap.shape[-1]
@@ -66,32 +59,19 @@ class Cube2Equi(BaseCube2Equi):
         return cubemap
 
     def _equirect_facetype(self, h: int, w: int):
-        r"""0F 1R 2B 3L 4U 5D
-        """
+        r"""0F 1R 2B 3L 4U 5D"""
 
         tp = np.roll(
-            np.arange(4).repeat(w // 4)[None, :].repeat(h, 0),
-            3 * w // 8,
-            1
+            np.arange(4).repeat(w // 4)[None, :].repeat(h, 0), 3 * w // 8, 1
         )
 
         # Prepare ceil mask
         mask = np.zeros((h, w // 4), np.bool)
         idx = np.linspace(-np.pi, np.pi, w // 4) / 4
-        idx = h // 2 - \
-            np.around(
-                np.arctan(np.cos(idx)) * h / np.pi
-            ).astype(int)
+        idx = h // 2 - np.around(np.arctan(np.cos(idx)) * h / np.pi).astype(int)
         for i, j in enumerate(idx):
             mask[:j, i] = 1
-        mask = np.roll(
-            np.concatenate(
-                [mask] * 4,
-                1
-            ),
-            3 * w // 8,
-            1
-        )
+        mask = np.roll(np.concatenate([mask] * 4, 1), 3 * w // 8, 1)
 
         tp[mask] = 4
         tp[np.flip(mask, 0)] = 5
@@ -108,11 +88,10 @@ class Cube2Equi(BaseCube2Equi):
     def _run_single(
         self,
         cubemap: np.ndarray,  # `horizon`
-        sampling_method: str = 'faster',
-        mode: str = 'bilinear',
+        sampling_method: str = "faster",
+        mode: str = "bilinear",
     ) -> np.ndarray:
-        r"""Run a single batch of transformation
-        """
+        r"""Run a single batch of transformation"""
         w_face = cubemap.shape[-2]
 
         theta, phi = self.create_equi_grid(self.h_out, self.w_out)
@@ -125,14 +104,15 @@ class Cube2Equi(BaseCube2Equi):
         coor_y = np.zeros((self.h_out, self.w_out))
 
         for i in range(6):
-            mask = (tp == i)
+            mask = tp == i
 
             if i < 4:
-                coor_x[mask] = 0.5 * np.tan(
-                    theta[mask] - np.pi * i / 2
-                )
-                coor_y[mask] = -0.5 * np.tan(phi[mask]) \
+                coor_x[mask] = 0.5 * np.tan(theta[mask] - np.pi * i / 2)
+                coor_y[mask] = (
+                    -0.5
+                    * np.tan(phi[mask])
                     / np.cos(theta[mask] - np.pi * i / 2)
+                )
             elif i == 4:
                 c = 0.5 * np.tan(np.pi / 2 - phi[mask])
                 coor_x[mask] = c * np.sin(theta[mask])
@@ -148,14 +128,11 @@ class Cube2Equi(BaseCube2Equi):
 
         # change x axis of the x coordinate map
         for i in range(6):
-            mask = (tp == i)
+            mask = tp == i
             coor_x[mask] = coor_x[mask] + w_face * i
 
         grid = np.stack((coor_y, coor_x), axis=0)
-        grid_sample = getattr(
-            numpy_func,
-            sampling_method
-        )
+        grid_sample = getattr(numpy_func, sampling_method)
         equi = grid_sample(cubemap, grid, mode=mode)
 
         return equi
@@ -163,9 +140,9 @@ class Cube2Equi(BaseCube2Equi):
     def run(
         self,
         cubemap: Union[np.ndarray, dict, list],
-        cube_format: str = 'dice',
-        sampling_method: str = 'faster',
-        mode: str = 'bilinear',
+        cube_format: str = "dice",
+        sampling_method: str = "faster",
+        mode: str = "bilinear",
     ) -> np.ndarray:
         r"""Run cube to equirectangular image transformation
 
@@ -178,15 +155,17 @@ class Cube2Equi(BaseCube2Equi):
 
         # Convert all cubemap format to `horizon` and batched
         is_single = False
-        if cube_format in ['dice', 'horizon']:
+        if cube_format in ["dice", "horizon"]:
             if isinstance(cubemap, np.ndarray):
                 # could be single or batched
-                assert len(cubemap.shape) >= 3, \
-                    f'input shape {cubemap.shape} is not valid'
+                assert (
+                    len(cubemap.shape) >= 3
+                ), f"input shape {cubemap.shape} is not valid"
                 if len(cubemap.shape) == 4:
                     # batch
                     cubemap = [
-                        self._to_horizon(c, cube_format) for c in cubemap]
+                        self._to_horizon(c, cube_format) for c in cubemap
+                    ]
                 else:
                     # single
                     is_single = True
@@ -196,7 +175,7 @@ class Cube2Equi(BaseCube2Equi):
                 cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
             else:
                 raise ValueError
-        elif cube_format == 'dict':
+        elif cube_format == "dict":
             if isinstance(cubemap, dict):
                 # single
                 is_single = True
@@ -206,7 +185,7 @@ class Cube2Equi(BaseCube2Equi):
                 cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
             else:
                 raise ValueError
-        elif cube_format == 'list':
+        elif cube_format == "list":
             if isinstance(cubemap[0], np.ndarray):
                 # single
                 is_single = True

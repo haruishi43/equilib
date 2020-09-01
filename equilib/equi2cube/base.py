@@ -2,8 +2,7 @@
 
 
 class BaseEqui2Cube(object):
-    r"""Base Equi2Cube class to build off of
-    """
+    r"""Base Equi2Cube class to build off of"""
 
     def __init__(self, w_face: int, **kwargs):
         r"""

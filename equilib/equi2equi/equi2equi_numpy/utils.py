@@ -19,19 +19,28 @@ def create_rotation_matrix(
         rotation matrix: numpy.ndarray
     """
     # calculate rotation about the x-axis
-    R_x = np.array([
-        [1., 0., 0.],
-        [0., np.cos(x), -np.sin(x)],
-        [0., np.sin(x), np.cos(x)]])
+    R_x = np.array(
+        [
+            [1.0, 0.0, 0.0],
+            [0.0, np.cos(x), -np.sin(x)],
+            [0.0, np.sin(x), np.cos(x)],
+        ]
+    )
     # calculate rotation about the y-axis
-    R_y = np.array([
-        [np.cos(y), 0., np.sin(y)],
-        [0., 1., 0.],
-        [-np.sin(y), 0., np.cos(y)]])
+    R_y = np.array(
+        [
+            [np.cos(y), 0.0, np.sin(y)],
+            [0.0, 1.0, 0.0],
+            [-np.sin(y), 0.0, np.cos(y)],
+        ]
+    )
     # calculate rotation about the z-axis
-    R_z = np.array([
-        [np.cos(z), -np.sin(z), 0.],
-        [np.sin(z), np.cos(z), 0.],
-        [0., 0., 1.]])
+    R_z = np.array(
+        [
+            [np.cos(z), -np.sin(z), 0.0],
+            [np.sin(z), np.cos(z), 0.0],
+            [0.0, 0.0, 1.0],
+        ]
+    )
 
     return R_z @ R_y @ R_x

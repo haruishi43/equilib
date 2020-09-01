@@ -6,17 +6,15 @@ import numpy as np
 
 from equilib.grid_sample import numpy_func
 
-from .utils import create_rotation_matrix
 from ..base import BaseEqui2Equi
+from .utils import create_rotation_matrix
 
 __all__ = ["Equi2Equi"]
 
 
 class Equi2Equi(BaseEqui2Equi):
-
     def __init__(self, **kwargs):
-        r"""Equi2Equi Numpy
-        """
+        r"""Equi2Equi Numpy"""
         super().__init__(**kwargs)
 
     def create_coordinate(self, h_out: int, w_out: int) -> np.ndarray:
@@ -25,9 +23,9 @@ class Equi2Equi(BaseEqui2Equi):
         return:
             coordinate: numpy.ndarray
         """
-        xs = np.linspace(0, w_out-1, w_out)
+        xs = np.linspace(0, w_out - 1, w_out)
         theta = xs * 2 * np.pi / w_out - np.pi
-        ys = np.linspace(0, h_out-1, h_out)
+        ys = np.linspace(0, h_out - 1, h_out)
         phi = ys * np.pi / h_out - np.pi / 2
         theta, phi = np.meshgrid(theta, phi)
         coord = np.stack((theta, phi), axis=-1)
@@ -102,11 +100,7 @@ class Equi2Equi(BaseEqui2Equi):
         grid = np.stack((uj, ui), axis=0)
 
         # grid sample
-        grid_sample = getattr(
-            numpy_func,
-            sampling_method,
-            "faster"
-        )
+        grid_sample = getattr(numpy_func, sampling_method, "faster")
         sampled = grid_sample(src, grid, mode=mode)
         return sampled
 
@@ -134,14 +128,16 @@ class Equi2Equi(BaseEqui2Equi):
         _return_type = type(src)
         _original_shape_len = len(src.shape)
         if _return_type == np.ndarray:
-            assert _original_shape_len >= 3, \
-                f"ERR: got {_original_shape_len} for input equi"
+            assert (
+                _original_shape_len >= 3
+            ), f"ERR: got {_original_shape_len} for input equi"
             if _original_shape_len == 3:
                 src = src[np.newaxis, :, :, :]
                 rot = [rot]
 
-        assert len(src) == len(rot), \
-            f"ERR: length of src and rot differs {len(src)} vs {len(rot)}"
+        assert len(src) == len(
+            rot
+        ), f"ERR: length of src and rot differs {len(src)} vs {len(rot)}"
 
         samples = []
         for s, r in zip(src, rot):
@@ -153,9 +149,7 @@ class Equi2Equi(BaseEqui2Equi):
                 sampling_method=sampling_method,
                 mode=mode,
             )
-            samples.append(
-                sample
-            )
+            samples.append(sample)
 
         if _return_type == np.ndarray:
             samples = np.stack(samples, axis=0)
