@@ -10,13 +10,16 @@ from torchvision import transforms
 
 from equilib.equi2cube import TorchEqui2Cube
 
+WIDTH = 256
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 def run(equi, rot, cube_format):
     h_equi, w_equi = equi.shape[-2:]
     print('equirectangular image size:')
     print(h_equi, w_equi)
 
-    w_face = 256
+    w_face = WIDTH
 
     tic = time.perf_counter()
     equi2cube = TorchEqui2Cube(
@@ -43,7 +46,7 @@ def test_torch_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
     equi_path = osp.join(data_path, 'test.jpg')
-    device = torch.device('cuda')
+    device = DEVICE
 
     # Transforms
     to_tensor = transforms.Compose([
@@ -109,7 +112,7 @@ def test_torch_batch():
     result_path = osp.join('.', 'tests', 'results')
     equi_path = osp.join(data_path, 'test.jpg')
     batch_size = 4
-    device = torch.device('cuda')
+    device = DEVICE
 
     # Transforms
     to_tensor = transforms.Compose([

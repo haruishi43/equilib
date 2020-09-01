@@ -8,8 +8,8 @@ from PIL import Image
 
 from equilib.cube2equi import NumpyCube2Equi
 
-OUT_W = 4000
-OUT_H = 2000
+OUT_W = 480
+OUT_H = 240
 
 
 def run(cube, cube_format):

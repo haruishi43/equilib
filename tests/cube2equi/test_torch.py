@@ -9,8 +9,10 @@ from torchvision import transforms
 
 from equilib.cube2equi import TorchCube2Equi
 
-OUT_W = 4000
-OUT_H = 2000
+OUT_W = 480
+OUT_H = 240
+
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def run(cube, cube_format):
@@ -63,7 +65,7 @@ def test_torch_single():
     result_path = osp.join('.', 'tests', 'results')
 
     cube_format = "dict"
-    device = torch.device('cuda')
+    device = DEVICE
 
     # Transforms
     to_tensor = transforms.Compose([
@@ -115,7 +117,7 @@ def test_torch_batch():
 
     batch_size = 4
     cube_format = "dict"
-    device = torch.device('cuda')
+    device = DEVICE
 
     # Transforms
     to_tensor = transforms.Compose([

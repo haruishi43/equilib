@@ -11,22 +11,21 @@ from equilib.equi2pers import NumpyEqui2Pers
 SAMPLING_METHOD = 'faster'
 SAMPLING_MODE = 'bilinear'
 
+WIDTH = 640
+HEIGHT = 480
+FOV = 90
+
 
 def run(equi, rot):
     h_equi, w_equi = equi.shape[-2:]
     print('equirectangular image size:')
     print(h_equi, w_equi)
 
-    # Variables:
-    h_pers = 480
-    w_pers = 640
-    fov_x = 90
-
     tic = time.perf_counter()
     equi2pers = NumpyEqui2Pers(
-        w_pers=w_pers,
-        h_pers=h_pers,
-        fov_x=fov_x
+        w_pers=WIDTH,
+        h_pers=HEIGHT,
+        fov_x=FOV,
     )
     toc = time.perf_counter()
     print(f"Init Equi2Pers: {toc - tic:0.4f} seconds")

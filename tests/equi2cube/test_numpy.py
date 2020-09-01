@@ -8,13 +8,15 @@ from PIL import Image
 
 from equilib.equi2cube import NumpyEqui2Cube
 
+WIDTH = 256
+
 
 def run(equi, rot, cube_format):
     h_equi, w_equi = equi.shape[-2:]
     print('equirectangular image size:')
     print(h_equi, w_equi)
 
-    w_face = 256
+    w_face = WIDTH
 
     tic = time.perf_counter()
     equi2cube = NumpyEqui2Cube(

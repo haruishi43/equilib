@@ -8,19 +8,19 @@ from PIL import Image
 
 from equilib.equi2equi import NumpyEqui2Equi
 
+WIDTH = 640
+HEIGHT = 320
+
 
 def run(equi, rot):
     h_equi, w_equi = equi.shape[-2:]
     print('equirectangular image size:')
     print(h_equi, w_equi)
 
-    h_out = 320
-    w_out = 640
-
     tic = time.perf_counter()
     equi2equi = NumpyEqui2Equi(
-        w_out=w_out,
-        h_out=h_out,
+        w_out=WIDTH,
+        h_out=HEIGHT,
     )
     toc = time.perf_counter()
     print(f"Init Equi2Equi: {toc - tic:0.4f} seconds")

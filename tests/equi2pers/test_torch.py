@@ -16,22 +16,23 @@ from equilib.equi2pers import TorchEqui2Pers
 SAMPLING_METHOD = 'torch'
 SAMPLING_MODE = 'bilinear'
 
+WIDTH = 640
+HEIGHT = 480
+FOV = 90
+
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 def run(equi, rot):
     h_equi, w_equi = equi.shape[-2:]
     print('equirectangular image size:')
     print(h_equi, w_equi)
 
-    # Variables:
-    h_pers = 480
-    w_pers = 640
-    fov_x = 90
-
     tic = time.perf_counter()
     equi2pers = TorchEqui2Pers(
-        w_pers=w_pers,
-        h_pers=h_pers,
-        fov_x=fov_x
+        w_pers=WIDTH,
+        h_pers=HEIGHT,
+        fov_x=FOV
     )
     toc = time.perf_counter()
     print(f"Init Equi2Pers: {toc - tic:0.4f} seconds")
@@ -54,7 +55,7 @@ def test_torch_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
     equi_path = osp.join(data_path, 'test.jpg')
-    device = torch.device('cuda')
+    device = DEVICE
 
     # Transforms
     to_tensor = transforms.Compose([
@@ -96,7 +97,7 @@ def test_torch_batch():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
     equi_path = osp.join(data_path, 'test.jpg')
-    device = torch.device('cuda')
+    device = DEVICE
     batch_size = 16
 
     # Transforms

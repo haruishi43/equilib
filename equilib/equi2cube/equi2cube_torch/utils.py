@@ -40,17 +40,23 @@ def create_rotation_matrix(
     R_x = torch.tensor([
         [1., 0., 0.],
         [0., np.cos(x), -np.sin(x)],
-        [0., np.sin(x), np.cos(x)]])
+        [0., np.sin(x), np.cos(x)]],
+        dtype=torch.float,
+    )
     # calculate rotation about the y-axis
     R_y = torch.tensor([
         [np.cos(y), 0., np.sin(y)],
         [0., 1., 0.],
-        [-np.sin(y), 0., np.cos(y)]])
+        [-np.sin(y), 0., np.cos(y)]],
+        dtype=torch.float,
+    )
     # calculate rotation about the z-axis
     R_z = torch.tensor([
         [np.cos(z), -np.sin(z), 0.],
         [np.sin(z), np.cos(z), 0.],
-        [0., 0., 1.]])
+        [0., 0., 1.]],
+        dtype=torch.float,
+    )
 
     return R_z @ R_y @ R_x
 
