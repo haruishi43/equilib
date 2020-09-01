@@ -2,8 +2,6 @@
 
 import os.path as osp
 
-import numpy as np
-
 from setuptools import find_packages, setup
 
 
@@ -20,14 +18,6 @@ def find_version():
     return locals()['__version__']
 
 
-def numpy_include():
-    try:
-        numpy_include = np.get_include()
-    except AttributeError:
-        numpy_include = np.get_numpy_include()
-    return numpy_include
-
-
 def get_requirements(filename='requirements.txt'):
     here = osp.dirname(osp.realpath(__file__))
     with open(osp.join(here, filename), 'r') as f:
@@ -38,12 +28,24 @@ def get_requirements(filename='requirements.txt'):
 setup(
     name='equilib',
     version=find_version(),
-    description='',
+    description='equirectangular image processing with python',
     author='Haruya Ishikawa',
-    license='',
+    author_email="www.haru.ishi43@gmail.com",
+    license='MIT',
     long_description=readme(),
-    url='',
+    url='https://github.com/haruishi43/equilib',
     packages=find_packages(),
     install_requires=get_requirements(),
     keywords=['Equirectangular', 'Computer Vision'],
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+    ],
+    python_requires='>=3.5',
 )
