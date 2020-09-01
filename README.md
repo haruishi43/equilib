@@ -7,6 +7,7 @@
 - Able to use GPU for faster processing.
 - No need for other dependencies except for `numpy` and `pytorch`.
 - Added functionality like rotation matrix and batched processing.
+- Highly modular
 
 ## Installation:
 
@@ -19,7 +20,7 @@ pip install -r requirements.txt
 python setup.py develop
 ```
 
-## What is a equirectangular image
+## Equirectangular image
 
 <img src="data/equi.jpg" alt="equi" width="480"/>
 
@@ -55,7 +56,9 @@ rot = {
 pers_img = equi2pers(equi_img, rot, sampling_method="faster")
 ```
 
-The API for each module is pretty similar. Documentation is WIP.
+The API for each module is pretty similar.
+For more information, take a look in [.readme](.readme/)
+
 
 ### Coordinate System:
 
@@ -92,7 +95,6 @@ pytest tests
 ### TODO:
 
 - [x] Keeping `.vscode` for my development
-- [ ] Document better @ `README`
 - [ ] Add graphs and statistics for speed improvements
 
 
