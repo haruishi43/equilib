@@ -6,3 +6,7 @@
 - [`equi2cube`](equi2cube.md)
 - [`equi2equi`](equi2equi.md)
 - [`cube2equi`](cube2equi.md)
+
+## Grid Sample
+
+- [`grid_sample`](grid_sample.md)
