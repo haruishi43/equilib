@@ -5,11 +5,7 @@ class BaseEqui2Pers(object):
     r"""Base Equi2Pers class to build off of"""
 
     def __init__(
-        self,
-        w_pers: int,
-        h_pers: int,
-        fov_x: float,
-        **kwargs
+        self, w_pers: int, h_pers: int, fov_x: float, **kwargs
     ) -> None:
         r"""
         params:

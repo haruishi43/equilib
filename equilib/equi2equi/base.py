@@ -7,10 +7,7 @@ class BaseEqui2Equi(object):
     r"""Base Equi2Equi class to build off of"""
 
     def __init__(
-        self,
-        h_out: Optional[int] = None,
-        w_out: Optional[int] = None,
-        **kwargs
+        self, h_out: Optional[int] = None, w_out: Optional[int] = None, **kwargs
     ) -> None:
         r""""""
         self.h_out = h_out
