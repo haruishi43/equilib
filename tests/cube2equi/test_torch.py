@@ -9,8 +9,8 @@ from torchvision import transforms
 
 from equilib.cube2equi import TorchCube2Equi
 
-OUT_W = 4000
-OUT_H = 2000
+OUT_W = 800
+OUT_H = 400
 
 
 def run(cube, cube_format):

@@ -180,6 +180,9 @@ class Cube2Equi(BaseCube2Equi):
         coor_x = torch.zeros((self.h_out, self.w_out))
         coor_y = torch.zeros((self.h_out, self.w_out))
 
+        # FIXME: there's a bug where left section (3L) has artifacts
+        # on top and bottom
+        # It might have to do with 4U or 5D
         for i in range(6):
             mask = (tp == i)
 
@@ -206,13 +209,12 @@ class Cube2Equi(BaseCube2Equi):
             torch.clamp(coor_y + 0.5, 0, 1) * w_face,
             0, w_face - 1)
 
-        coor_x = torch.where(coor_x >= w_face, coor_x - w_face, coor_x)
-        coor_y = torch.where(coor_y >= w_face, coor_y - w_face, coor_y)
-
+        # change x axis of the x coordinate map
         for i in range(6):
             mask = (tp == i)
             coor_x[mask] = coor_x[mask] + w_face * i
 
+        # repeat batch
         coor_x = coor_x.repeat(batch, 1, 1)
         coor_y = coor_y.repeat(batch, 1, 1)
 
