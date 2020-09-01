@@ -11,6 +11,16 @@
 
 ## Installation:
 
+Prerequisites:
+- Python (>=3.5)
+- Pytorch
+
+```Bash
+pip install pyequilib
+```
+
+For developing, use:
+
 ```Bash
 git clone --recursive https://github.com/Toraudonn/equilib.git
 cd equilib
