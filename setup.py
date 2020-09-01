@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
+import distutils.spawn
 import os.path as osp
+import shlex
+import subprocess
+import sys
 
 from setuptools import find_packages, setup
 
@@ -25,16 +29,48 @@ def get_requirements(filename="requirements.txt"):
     return requires
 
 
+def get_long_description():
+    with open("README.md") as f:
+        long_description = f.read()
+
+    try:
+        import github2pypi
+
+        return github2pypi.replace_url(
+            slug="haruishi43/equilib", content=long_description
+        )
+    except Exception:
+        return long_description
+
+
+if sys.argv[1] == "release":
+    if not distutils.spawn.find_executable("twine"):
+        print("Please install twine:\n\n\tpip install twine\n", file=sys.stderr)
+        sys.exit(1)
+
+    commands = [
+        "git pull origin master",
+        "git tag v{:s}".format(find_version()),
+        "git push origin master --tag",
+        "python setup.py sdist",
+        "twine upload dist/pyequilib-{:s}.tar.gz".format(find_version()),
+    ]
+    for cmd in commands:
+        subprocess.check_call(shlex.split(cmd))
+    sys.exit(0)
+
+
 setup(
-    name="equilib",
+    name="pyequilib",
     version=find_version(),
+    packages=find_packages(exclude=["github2pypi"]),
     description="equirectangular image processing with python",
+    long_description=get_long_description(),
+    long_description_content_type="text/markdown",
     author="Haruya Ishikawa",
     author_email="www.haru.ishi43@gmail.com",
     license="MIT",
-    long_description=readme(),
     url="https://github.com/haruishi43/equilib",
-    packages=find_packages(),
     install_requires=get_requirements(),
     keywords=["Equirectangular", "Computer Vision"],
     classifiers=[

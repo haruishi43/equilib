@@ -55,6 +55,7 @@ jobs:
         pip install pytest
         pip install torch torchvision
         pytest tests
+
     - name: Install from dist
       run: |
         rm -f dist/*.tar.gz
