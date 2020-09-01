@@ -17,4 +17,5 @@ class SomeCube2Equi(BaseCube2Equi):
 
 - [x] Implement `numpy`
 - [x] Implement `torch`
-- [ ] Bug on `torch` where there's a bit of artifacts on the left side when output size is large
+- [x] -Bug on `torch` where there's a bit of artifacts on the left side when output size is large-
+    - This only occurs on `torch` grid sample and not `custom`, therefore a problem with grid sample
