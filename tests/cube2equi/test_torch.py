@@ -62,7 +62,7 @@ def test_torch_single():
     data_path = osp.join('.', 'tests', 'data')
     result_path = osp.join('.', 'tests', 'results')
 
-    cube_format = "horizon"
+    cube_format = "dict"
     device = torch.device('cuda')
 
     # Transforms
@@ -106,5 +106,62 @@ def test_torch_single():
         f'cube2equi_torch_single_{cube_format}.jpg'
     )
     equi_img.save(out_path)
+    toc = time.perf_counter()
+
+
+def test_torch_batch():
+    data_path = osp.join('.', 'tests', 'data')
+    result_path = osp.join('.', 'tests', 'results')
+
+    batch_size = 4
+    cube_format = "dict"
+    device = torch.device('cuda')
+
+    # Transforms
+    to_tensor = transforms.Compose([
+        transforms.ToTensor(),
+    ])
+
+    to_PIL = transforms.Compose([
+        transforms.ToPILImage(),
+    ])
+
+    tic = time.perf_counter()
+    batched_cube = []
+    for _ in range(batch_size):
+        if cube_format in ['horizon', 'dice']:
+            img_path = osp.join(data_path, f'test_{cube_format}.jpg')
+            cube = Image.open(img_path)
+            cube = cube.convert('RGB')
+            cube = to_tensor(cube).to(device)
+        elif cube_format in ['dict', 'list']:
+            img_paths = osp.join(data_path, "test_dict_{k}.jpg")
+            cube = {}
+            for k in ['F', 'R', 'B', 'L', 'U', 'D']:
+                face = Image.open(
+                    img_paths.format(cube_format=cube_format, k=k)
+                )
+                face = face.convert('RGB')
+                face = to_tensor(face).to(device)
+                cube[k] = face
+            if cube_format == 'list':
+                cube = list(cube.values())
+        else:
+            raise ValueError
+
+        batched_cube.append(cube)
+    toc = time.perf_counter()
+    print(f"Process Cube Image: {toc - tic:0.4f} seconds")
+
+    batched_equi = run(batched_cube, cube_format=cube_format)
+
+    tic = time.perf_counter()
+    for i, equi in enumerate(batched_equi):
+        equi_img = to_PIL(equi.to('cpu'))
+        out_path = osp.join(
+            result_path,
+            f'cube2equi_torch_batched_{cube_format}_{i}.jpg'
+        )
+        equi_img.save(out_path)
     toc = time.perf_counter()
     print(f"post process: {toc - tic:0.4f} seconds")

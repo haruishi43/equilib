@@ -122,6 +122,53 @@ class Cube2Equi(BaseCube2Equi):
     ) -> torch.Tensor:
         r"""
         """
+
+        # Convert all cubemap format to `horizon` and batched
+        is_single = False
+        if cube_format in ['dice', 'horizon']:
+            if isinstance(cubemap, torch.Tensor):
+                # could be single or batched
+                assert len(cubemap.shape) >= 3, \
+                    f'input shape {cubemap.shape} is not valid'
+                if len(cubemap.shape) == 4:
+                    # batch
+                    cubemap = [
+                        self._to_horizon(c, cube_format) for c in cubemap]
+                else:
+                    # single
+                    is_single = True
+                    cubemap = [self._to_horizon(cubemap, cube_format)]
+            elif isinstance(cubemap, list):
+                # could only be batched
+                cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
+            else:
+                raise ValueError
+        elif cube_format == 'dict':
+            if isinstance(cubemap, dict):
+                # single
+                is_single = True
+                cubemap = [self._to_horizon(cubemap, cube_format)]
+            elif isinstance(cubemap, list):
+                # batch
+                cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
+            else:
+                raise ValueError
+        elif cube_format == 'list':
+            if isinstance(cubemap[0], torch.Tensor):
+                # single
+                is_single = True
+                cubemap = [self._to_horizon(cubemap, cube_format)]
+            elif isinstance(cubemap[0], list):
+                # batch
+                cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
+            else:
+                raise ValueError
+        else:
+            raise ValueError
+
+        batch = len(cubemap)
+        cubemap = torch.stack(cubemap, 0)
+
         # get device
         device = get_device(cubemap)
         w_face = cubemap.shape[-2]
@@ -166,11 +213,17 @@ class Cube2Equi(BaseCube2Equi):
             mask = (tp == i)
             coor_x[mask] = coor_x[mask] + w_face * i
 
-        grid = torch.stack((coor_y, coor_x), axis=0).to(device)
+        coor_x = coor_x.repeat(batch, 1, 1)
+        coor_y = coor_y.repeat(batch, 1, 1)
+
+        grid = torch.stack((coor_y, coor_x), axis=-3).to(device)
         grid_sample = getattr(
             torch_func,
             sampling_method
         )
-        equi = grid_sample(cubemap, grid, mode=mode)
+        equis = grid_sample(cubemap, grid, mode=mode)
 
-        return equi
+        if is_single:
+            equis = equis.squeeze(0)
+
+        return equis

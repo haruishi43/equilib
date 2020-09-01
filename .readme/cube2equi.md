@@ -13,4 +13,4 @@ class SomeCube2Equi(BaseCube2Equi):
 ## TODO:
 
 - [x] Implement `numpy`
-- [ ] Implement `torch`
+- [x] Implement `torch`

@@ -8,9 +8,6 @@
 - No need for other dependencies except for `numpy` and `pytorch`.
 - Added functionality like rotation matrix and batched processing.
 
-_NOTE_:
-- `cube2equi` is _sort of_ working on `numpy`, but needs more work to improve the quality. Using other implementation that uses `scipy` or `cv2` is recommended.
-
 ## Installation:
 
 ```Bash
