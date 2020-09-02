@@ -1,6 +1,3 @@
-[pypi-image]: 
-[pypi-url]: 
-
 <h1 align="center">
   equilib
 </h1>
@@ -14,11 +11,6 @@
   <a href="https://pypi.org/project/equilib"><img src="https://img.shields.io/pypi/pyversions/equilib"></a>
   <a href="https://github.com/haruishi43/equilib/actions"><img src="https://github.com/haruishi43/equilib/workflows/ci/badge.svg"></a>
 </div>
-
-
-# equilib
-
-[![PyPI Version][pypi-image]][pypi-url]
 
 <img src=".img/equilib.png" alt="equilib" width="720"/>
 
