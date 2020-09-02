@@ -1,4 +1,9 @@
+[pypi-image]: https://badge.fury.io/py/pyequilib.svg
+[pypi-url]: https://pypi.org/project/pyequilib/0.0.1/
+
 # equilib
+
+[![PyPI Version][pypi-image]][pypi-url]
 
 <img src=".img/equilib.png" alt="equilib" width="720"/>
 
