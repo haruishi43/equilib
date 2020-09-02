@@ -7,7 +7,7 @@
 </h4>
 
 <div align="center">
-  <a href="https://pypi.org/project/pyequilib/0.0.1/"><img src="https://badge.fury.io/py/pyequilib.svg"></a>
+  <a href="https://pypi.org/project/pyequilib/0.1.0/"><img src="https://badge.fury.io/py/pyequilib.svg"></a>
   <a href="https://pypi.org/project/equilib"><img src="https://img.shields.io/pypi/pyversions/pyequilib"></a>
   <a href="https://github.com/haruishi43/equilib/actions"><img src="https://github.com/haruishi43/equilib/workflows/ci/badge.svg"></a>
 </div>
