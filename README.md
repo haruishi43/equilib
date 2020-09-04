@@ -116,7 +116,6 @@ pytest tests
 
 ### TODO:
 
-- [x] Keeping `.vscode` for my development
 - [ ] Add graphs and statistics for speed improvements
 
 
