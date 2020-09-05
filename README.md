@@ -58,7 +58,7 @@ Common image sizes:
 ```Python
 import numpy as np
 from PIL import Image
-from equilib.equi2pers import NumpyEqui2Pers
+from pyequilib.equi2pers import NumpyEqui2Pers
 
 # Intialize equi2pers
 equi2pers = NumpyEqui2Pers(w_pers=640, h_pers=480, fov_x=90)
@@ -78,8 +78,9 @@ rot = {
 pers_img = equi2pers(equi_img, rot, sampling_method="faster")
 ```
 
-The API for each module is pretty similar.
-For more information, take a look in [.readme](.readme/)
+The API for each module is pretty similar with other conversions.
+For more information, take a look in [.readme](.readme/).
+Note that module name differs if you imported from pypi or used setup code (if you used `setup.py`, it should be `equilib`).
 
 
 ### Coordinate System:
@@ -117,6 +118,7 @@ pytest tests
 ### TODO:
 
 - [ ] Add graphs and statistics for speed improvements
+- [ ] Module name differes between PyPI and `setup.py`
 
 
 ## Acknowledgements:
