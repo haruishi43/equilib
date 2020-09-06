@@ -42,23 +42,12 @@ pip install -r requirements.txt
 python setup.py develop
 ```
 
-## Equirectangular image
-
-<img src="data/equi.jpg" alt="equi" width="480"/>
-
-Any image size with `2:1` ratio that captures 360 degree field of view.
-
-Common image sizes:
-
-- `2160s`: `3840x1920`
-- `2880s`: `5760x2880`
-
 ## Basic Usage:
 
 ```Python
 import numpy as np
 from PIL import Image
-from pyequilib.equi2pers import NumpyEqui2Pers
+from equilib.equi2pers import NumpyEqui2Pers
 
 # Intialize equi2pers
 equi2pers = NumpyEqui2Pers(w_pers=640, h_pers=480, fov_x=90)
@@ -79,8 +68,9 @@ pers_img = equi2pers(equi_img, rot, sampling_method="faster")
 ```
 
 The API for each module is pretty similar with other conversions.
-For more information, take a look in [.readme](.readme/).
-Note that module name differs if you imported from pypi or used setup code (if you used `setup.py`, it should be `equilib`).
+First, you initialize the module (the naming of the module is `Numpy`, `Torch` or `CPP` + function name `[Equi2Pers, Equi2Equi, Equi2Cube, Cube2Equi]`).
+Lastly, input the image(s) (and rotations if needed) to the function to obtain the transformed output.
+For more information about how each functions work, take a look in [.readme](.readme/) or go through example codes in the `tests` or `scripts`.
 
 
 ### Coordinate System:
@@ -91,6 +81,17 @@ Right-handed rule XYZ global coordinate system. `x-axis` faces forward and `z-ax
 - `yaw`: counter-clockwise rotation about the `z-axis`
 
 See demo scripts under `scripts`.
+
+## Equirectangular image
+
+<img src="data/equi.jpg" alt="equi" width="480"/>
+
+Any image size with `2:1` ratio that captures 360 degree field of view.
+
+Common image sizes:
+
+- `2160s`: `3840x1920`
+- `2880s`: `5760x2880`
 
 ## Grid Sampling
 
@@ -118,7 +119,6 @@ pytest tests
 ### TODO:
 
 - [ ] Add graphs and statistics for speed improvements
-- [ ] Module name differes between PyPI and `setup.py`
 
 
 ## Acknowledgements:
