@@ -110,44 +110,32 @@ class Cube2Equi(BaseCube2Equi):
         r""""""
 
         # Convert all cubemap format to `horizon` and batched
-        is_single = False
         if cube_format in ["dice", "horizon"]:
             if isinstance(cubemap, torch.Tensor):
-                # could be single or batched
                 assert (
                     len(cubemap.shape) >= 3
                 ), "input shape {} is not valid".format(cubemap.shape)
                 if len(cubemap.shape) == 4:
-                    # batch
                     cubemap = [
                         self._to_horizon(c, cube_format) for c in cubemap
                     ]
                 else:
-                    # single
-                    is_single = True
                     cubemap = [self._to_horizon(cubemap, cube_format)]
             elif isinstance(cubemap, list):
-                # could only be batched
                 cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
             else:
                 raise ValueError
         elif cube_format == "dict":
             if isinstance(cubemap, dict):
-                # single
-                is_single = True
                 cubemap = [self._to_horizon(cubemap, cube_format)]
             elif isinstance(cubemap, list):
-                # batch
                 cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
             else:
                 raise ValueError
         elif cube_format == "list":
             if isinstance(cubemap[0], torch.Tensor):
-                # single
-                is_single = True
                 cubemap = [self._to_horizon(cubemap, cube_format)]
             elif isinstance(cubemap[0], list):
-                # batch
                 cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
             else:
                 raise ValueError
@@ -211,7 +199,7 @@ class Cube2Equi(BaseCube2Equi):
         grid_sample = getattr(torch_func, sampling_method)
         equis = grid_sample(cubemap, grid, mode=mode)
 
-        if is_single:
+        if batch == 1:
             equis = equis.squeeze(0)
 
         return equis
