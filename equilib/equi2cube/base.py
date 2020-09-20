@@ -4,7 +4,7 @@
 class BaseEqui2Cube(object):
     r"""Base Equi2Cube class to build off of"""
 
-    def __init__(self, w_face: int, **kwargs):
+    def __init__(self, w_face: int, **kwargs) -> None:
         r"""
         params:
             w_face: cube face width (int)

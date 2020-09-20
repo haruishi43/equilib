@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import math
-from typing import Union
+from typing import Dict, List, Tuple, Union
 
 import torch
 
@@ -11,18 +11,20 @@ from ..base import BaseCube2Equi
 from .utils import get_device
 
 
-def cube_list2h(cube_list: list):
+def cube_list2h(cube_list: List[torch.Tensor]) -> torch.Tensor:
     assert len(cube_list) == 6
     assert sum(face.shape == cube_list[0].shape for face in cube_list) == 6
     return torch.cat(cube_list, dim=-1)
 
 
-def cube_dict2h(cube_dict: dict, face_k=["F", "R", "B", "L", "U", "D"]):
+def cube_dict2h(
+    cube_dict: Dict[str, torch.Tensor], face_k=["F", "R", "B", "L", "U", "D"]
+) -> torch.Tensor:
     assert len(face_k) == 6
     return cube_list2h([cube_dict[k] for k in face_k])
 
 
-def cube_dice2h(cube_dice: torch.Tensor):
+def cube_dice2h(cube_dice: torch.Tensor) -> torch.Tensor:
     r"""dice to horizion
 
     params:
@@ -40,7 +42,7 @@ def cube_dice2h(cube_dice: torch.Tensor):
 
 
 class Cube2Equi(BaseCube2Equi):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
     def _to_horizon(
@@ -93,7 +95,7 @@ class Cube2Equi(BaseCube2Equi):
 
         return tp.type(torch.int32)
 
-    def create_equi_grid(self, h_out: int, w_out: int) -> torch.Tensor:
+    def create_equi_grid(self, h_out: int, w_out: int) -> Tuple(torch.Tensor):
         _dtype = torch.float32
         theta = torch.linspace(-math.pi, math.pi, steps=w_out, dtype=_dtype)
         phi = torch.linspace(math.pi, -math.pi, steps=h_out, dtype=_dtype) / 2
@@ -102,7 +104,9 @@ class Cube2Equi(BaseCube2Equi):
 
     def run(
         self,
-        cubemap: Union[torch.Tensor, dict, list],
+        cubemap: Union[
+            torch.Tensor, Dict[str, torch.Tensor], List[torch.Tensor]
+        ],
         cube_format: str = "dice",
         sampling_method: str = "torch",
         mode: str = "bilinear",

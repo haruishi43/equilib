@@ -30,7 +30,7 @@ def deg2rad(tensor: torch.Tensor) -> torch.Tensor:
 def create_coord(
     height: int,
     width: int,
-) -> torch.tensor:
+) -> torch.Tensor:
     r"""Create mesh coordinate grid"""
     _xs = torch.linspace(0, width - 1, width)
     _ys = torch.linspace(0, height - 1, height)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import math
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import torch
 
@@ -21,7 +21,7 @@ from .utils import (
 class Equi2Cube(BaseEqui2Cube):
     r"""Equi2Cube PyTorch"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
     def rotation_matrix(
@@ -43,7 +43,7 @@ class Equi2Cube(BaseEqui2Cube):
         R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
         return R
 
-    def create_xyz(self, w_face: int):
+    def create_xyz(self, w_face: int) -> torch.Tensor:
         r"""xyz coordinates of the faces of the cube"""
         _dtype = torch.float32
         out = torch.zeros((w_face, w_face * 6, 3), dtype=_dtype)
@@ -90,7 +90,7 @@ class Equi2Cube(BaseEqui2Cube):
 
         return out
 
-    def xyz2rot(self, xyz):
+    def xyz2rot(self, xyz) -> Tuple[torch.Tensor]:
         r"""Return rotation (theta, phi) from xyz"""
         norm = torch.norm(xyz, dim=-1)
         phi = torch.asin(xyz[:, :, :, 2] / norm)
@@ -105,7 +105,12 @@ class Equi2Cube(BaseEqui2Cube):
         sampling_method: str = "torch",
         mode: str = "bilinear",
         debug: bool = False,
-    ) -> Union[torch.Tensor, List[torch.Tensor], List[dict]]:
+    ) -> Union[
+        torch.Tensor,
+        List[torch.Tensor],
+        List[Dict[str, torch.Tensor]],
+        Dict[torch.Tensor],
+    ]:
         r"""Call Equi2Cube
 
         params:

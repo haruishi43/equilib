@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -9,13 +9,15 @@ from equilib.grid_sample import numpy_func
 from ..base import BaseCube2Equi
 
 
-def cube_list2h(cube_list: list):
+def cube_list2h(cube_list: List[np.ndarray]):
     assert len(cube_list) == 6
     assert sum(face.shape == cube_list[0].shape for face in cube_list) == 6
     return np.concatenate(cube_list, axis=-1)
 
 
-def cube_dict2h(cube_dict: dict, face_k=["F", "R", "B", "L", "U", "D"]):
+def cube_dict2h(
+    cube_dict: Dict[str, np.ndarray], face_k=["F", "R", "B", "L", "U", "D"]
+):
     assert len(face_k) == 6
     return cube_list2h([cube_dict[k] for k in face_k])
 
@@ -78,7 +80,7 @@ class Cube2Equi(BaseCube2Equi):
 
         return tp.astype(np.int32)
 
-    def create_equi_grid(self, h_out: int, w_out: int) -> np.ndarray:
+    def create_equi_grid(self, h_out: int, w_out: int) -> Tuple[np.ndarray]:
         _dtype = np.float32
         theta = np.linspace(-np.pi, np.pi, num=w_out, dtype=_dtype)
         phi = np.linspace(np.pi, -np.pi, num=h_out, dtype=_dtype) / 2
@@ -139,7 +141,7 @@ class Cube2Equi(BaseCube2Equi):
 
     def run(
         self,
-        cubemap: Union[np.ndarray, dict, list],
+        cubemap: Union[np.ndarray, Dict[str, np.ndarray], List[np.ndarray]],
         cube_format: str = "dice",
         sampling_method: str = "faster",
         mode: str = "bilinear",

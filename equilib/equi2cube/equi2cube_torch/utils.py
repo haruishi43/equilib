@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from typing import Dict, List
+
 import numpy as np
 
 import torch
@@ -64,12 +66,12 @@ def create_rotation_matrix(
     return R_z @ R_y @ R_x
 
 
-def cube_h2list(cube_h):
+def cube_h2list(cube_h: torch.Tensor) -> List[torch.Tensor]:
     assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
     return torch.split(cube_h, split_size_or_sections=cube_h.shape[-2], dim=-1)
 
 
-def cube_h2dict(cube_h):
+def cube_h2dict(cube_h: torch.Tensor) -> Dict[str, torch.Tensor]:
     cube_list = cube_h2list(cube_h)
     if len(cube_h.shape) == 3:
         return dict(
@@ -93,7 +95,7 @@ def cube_h2dict(cube_h):
         return ret
 
 
-def cube_h2dice(cube_h):
+def cube_h2dice(cube_h: torch.Tensor) -> torch.Tensor:
     w = cube_h.shape[-2]
     # Order: F R B L U D
     sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]

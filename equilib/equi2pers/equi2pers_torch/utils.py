@@ -32,7 +32,7 @@ def create_M(
     width: int,
     fov_x: float,
     rot: Dict[str, float],
-) -> torch.tensor:
+) -> torch.Tensor:
     r"""Create M"""
     m = create_coord(height, width)
     K = create_K(height, width, fov_x)
@@ -45,7 +45,7 @@ def create_M(
 def create_coord(
     height: int,
     width: int,
-) -> torch.tensor:
+) -> torch.Tensor:
     r"""Create mesh coordinate grid"""
     _xs = torch.linspace(0, width - 1, width)
     _ys = torch.linspace(0, height - 1, height)

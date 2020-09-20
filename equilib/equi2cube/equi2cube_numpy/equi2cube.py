@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -13,7 +13,7 @@ from .utils import create_rotation_matrix, cube_h2dice, cube_h2dict, cube_h2list
 class Equi2Cube(BaseEqui2Cube):
     r"""Equi2Cube Numpy"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
     def rotation_matrix(
@@ -37,7 +37,7 @@ class Equi2Cube(BaseEqui2Cube):
         R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
         return R
 
-    def create_xyz(self, w_face: int):
+    def create_xyz(self, w_face: int) -> np.ndarray:
         r"""xyz coordinates of the faces of the cube"""
         out = np.zeros((w_face, w_face * 6, 3), np.float32)
         rng = np.linspace(-0.5, 0.5, num=w_face, dtype=np.float32)
@@ -80,7 +80,7 @@ class Equi2Cube(BaseEqui2Cube):
 
         return out
 
-    def xyz2rot(self, xyz):
+    def xyz2rot(self, xyz) -> Tuple[np.ndarray]:
         r"""Return rotation (theta, phi) from xyz"""
         norm = np.linalg.norm(xyz, axis=-1)
         phi = np.arcsin(xyz[:, :, 2] / norm)
@@ -94,7 +94,7 @@ class Equi2Cube(BaseEqui2Cube):
         cube_format: str,
         sampling_method: str = "faster",
         mode: str = "bilinear",
-    ):
+    ) -> np.ndarray:
         r"""Call a single run
 
         params:
@@ -152,7 +152,7 @@ class Equi2Cube(BaseEqui2Cube):
         cube_format: str,
         sampling_method: str = "faster",
         mode: str = "bilinear",
-    ) -> Union[np.ndarray, List[np.ndarray], List[dict]]:
+    ) -> Union[np.ndarray, List[np.ndarray], List[Dict[str, np.ndarray]]]:
         r"""Call Equi2Cube
 
         params:

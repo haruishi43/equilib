@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from typing import Dict, List
+
 import numpy as np
 
 
@@ -46,12 +48,12 @@ def create_rotation_matrix(
     return R_z @ R_y @ R_x
 
 
-def cube_h2list(cube_h):
+def cube_h2list(cube_h: np.ndarray) -> List[np.ndarray]:
     assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
     return np.split(cube_h, 6, axis=-1)
 
 
-def cube_h2dict(cube_h):
+def cube_h2dict(cube_h: np.ndarray) -> Dict[np.ndarray]:
     cube_list = cube_h2list(cube_h)
     return dict(
         [
@@ -61,7 +63,7 @@ def cube_h2dict(cube_h):
     )
 
 
-def cube_h2dice(cube_h):
+def cube_h2dice(cube_h: np.ndarray) -> np.ndarray:
     assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
     w = cube_h.shape[-2]
     cube_dice = np.zeros((cube_h.shape[0], w * 3, w * 4), dtype=cube_h.dtype)

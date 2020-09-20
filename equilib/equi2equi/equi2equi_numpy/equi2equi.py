@@ -13,7 +13,7 @@ __all__ = ["Equi2Equi"]
 
 
 class Equi2Equi(BaseEqui2Equi):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         r"""Equi2Equi Numpy"""
         super().__init__(**kwargs)
 
