@@ -95,7 +95,7 @@ class Cube2Equi(BaseCube2Equi):
 
         return tp.type(torch.int32)
 
-    def create_equi_grid(self, h_out: int, w_out: int) -> Tuple(torch.Tensor):
+    def create_equi_grid(self, h_out: int, w_out: int) -> Tuple[torch.Tensor]:
         _dtype = torch.float32
         theta = torch.linspace(-math.pi, math.pi, steps=w_out, dtype=_dtype)
         phi = torch.linspace(math.pi, -math.pi, steps=h_out, dtype=_dtype) / 2

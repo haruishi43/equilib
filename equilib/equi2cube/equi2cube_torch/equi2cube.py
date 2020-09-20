@@ -109,7 +109,7 @@ class Equi2Cube(BaseEqui2Cube):
         torch.Tensor,
         List[torch.Tensor],
         List[Dict[str, torch.Tensor]],
-        Dict[torch.Tensor],
+        Dict[str, torch.Tensor],
     ]:
         r"""Call Equi2Cube
 

@@ -53,7 +53,7 @@ def cube_h2list(cube_h: np.ndarray) -> List[np.ndarray]:
     return np.split(cube_h, 6, axis=-1)
 
 
-def cube_h2dict(cube_h: np.ndarray) -> Dict[np.ndarray]:
+def cube_h2dict(cube_h: np.ndarray) -> Dict[str, np.ndarray]:
     cube_list = cube_h2list(cube_h)
     return dict(
         [
