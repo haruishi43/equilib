@@ -8,11 +8,39 @@ import numpy as np
 import torch
 
 from equilib.grid_sample import torch_func
+from equilib.common.torch_utils import (
+    create_rotation_matrix,
+    get_device,
+    sizeof,
+)
 
-from ..base import BaseEqui2Equi
-from .utils import create_rotation_matrix, get_device, sizeof
+from .base import BaseEqui2Equi
+
 
 __all__ = ["Equi2Equi"]
+
+
+def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
+    r"""Rotation coordinates to phi/theta of the equirectangular image
+
+    params:
+        M: torch.Tensor
+
+    return:
+        phis: torch.Tensor
+        thetas: torch.Tensor
+    """
+    if len(M.shape) == 3:
+        M = M.unsqueeze(0)
+
+    norms = torch.norm(M, dim=-1)
+    thetas = torch.atan2(M[:, :, :, 0], M[:, :, :, 2])
+    phis = torch.asin(M[:, :, :, 1] / norms)
+
+    if thetas.shape[0] == phis.shape[0] == 1:
+        thetas = thetas.squeeze(0)
+        phis = phis.squeeze(0)
+    return phis, thetas
 
 
 class Equi2Equi(BaseEqui2Equi):

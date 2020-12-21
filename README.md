@@ -76,23 +76,13 @@ For more information about how each functions work, take a look in [.readme](.re
 
 ### Coordinate System:
 
-Right-handed rule XYZ global coordinate system. `x-axis` faces forward and `z-axis` faces up.
+__Right-handed rule XYZ global coordinate system__. `x-axis` faces forward and `z-axis` faces up.
 - `roll`: counter-clockwise rotation about the `x-axis`
 - `pitch`: counter-clockwise rotation about the `y-axis`
 - `yaw`: counter-clockwise rotation about the `z-axis`
 
 See demo scripts under `scripts`.
 
-## Equirectangular image
-
-<img src="data/equi.jpg" alt="equi" width="480"/>
-
-Any image size with `2:1` ratio that captures 360 degree field of view.
-
-Common image sizes:
-
-- `2160s`: `3840x1920`
-- `2880s`: `5760x2880`
 
 ## Grid Sampling
 
@@ -116,6 +106,8 @@ Running tests:
 ```Bash
 pytest tests
 ```
+
+Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
 
 ### TODO:
 

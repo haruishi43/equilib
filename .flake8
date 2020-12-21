@@ -33,6 +33,12 @@ ignore =
   H501,
   # I100:
   I100,
+  # function name should be lowercase
+  N802,
+  # N803, arguments should be lowercase
+  N803,
+  # N806, should be lowercase
+  N806,
   # N812, non lowercase
   N812,
   # N817: camelcase

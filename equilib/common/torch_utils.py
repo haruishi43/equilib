@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import Tuple
-
 import numpy as np
 
 import torch
@@ -86,26 +84,3 @@ def create_rotation_matrix(
     )
 
     return R_z @ R_y @ R_x
-
-
-def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
-    r"""Rotation coordinates to phi/theta of the equirectangular image
-
-    params:
-        M: torch.Tensor
-
-    return:
-        phis: torch.Tensor
-        thetas: torch.Tensor
-    """
-    if len(M.shape) == 3:
-        M = M.unsqueeze(0)
-
-    norms = torch.norm(M, dim=-1)
-    thetas = torch.atan2(M[:, :, :, 0], M[:, :, :, 2])
-    phis = torch.asin(M[:, :, :, 1] / norms)
-
-    if thetas.shape[0] == phis.shape[0] == 1:
-        thetas = thetas.squeeze(0)
-        phis = phis.squeeze(0)
-    return phis, thetas

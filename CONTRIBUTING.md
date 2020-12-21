@@ -2,7 +2,7 @@
 We want to make contributing to this project as easy and transparent as possible.
 
 ## Issues
-We use [GitHub issues](../../../issues) to track public bugs. Please ensure your description is
+We use [GitHub issues](../../issues) to track public bugs. Please ensure your description is
 clear and has sufficient instructions to be able to reproduce the issue.
 
 ## Test

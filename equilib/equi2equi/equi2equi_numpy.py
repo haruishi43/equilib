@@ -5,9 +5,9 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 
 from equilib.grid_sample import numpy_func
+from equilib.common.numpy_utils import create_rotation_matrix
 
-from ..base import BaseEqui2Equi
-from .utils import create_rotation_matrix
+from .base import BaseEqui2Equi
 
 __all__ = ["Equi2Equi"]
 

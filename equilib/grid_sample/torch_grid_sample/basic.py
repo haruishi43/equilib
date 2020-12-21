@@ -4,7 +4,8 @@ from typing import List
 
 import torch
 
-from .utils import get_device
+from equilib.common.torch_utils import get_device
+
 from .interp import linear_interp
 
 
@@ -19,10 +20,11 @@ def interp2d(
     mode: interpolation mode
     """
     q00, q10, q01, q11 = Q
+    L = torch.tensor(1.0).to(get_device(Q))
     if mode == "bilinear":
-        f0 = linear_interp(q00, q01, dx, 1.0)
-        f1 = linear_interp(q10, q11, dx, 1.0)
-        return linear_interp(f0, f1, dy, 1.0)
+        f0 = linear_interp(q00, q01, dx, L)
+        f1 = linear_interp(q10, q11, dx, L)
+        return linear_interp(f0, f1, dy, L)
     else:
         raise NotImplementedError
 

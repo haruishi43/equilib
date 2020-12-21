@@ -1,14 +1,15 @@
-## cube2equi
+# cube2equi
 
-cubemap to equirectangular transformation
+Cubemap to equirectangular transformation
+
+## Usage
 
 ```Python
-class SomeCube2Equi(BaseCube2Equi):
-    def __init__(self, w_out: int, h_out: int):
-        ...
-    def run(self, cubemap, cube_format, **kwargs):
-        ...
+
+
 ```
+
+
 
 - `w_out` and `h_out` must be divisible by 8.
 - if `w_out, h_out` is large respect to the input cubemap, it may leave some artifacts

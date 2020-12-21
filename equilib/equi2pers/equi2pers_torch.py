@@ -3,14 +3,119 @@
 import math
 from typing import Dict, List, Tuple, Union
 
+import numpy as np
+
 import torch
 
 from equilib.grid_sample import torch_func
+from equilib.common.torch_utils import (
+    create_coord,
+    create_rotation_matrix,
+    deg2rad,
+    get_device,
+    sizeof,
+)
 
-from ..base import BaseEqui2Pers
-from .utils import create_rotation_matrix, deg2rad, get_device, sizeof
+from .base import BaseEqui2Pers
 
 __all___ = ["Equi2Pers"]
+
+
+def create_M(
+    height: int,
+    width: int,
+    fov_x: float,
+    rot: Dict[str, float],
+) -> torch.Tensor:
+    r"""Create M"""
+    m = create_coord(height, width)
+    K = create_K(height, width, fov_x)
+    R = create_rot_mat(**rot)
+    M = R.inverse() @ K.inverse() @ m.unsqueeze(3)
+    M = M.squeeze(3)
+    return M
+
+
+def create_K(
+    height: int,
+    width: int,
+    fov_x: float,
+    skew: float = 0.0,
+) -> torch.Tensor:
+    r"""Create Intrinsic Matrix
+
+    params:
+        height: int
+        width: int
+        fov_x: float
+        skew: float
+
+    return:
+        K: 3x3 matrix torch.Tensor
+
+    NOTE:
+        ref: http://ksimek.github.io/2013/08/13/intrinsic/
+    """
+    fov_x = torch.tensor(fov_x)
+    f = width / (2 * torch.tan(deg2rad(fov_x) / 2))
+    K = torch.tensor(
+        [[f, skew, width / 2], [0.0, f, height / 2], [0.0, 0.0, 1.0]]
+    )
+    return K
+
+
+def create_rot_mat(
+    roll: float,
+    pitch: float,
+    yaw: float,
+) -> torch.Tensor:
+    r"""Create Rotation Matrix
+
+    params:
+        roll: x-axis rotation float
+        pitch: y-axis rotation float
+        yaw: z-axis rotation float
+
+    return:
+        rotation matrix: torch.Tensor
+
+    Camera coordinates -> z-axis points forward, y-axis points upward
+    Global coordinates -> x-axis points forward, z-axis poitns upward
+
+    NOTE: https://www.sciencedirect.com/topics/engineering/intrinsic-parameter
+    """
+    # default rotation that changes global to camera coordinates
+    x = np.pi
+    y = np.pi
+    z = np.pi
+    R = create_rotation_matrix(x=x, y=y, z=z)
+
+    # rotation matrix
+    R = R @ create_rotation_matrix(x=roll, y=pitch, z=yaw)
+    return R
+
+
+def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
+    r"""Rotation coordinates to phi/theta of the equirectangular image
+
+    params:
+        M: torch.Tensor
+
+    return:
+        phis: torch.Tensor
+        thetas: torch.Tensor
+    """
+    if len(M.shape) == 3:
+        M = M.unsqueeze(0)
+
+    norms = torch.norm(M, dim=-1)
+    thetas = torch.atan2(M[:, :, :, 0], M[:, :, :, 2])
+    phis = torch.asin(M[:, :, :, 1] / norms)
+
+    if thetas.shape[0] == phis.shape[0] == 1:
+        thetas = thetas.squeeze(0)
+        phis = phis.squeeze(0)
+    return phis, thetas
 
 
 class Equi2Pers(BaseEqui2Pers):

@@ -117,7 +117,7 @@ def test_torch_batch():
     # NOTE: Sometimes images are RGBA
     equi_img = equi_img.convert("RGB")
     batched_equi = []
-    for i in range(batch_size):
+    for _ in range(batch_size):
         equi = to_tensor(equi_img)
         batched_equi.append(copy.deepcopy(equi))
     batched_equi = torch.stack(batched_equi, dim=0)

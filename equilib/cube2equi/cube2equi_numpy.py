@@ -6,23 +6,24 @@ import numpy as np
 
 from equilib.grid_sample import numpy_func
 
-from ..base import BaseCube2Equi
+from .base import BaseCube2Equi
 
 
-def cube_list2h(cube_list: List[np.ndarray]):
+def cube_list2h(cube_list: List[np.ndarray]) -> np.ndarray:
     assert len(cube_list) == 6
     assert sum(face.shape == cube_list[0].shape for face in cube_list) == 6
     return np.concatenate(cube_list, axis=-1)
 
 
 def cube_dict2h(
-    cube_dict: Dict[str, np.ndarray], face_k=["F", "R", "B", "L", "U", "D"]
-):
+    cube_dict: Dict[str, np.ndarray],
+    face_k: Union[Tuple[str], List[str]] = ("F", "R", "B", "L", "U", "D"),
+) -> np.ndarray:
     assert len(face_k) == 6
     return cube_list2h([cube_dict[k] for k in face_k])
 
 
-def cube_dice2h(cube_dice: np.ndarray):
+def cube_dice2h(cube_dice: np.ndarray) -> np.ndarray:
     r"""dice to horizion
 
     params:

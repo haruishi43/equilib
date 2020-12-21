@@ -5,9 +5,35 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 
 from equilib.grid_sample import numpy_func
+from equilib.common.numpy_utils import create_rotation_matrix
 
-from ..base import BaseEqui2Cube
-from .utils import create_rotation_matrix, cube_h2dice, cube_h2dict, cube_h2list
+from .base import BaseEqui2Cube
+
+
+def cube_h2list(cube_h: np.ndarray) -> List[np.ndarray]:
+    assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
+    return np.split(cube_h, 6, axis=-1)
+
+
+def cube_h2dict(cube_h: np.ndarray) -> Dict[str, np.ndarray]:
+    cube_list = cube_h2list(cube_h)
+    return {
+        k: cube_list[i] for i, k in enumerate(["F", "R", "B", "L", "U", "D"])
+    }
+
+
+def cube_h2dice(cube_h: np.ndarray) -> np.ndarray:
+    assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
+    w = cube_h.shape[-2]
+    cube_dice = np.zeros((cube_h.shape[0], w * 3, w * 4), dtype=cube_h.dtype)
+    cube_list = cube_h2list(cube_h)
+    # Order: F R B L U D
+    sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
+    for i, (sx, sy) in enumerate(sxy):
+        cube_dice[:, sy * w : (sy + 1) * w, sx * w : (sx + 1) * w] = cube_list[
+            i
+        ]
+    return cube_dice
 
 
 class Equi2Cube(BaseEqui2Cube):

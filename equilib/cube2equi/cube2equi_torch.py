@@ -6,9 +6,9 @@ from typing import Dict, List, Tuple, Union
 import torch
 
 from equilib.grid_sample import torch_func
+from equilib.common.torch_utils import get_device
 
-from ..base import BaseCube2Equi
-from .utils import get_device
+from .base import BaseCube2Equi
 
 
 def cube_list2h(cube_list: List[torch.Tensor]) -> torch.Tensor:
@@ -18,7 +18,8 @@ def cube_list2h(cube_list: List[torch.Tensor]) -> torch.Tensor:
 
 
 def cube_dict2h(
-    cube_dict: Dict[str, torch.Tensor], face_k=["F", "R", "B", "L", "U", "D"]
+    cube_dict: Dict[str, torch.Tensor],
+    face_k: Union[Tuple[str], List[str]] = ("F", "R", "B", "L", "U", "D"),
 ) -> torch.Tensor:
     assert len(face_k) == 6
     return cube_list2h([cube_dict[k] for k in face_k])

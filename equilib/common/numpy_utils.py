@@ -1,8 +1,29 @@
 #!/usr/bin/env python3
 
-from typing import Dict, List
-
 import numpy as np
+
+
+def create_coord(
+    height: int,
+    width: int,
+) -> np.ndarray:
+    r"""Create mesh coordinate grid with height and width
+
+    `z-axis` scale is `1`
+
+    params:
+        height: int
+        width: int
+
+    return:
+        coordinate: numpy.ndarray
+    """
+    _xs = np.linspace(0, width - 1, width)
+    _ys = np.linspace(0, height - 1, height)
+    xs, ys = np.meshgrid(_xs, _ys)
+    zs = np.ones_like(xs)
+    coord = np.stack((xs, ys, zs), axis=2)
+    return coord
 
 
 def create_rotation_matrix(
@@ -46,32 +67,3 @@ def create_rotation_matrix(
     )
 
     return R_z @ R_y @ R_x
-
-
-def cube_h2list(cube_h: np.ndarray) -> List[np.ndarray]:
-    assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
-    return np.split(cube_h, 6, axis=-1)
-
-
-def cube_h2dict(cube_h: np.ndarray) -> Dict[str, np.ndarray]:
-    cube_list = cube_h2list(cube_h)
-    return dict(
-        [
-            (k, cube_list[i])
-            for i, k in enumerate(["F", "R", "B", "L", "U", "D"])
-        ]
-    )
-
-
-def cube_h2dice(cube_h: np.ndarray) -> np.ndarray:
-    assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
-    w = cube_h.shape[-2]
-    cube_dice = np.zeros((cube_h.shape[0], w * 3, w * 4), dtype=cube_h.dtype)
-    cube_list = cube_h2list(cube_h)
-    # Order: F R B L U D
-    sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
-    for i, (sx, sy) in enumerate(sxy):
-        cube_dice[:, sy * w : (sy + 1) * w, sx * w : (sx + 1) * w] = cube_list[
-            i
-        ]
-    return cube_dice

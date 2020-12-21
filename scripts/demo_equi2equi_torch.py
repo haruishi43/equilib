@@ -124,7 +124,7 @@ def test_video(path: str) -> None:
     cv2.destroyAllWindows()
 
     print(sum(times) / len(times))
-    x_axis = [i for i in range(len(times))]
+    x_axis = list(range(len(times)))
     plt.plot(x_axis, times)
     save_path = osp.join("./results", "times_equi2equi_torch_video.png")
     plt.savefig(save_path)

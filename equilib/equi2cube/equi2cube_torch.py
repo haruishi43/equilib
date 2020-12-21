@@ -6,16 +6,68 @@ from typing import Dict, List, Tuple, Union
 import torch
 
 from equilib.grid_sample import torch_func
-
-from ..base import BaseEqui2Cube
-from .utils import (
+from equilib.common.torch_utils import (
     create_rotation_matrix,
-    cube_h2dice,
-    cube_h2dict,
-    cube_h2list,
     get_device,
     sizeof,
 )
+
+from .base import BaseEqui2Cube
+
+
+def cube_h2list(cube_h: torch.Tensor) -> List[torch.Tensor]:
+    assert cube_h.shape[-2] * 6 == cube_h.shape[-1]
+    return torch.split(cube_h, split_size_or_sections=cube_h.shape[-2], dim=-1)
+
+
+def cube_h2dict(cube_h: torch.Tensor) -> Dict[str, torch.Tensor]:
+    cube_list = cube_h2list(cube_h)
+    if len(cube_h.shape) == 3:
+        return {
+            k: cube_list[i]
+            for i, k in enumerate(["F", "R", "B", "L", "U", "D"])
+        }
+    else:
+        batches = cube_h.shape[0]
+        ret = []
+        for b in range(batches):
+            ret.append(
+                {
+                    k: cube_list[i][b]
+                    for i, k in enumerate(["F", "R", "B", "L", "U", "D"])
+                }
+            )
+        return ret
+
+
+def cube_h2dice(cube_h: torch.Tensor) -> torch.Tensor:
+    w = cube_h.shape[-2]
+    # Order: F R B L U D
+    sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
+
+    if len(cube_h.shape) == 3:
+        batches = 1
+        cube_dice = torch.zeros(
+            (cube_h.shape[-3], w * 3, w * 4), dtype=cube_h.dtype
+        )
+        cube_list = cube_h2list(cube_h)
+        for i, (sx, sy) in enumerate(sxy):
+            cube_dice[
+                :, sy * w : (sy + 1) * w, sx * w : (sx + 1) * w
+            ] = cube_list[i]
+    else:
+        batches = cube_h.shape[0]
+        cube_dice = torch.zeros(
+            (batches, cube_h.shape[-3], w * 3, w * 4), dtype=cube_h.dtype
+        )
+        cube_list = cube_h2list(cube_h)
+        for b in range(batches):
+            for i, (sx, sy) in enumerate(sxy):
+                cube_dice[
+                    b, :, sy * w : (sy + 1) * w, sx * w : (sx + 1) * w
+                ] = cube_list[i][b]
+
+    return cube_dice
 
 
 class Equi2Cube(BaseEqui2Cube):

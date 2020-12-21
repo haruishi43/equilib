@@ -27,8 +27,8 @@ def grid_sample(
 
     # grid in shape: (batch, channel, h_out, w_out)
     # grid out shape: (batch, h_out, w_out, channel)
-    batches, channels, h_img, w_img = img.shape
-    _batches, xy, h_out, w_out = grid.shape
+    batches, _, h_img, w_img = img.shape
+    _batches, _, _, _ = grid.shape
     assert batches == _batches, "Batch size mismatch"
 
     # normalize grid -1~1
