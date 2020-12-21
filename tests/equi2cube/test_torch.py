@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+from typing import Union
 import os.path as osp
 
 import numpy as np
@@ -17,7 +18,7 @@ WIDTH = 256
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def run(equi, rot, cube_format):
+def run(equi, rot, cube_format) -> Union[dict, list, torch.Tensor]:
     h_equi, w_equi = equi.shape[-2:]
     print("equirectangular image size:")
     print(h_equi, w_equi)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+from typing import Union
 import os.path as osp
 
 import numpy as np
@@ -12,7 +13,7 @@ from equilib.equi2cube import NumpyEqui2Cube
 WIDTH = 256
 
 
-def run(equi, rot, cube_format):
+def run(equi, rot, cube_format) -> Union[list, dict, np.ndarray]:
     h_equi, w_equi = equi.shape[-2:]
     print("equirectangular image size:")
     print(h_equi, w_equi)

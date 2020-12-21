@@ -17,7 +17,7 @@ HEIGHT = 480
 FOV = 90
 
 
-def run(equi, rot):
+def run(equi, rot) -> np.ndarray:
     h_equi, w_equi = equi.shape[-2:]
     print("equirectangular image size:")
     print(h_equi, w_equi)

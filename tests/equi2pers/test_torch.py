@@ -24,7 +24,7 @@ FOV = 90
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def run(equi, rot):
+def run(equi, rot) -> torch.Tensor:
     h_equi, w_equi = equi.shape[-2:]
     print("equirectangular image size:")
     print(h_equi, w_equi)

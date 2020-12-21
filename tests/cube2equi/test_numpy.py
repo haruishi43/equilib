@@ -13,7 +13,7 @@ OUT_W = 480
 OUT_H = 240
 
 
-def run(cube, cube_format):
+def run(cube, cube_format) -> np.ndarray:
     print("Input is {}:".format(cube_format))
     if isinstance(cube, list):
         c = cube[0]  # get the first of the batch

@@ -5,6 +5,8 @@ ignore =
   E203,
   E206,
   E501,
+  # E731 do not assign a lambda expression, use a defflake8()
+  E731,
   # F812: list comprehension redefines ...
   F812,
   # H101: Use TODO(NAME)
@@ -31,4 +33,10 @@ ignore =
   H501,
   # I100:
   I100,
+  # N812, non lowercase
+  N812,
+  # N817: camelcase
+  N817,
   W503,
+  # EXE001: Shebang is present but the file is not executable.
+  EXE001

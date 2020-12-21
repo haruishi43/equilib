@@ -17,7 +17,7 @@ OUT_H = 240
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def run(cube, cube_format):
+def run(cube, cube_format) -> torch.Tensor:
     print("Input is {}".format(cube_format))
     if isinstance(cube, list):
         c = cube[0]  # get the first of the batch

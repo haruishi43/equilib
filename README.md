@@ -10,6 +10,7 @@
   <a href="https://pypi.org/project/pyequilib/0.1.0/"><img src="https://badge.fury.io/py/pyequilib.svg"></a>
   <a href="https://pypi.org/project/equilib"><img src="https://img.shields.io/pypi/pyversions/pyequilib"></a>
   <a href="https://github.com/haruishi43/equilib/actions"><img src="https://github.com/haruishi43/equilib/workflows/ci/badge.svg"></a>
+  <a href="https://github.com/haruishi43/equilib/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/haruishi43/equilib"></a>
 </div>
 
 <img src=".img/equilib.png" alt="equilib" width="720"/>
