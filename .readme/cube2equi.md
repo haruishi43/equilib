@@ -2,15 +2,6 @@
 
 Cubemap to equirectangular transformation
 
-## Usage
-
-```Python
-
-
-```
-
-
-
 - `w_out` and `h_out` must be divisible by 8.
 - if `w_out, h_out` is large respect to the input cubemap, it may leave some artifacts
 

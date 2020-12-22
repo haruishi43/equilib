@@ -16,7 +16,7 @@ __all__ = [
     "equi2pers",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __author__ = "Haruya Ishikawa"
 __homepage__ = "www.hoge.com"
 __description__ = "equirectangular processing"

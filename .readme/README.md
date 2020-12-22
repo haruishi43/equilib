@@ -10,3 +10,7 @@
 ## Grid Sample
 
 - [`grid_sample`](grid_sample.md)
+
+## Benchmarks
+
+- [`bencmarks`](benchmarks.md

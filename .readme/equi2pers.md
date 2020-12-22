@@ -2,31 +2,6 @@
 
 equirectangular to perspective transformation
 
-I try to keep a common api that can be used in both `c++`, `numpy`, and `pytorch`.
-
-```Python
-class SomeEqui2Pers(BaseEqui2Pers):
-    def __init__(self, w_pers, h_pers, fov_x):
-        ...
-    def run(self, equi, rot, **kwargs):
-        ...
-```
-
-### Numpy
-
-```Python
-from equilib.equi2pers import NumpyEqui2Pers
-```
-
-### PyTorch
-
-```Python
-from equilib.equi2pers import TorchEqui2Pers
-```
-
-### C++
-
-__WIP__
 
 ### TODO:
 

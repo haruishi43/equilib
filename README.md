@@ -145,6 +145,7 @@ pers_img = equi2pers(
 </table>
 
 For more information about how each APIs work, take a look in [.readme](.readme/) or go through example codes in the `tests` or `demo`.
+See performance and benchmarking results of the APIs in [.readme/benchmark.md](.readme/benchmark.md).
 
 
 ### Coordinate System:
@@ -185,7 +186,7 @@ Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
 ### TODO:
 
 - [ ] Documentations for each transform
-- [ ] Add graphs and statistics for speed improvements
+- [x] Add table and statistics for speed improvements
 
 
 ## Acknowledgements:
