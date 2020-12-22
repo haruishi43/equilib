@@ -17,10 +17,10 @@ from equilib.grid_sample import (
 
 ## Numpy
 
-- `faster`: faster implementation by removing iteration
+- `default`: faster implementation by removing iteration
 - `naive`: slow implementation (serves no purpose really)
 
 ## PyTorch
 
-- `torch`: default `torch.grid_sample` function with wrapper
+- `default`: default `torch.grid_sample` function with wrapper
 - `custom`: custom implementation
