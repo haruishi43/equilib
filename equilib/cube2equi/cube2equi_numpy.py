@@ -6,8 +6,6 @@ import numpy as np
 
 from equilib.grid_sample import numpy_func
 
-from .base import BaseCube2Equi
-
 
 def cube_list2h(cube_list: List[np.ndarray]) -> np.ndarray:
     assert len(cube_list) == 6
@@ -40,179 +38,179 @@ def cube_dice2h(cube_dice: np.ndarray) -> np.ndarray:
     return cube_h
 
 
-class Cube2Equi(BaseCube2Equi):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+def _to_horizon(cubemap: np.ndarray, cube_format: str) -> np.ndarray:
+    if cube_format == "horizon":
+        pass
+    elif cube_format == "list":
+        cubemap = cube_list2h(cubemap)
+    elif cube_format == "dict":
+        cubemap = cube_dict2h(cubemap)
+    elif cube_format == "dice":
+        cubemap = cube_dice2h(cubemap)
+    else:
+        raise NotImplementedError("unknown cube_format")
 
-    def _to_horizon(self, cubemap: np.ndarray, cube_format: str) -> np.ndarray:
-        if cube_format == "horizon":
-            pass
-        elif cube_format == "list":
-            cubemap = cube_list2h(cubemap)
-        elif cube_format == "dict":
-            cubemap = cube_dict2h(cubemap)
-        elif cube_format == "dice":
-            cubemap = cube_dice2h(cubemap)
-        else:
-            raise NotImplementedError("unknown cube_format")
+    assert len(cubemap.shape) == 3
+    assert cubemap.shape[-2] * 6 == cubemap.shape[-1]
 
-        assert len(cubemap.shape) == 3
-        assert cubemap.shape[-2] * 6 == cubemap.shape[-1]
+    return cubemap
 
-        return cubemap
 
-    def _equirect_facetype(self, h: int, w: int):
-        r"""0F 1R 2B 3L 4U 5D"""
+def _equirect_facetype(h: int, w: int) -> np.ndarray:
+    r"""0F 1R 2B 3L 4U 5D"""
 
-        tp = np.roll(
-            np.arange(4).repeat(w // 4)[None, :].repeat(h, 0), 3 * w // 8, 1
-        )
+    tp = np.roll(
+        np.arange(4).repeat(w // 4)[None, :].repeat(h, 0), 3 * w // 8, 1
+    )
 
-        # Prepare ceil mask
-        mask = np.zeros((h, w // 4), np.bool)
-        idx = np.linspace(-np.pi, np.pi, w // 4) / 4
-        idx = h // 2 - np.around(np.arctan(np.cos(idx)) * h / np.pi).astype(int)
-        for i, j in enumerate(idx):
-            mask[:j, i] = 1
-        mask = np.roll(np.concatenate([mask] * 4, 1), 3 * w // 8, 1)
+    # Prepare ceil mask
+    mask = np.zeros((h, w // 4), np.bool)
+    idx = np.linspace(-np.pi, np.pi, w // 4) / 4
+    idx = h // 2 - np.around(np.arctan(np.cos(idx)) * h / np.pi).astype(int)
+    for i, j in enumerate(idx):
+        mask[:j, i] = 1
+    mask = np.roll(np.concatenate([mask] * 4, 1), 3 * w // 8, 1)
 
-        tp[mask] = 4
-        tp[np.flip(mask, 0)] = 5
+    tp[mask] = 4
+    tp[np.flip(mask, 0)] = 5
 
-        return tp.astype(np.int32)
+    return tp.astype(np.int32)
 
-    def create_equi_grid(self, h_out: int, w_out: int) -> Tuple[np.ndarray]:
-        _dtype = np.float32
-        theta = np.linspace(-np.pi, np.pi, num=w_out, dtype=_dtype)
-        phi = np.linspace(np.pi, -np.pi, num=h_out, dtype=_dtype) / 2
-        theta, phi = np.meshgrid(theta, phi)
-        return theta, phi
 
-    def _run_single(
-        self,
-        cubemap: np.ndarray,  # `horizon`
-        sampling_method: str = "faster",
-        mode: str = "bilinear",
-    ) -> np.ndarray:
-        r"""Run a single batch of transformation"""
-        w_face = cubemap.shape[-2]
+def create_equi_grid(h_out: int, w_out: int) -> Tuple[np.ndarray]:
+    _dtype = np.float32
+    theta = np.linspace(-np.pi, np.pi, num=w_out, dtype=_dtype)
+    phi = np.linspace(np.pi, -np.pi, num=h_out, dtype=_dtype) / 2
+    theta, phi = np.meshgrid(theta, phi)
+    return theta, phi
 
-        theta, phi = self.create_equi_grid(self.h_out, self.w_out)
 
-        # Get face id to each pixel: 0F 1R 2B 3L 4U 5D
-        tp = self._equirect_facetype(self.h_out, self.w_out)
+def _run_single(
+    cubemap: np.ndarray,  # `horizon`
+    w_out: int,
+    h_out: int,
+    sampling_method: str,
+    mode: str,
+) -> np.ndarray:
+    r"""Run a single batch of transformation"""
+    w_face = cubemap.shape[-2]
 
-        # xy coordinate map
-        coor_x = np.zeros((self.h_out, self.w_out))
-        coor_y = np.zeros((self.h_out, self.w_out))
+    theta, phi = create_equi_grid(h_out, w_out)
 
-        for i in range(6):
-            mask = tp == i
+    # Get face id to each pixel: 0F 1R 2B 3L 4U 5D
+    tp = _equirect_facetype(h_out, w_out)
 
-            if i < 4:
-                coor_x[mask] = 0.5 * np.tan(theta[mask] - np.pi * i / 2)
-                coor_y[mask] = (
-                    -0.5
-                    * np.tan(phi[mask])
-                    / np.cos(theta[mask] - np.pi * i / 2)
-                )
-            elif i == 4:
-                c = 0.5 * np.tan(np.pi / 2 - phi[mask])
-                coor_x[mask] = c * np.sin(theta[mask])
-                coor_y[mask] = c * np.cos(theta[mask])
-            elif i == 5:
-                c = 0.5 * np.tan(np.pi / 2 - np.abs(phi[mask]))
-                coor_x[mask] = c * np.sin(theta[mask])
-                coor_y[mask] = -c * np.cos(theta[mask])
+    # xy coordinate map
+    coor_x = np.zeros((h_out, w_out))
+    coor_y = np.zeros((h_out, w_out))
 
-        # Final renormalize
-        coor_x = np.clip(np.clip(coor_x + 0.5, 0, 1) * w_face, 0, w_face - 1)
-        coor_y = np.clip(np.clip(coor_y + 0.5, 0, 1) * w_face, 0, w_face - 1)
+    for i in range(6):
+        mask = tp == i
 
-        # change x axis of the x coordinate map
-        for i in range(6):
-            mask = tp == i
-            coor_x[mask] = coor_x[mask] + w_face * i
+        if i < 4:
+            coor_x[mask] = 0.5 * np.tan(theta[mask] - np.pi * i / 2)
+            coor_y[mask] = (
+                -0.5 * np.tan(phi[mask]) / np.cos(theta[mask] - np.pi * i / 2)
+            )
+        elif i == 4:
+            c = 0.5 * np.tan(np.pi / 2 - phi[mask])
+            coor_x[mask] = c * np.sin(theta[mask])
+            coor_y[mask] = c * np.cos(theta[mask])
+        elif i == 5:
+            c = 0.5 * np.tan(np.pi / 2 - np.abs(phi[mask]))
+            coor_x[mask] = c * np.sin(theta[mask])
+            coor_y[mask] = -c * np.cos(theta[mask])
 
-        grid = np.stack((coor_y, coor_x), axis=0)
-        grid_sample = getattr(numpy_func, sampling_method)
-        equi = grid_sample(cubemap, grid, mode=mode)
+    # Final renormalize
+    coor_x = np.clip(np.clip(coor_x + 0.5, 0, 1) * w_face, 0, w_face - 1)
+    coor_y = np.clip(np.clip(coor_y + 0.5, 0, 1) * w_face, 0, w_face - 1)
 
-        return equi
+    # change x axis of the x coordinate map
+    for i in range(6):
+        mask = tp == i
+        coor_x[mask] = coor_x[mask] + w_face * i
 
-    def run(
-        self,
-        cubemap: Union[np.ndarray, Dict[str, np.ndarray], List[np.ndarray]],
-        cube_format: str = "dice",
-        sampling_method: str = "faster",
-        mode: str = "bilinear",
-    ) -> np.ndarray:
-        r"""Run cube to equirectangular image transformation
+    grid = np.stack((coor_y, coor_x), axis=0)
+    grid_sample = getattr(numpy_func, sampling_method)
+    equi = grid_sample(cubemap, grid, mode=mode)
 
-        params:
-            cubemap: np.ndarray
-            cube_format: ('dice', 'horizon', 'list', 'dict')
-            sampling_method: str
-            mode: str
-        """
+    return equi
 
-        # Convert all cubemap format to `horizon` and batched
-        is_single = False
-        if cube_format in ["dice", "horizon"]:
-            if isinstance(cubemap, np.ndarray):
-                # could be single or batched
-                assert (
-                    len(cubemap.shape) >= 3
-                ), "input shape {} is not valid".format(cubemap.shape)
-                if len(cubemap.shape) == 4:
-                    # batch
-                    cubemap = [
-                        self._to_horizon(c, cube_format) for c in cubemap
-                    ]
-                else:
-                    # single
-                    is_single = True
-                    cubemap = [self._to_horizon(cubemap, cube_format)]
-            elif isinstance(cubemap, list):
-                # could only be batched
-                cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
+
+def run(
+    cubemap: Union[np.ndarray, Dict[str, np.ndarray], List[np.ndarray]],
+    cube_format: str,
+    w_out: int,
+    h_out: int,
+    sampling_method: str,
+    mode: str,
+) -> np.ndarray:
+    r"""Run cube to equirectangular image transformation
+
+    params:
+        cubemap: np.ndarray
+        cube_format: ('dice', 'horizon', 'list', 'dict')
+        sampling_method: str
+        mode: str
+    """
+
+    # Convert all cubemap format to `horizon` and batched
+    is_single = False
+    if cube_format in ["dice", "horizon"]:
+        if isinstance(cubemap, np.ndarray):
+            # could be single or batched
+            assert (
+                len(cubemap.shape) >= 3
+            ), "input shape {} is not valid".format(cubemap.shape)
+            if len(cubemap.shape) == 4:
+                # batch
+                cubemap = [_to_horizon(c, cube_format) for c in cubemap]
             else:
-                raise ValueError
-        elif cube_format == "dict":
-            if isinstance(cubemap, dict):
                 # single
                 is_single = True
-                cubemap = [self._to_horizon(cubemap, cube_format)]
-            elif isinstance(cubemap, list):
-                # batch
-                cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
-            else:
-                raise ValueError
-        elif cube_format == "list":
-            if isinstance(cubemap[0], np.ndarray):
-                # single
-                is_single = True
-                cubemap = [self._to_horizon(cubemap, cube_format)]
-            elif isinstance(cubemap[0], list):
-                # batch
-                cubemap = [self._to_horizon(c, cube_format) for c in cubemap]
-            else:
-                raise ValueError
+                cubemap = [_to_horizon(cubemap, cube_format)]
+        elif isinstance(cubemap, list):
+            # could only be batched
+            cubemap = [_to_horizon(c, cube_format) for c in cubemap]
         else:
             raise ValueError
+    elif cube_format == "dict":
+        if isinstance(cubemap, dict):
+            # single
+            is_single = True
+            cubemap = [_to_horizon(cubemap, cube_format)]
+        elif isinstance(cubemap, list):
+            # batch
+            cubemap = [_to_horizon(c, cube_format) for c in cubemap]
+        else:
+            raise ValueError
+    elif cube_format == "list":
+        if isinstance(cubemap[0], np.ndarray):
+            # single
+            is_single = True
+            cubemap = [_to_horizon(cubemap, cube_format)]
+        elif isinstance(cubemap[0], list):
+            # batch
+            cubemap = [_to_horizon(c, cube_format) for c in cubemap]
+        else:
+            raise ValueError
+    else:
+        raise ValueError
 
-        equis = []
-        for cm in cubemap:
-            equi = self._run_single(
-                cm,
-                sampling_method=sampling_method,
-                mode=mode,
-            )
-            equis.append(equi)
+    equis = []
+    for cm in cubemap:
+        equi = _run_single(
+            cm,
+            w_out=w_out,
+            h_out=h_out,
+            sampling_method=sampling_method,
+            mode=mode,
+        )
+        equis.append(equi)
 
-        equis = np.stack(equis, axis=0)
+    equis = np.stack(equis, axis=0)
 
-        if is_single:
-            equis = equis.squeeze(0)
+    if is_single:
+        equis = equis.squeeze(0)
 
-        return equis
+    return equis

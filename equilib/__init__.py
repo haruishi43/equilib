@@ -1,6 +1,22 @@
 #!/usr/bin/env python3
 
-__version__ = "0.1.1"
+from .cube2equi.base import Cube2Equi, cube2equi
+from .equi2cube.base import Equi2Cube, equi2cube
+from .equi2equi.base import Equi2Equi, equi2equi
+from .equi2pers.base import Equi2Pers, equi2pers
+
+__all__ = [
+    "Cube2Equi",
+    "Equi2Cube",
+    "Equi2Equi",
+    "Equi2Pers",
+    "cube2equi",
+    "equi2cube",
+    "equi2equi",
+    "equi2pers",
+]
+
+__version__ = "0.2.0"
 __author__ = "Haruya Ishikawa"
 __homepage__ = "www.hoge.com"
 __description__ = "equirectangular processing"

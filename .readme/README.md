@@ -10,8 +10,3 @@
 ## Grid Sample
 
 - [`grid_sample`](grid_sample.md)
-
-
-## Development
-
-- [`contributing`](contributing.md)

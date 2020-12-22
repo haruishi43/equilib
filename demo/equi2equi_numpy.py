@@ -14,7 +14,7 @@ import numpy as np
 
 from PIL import Image
 
-from equilib.equi2pers import NumpyEqui2Pers
+from equilib import Equi2Equi
 
 matplotlib.use("Agg")
 
@@ -36,12 +36,7 @@ def preprocess(
     return img
 
 
-def test_video(
-    path: str,
-    h_pers: int = 480,
-    w_pers: int = 640,
-    fov_x: float = 90.0,
-) -> None:
+def test_video(path: str) -> None:
     r"""Test video"""
     # Rotation:
     pi = np.pi
@@ -50,8 +45,13 @@ def test_video(
     pitch = 0  # -pi < b < pi
     yaw = 0
 
-    # Initialize equi2pers
-    equi2pers = NumpyEqui2Pers(w_pers=w_pers, h_pers=h_pers, fov_x=fov_x)
+    # Initialize equi2equi
+    equi2equi = Equi2Equi(
+        w_out=640,
+        h_out=320,
+        sampling_method="faster",
+        mode="bilinear",
+    )
 
     times = []
     cap = cv2.VideoCapture(path)
@@ -69,19 +69,17 @@ def test_video(
             break
 
         s = time.time()
-        equi_img = preprocess(frame, is_cv2=True)
-        pers_img = equi2pers(
-            equi=equi_img,
+        src_img = preprocess(frame, is_cv2=True)
+        out_img = equi2equi(
+            src=src_img,
             rot=rot,
-            sampling_method="faster",
-            mode="bilinear",
         )
-        pers_img = np.transpose(pers_img, (1, 2, 0))
-        pers_img = cv2.cvtColor(pers_img, cv2.COLOR_RGB2BGR)
+        out_img = np.transpose(out_img, (1, 2, 0))
+        out_img = cv2.cvtColor(out_img, cv2.COLOR_RGB2BGR)
         e = time.time()
         times.append(e - s)
 
-        # cv2.imshow("video", pers)
+        # cv2.imshow("video", out_img)
 
         # change direction `wasd` or exit with `q`
         k = cv2.waitKey(1)
@@ -102,43 +100,41 @@ def test_video(
     print(sum(times) / len(times))
     x_axis = list(range(len(times)))
     plt.plot(x_axis, times)
-    save_path = osp.join("./results", "times_equi2pers_numpy_video.png")
+    save_path = osp.join("./results", "times_equi2equi_numpy_video.png")
     plt.savefig(save_path)
 
 
-def test_image(
-    path: str,
-    h_pers: int = 480,
-    w_pers: int = 640,
-    fov_x: float = 90.0,
-) -> None:
+def test_image(path: str) -> None:
     r"""Test single image"""
     # Rotation:
     rot = {
         "roll": 0,  #
-        "pitch": np.pi / 4,  # vertical
+        "pitch": 0,  # vertical
         "yaw": np.pi / 4,  # horizontal
     }
 
-    # Initialize equi2pers
-    equi2pers = NumpyEqui2Pers(w_pers=w_pers, h_pers=h_pers, fov_x=fov_x)
-
-    # Open Image
-    equi_img = Image.open(path)
-    equi_img = preprocess(equi_img)
-
-    pers_img = equi2pers(
-        equi_img,
-        rot=rot,
+    # Initialize equi2equi
+    equi2equi = Equi2Equi(
+        w_out=640,
+        h_out=320,
         sampling_method="faster",
         mode="bilinear",
     )
 
-    pers_img = np.transpose(pers_img, (1, 2, 0))
-    pers_img = Image.fromarray(pers_img)
+    # Open Image
+    src_img = Image.open(path)
+    src_img = preprocess(src_img)
 
-    pers_path = osp.join("./results", "output_equi2pers_numpy_image.jpg")
-    pers_img.save(pers_path)
+    out_img = equi2equi(
+        src=src_img,
+        rot=rot,
+    )
+
+    out_img = np.transpose(out_img, (1, 2, 0))
+    out_img = Image.fromarray(out_img)
+
+    out_path = osp.join("./results", "output_equi2equi_numpy_image.jpg")
+    out_img.save(out_path)
 
 
 def main():
@@ -147,22 +143,17 @@ def main():
     parser.add_argument("--data", nargs="?", default=None, type=str)
     args = parser.parse_args()
 
-    # Variables:
-    h_pers = 480
-    w_pers = 640
-    fov_x = 90
-
     data_path = args.data
     if args.video:
         if data_path is None:
             data_path = "./data/R0010028_er_30.MP4"
         assert osp.exists(data_path)
-        test_video(data_path, h_pers, w_pers, fov_x)
+        test_video(data_path)
     else:
         if data_path is None:
             data_path = "./data/equi.jpg"
         assert osp.exists(data_path)
-        test_image(data_path, h_pers, w_pers, fov_x)
+        test_image(data_path)
 
 
 if __name__ == "__main__":

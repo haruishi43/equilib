@@ -18,7 +18,7 @@ import torch
 
 from torchvision import transforms
 
-from equilib.equi2equi import TorchEqui2Equi
+from equilib import Equi2Equi
 
 matplotlib.use("Agg")
 
@@ -75,7 +75,12 @@ def test_video(path: str) -> None:
     yaw = 0
 
     # Initialize equi2equi
-    equi2equi = TorchEqui2Equi(h_out=320, w_out=640)
+    equi2equi = Equi2Equi(
+        w_out=640,
+        h_out=320,
+        sampling_method="faster",
+        mode="bilinear",
+    )
     device = torch.device("cuda")
 
     times = []
@@ -98,8 +103,6 @@ def test_video(path: str) -> None:
         out_img = equi2equi(
             src=src_img,
             rot=rot,
-            sampling_method="torch",
-            mode="bilinear",
         )
         out_img = postprocess(out_img, to_cv2=True)
         e = time.time()
@@ -140,7 +143,12 @@ def test_image(path: str) -> None:
     }
 
     # Initialize equi2equi
-    equi2equi = TorchEqui2Equi(h_out=320, w_out=640)
+    equi2equi = Equi2Equi(
+        w_out=640,
+        h_out=320,
+        sampling_method="faster",
+        mode="bilinear",
+    )
     device = torch.device("cuda")
 
     # Open Image
@@ -150,8 +158,6 @@ def test_image(path: str) -> None:
     out_img = equi2equi(
         src=src_img,
         rot=rot,
-        sampling_method="torch",
-        mode="bilinear",
     )
     out_img = postprocess(out_img)
 

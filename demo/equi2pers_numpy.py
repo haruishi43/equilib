@@ -14,11 +14,7 @@ import numpy as np
 
 from PIL import Image
 
-import torch
-
-from torchvision import transforms
-
-from equilib.equi2pers import TorchEqui2Pers
+from equilib import Equi2Pers
 
 matplotlib.use("Agg")
 
@@ -26,43 +22,18 @@ matplotlib.use("Agg")
 def preprocess(
     img: Union[np.ndarray, Image.Image],
     is_cv2: bool = False,
-) -> torch.Tensor:
+) -> np.ndarray:
     r"""Preprocesses image"""
     if isinstance(img, np.ndarray) and is_cv2:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     if isinstance(img, Image.Image):
         # Sometimes images are RGBA
         img = img.convert("RGB")
-
-    to_tensor = transforms.Compose(
-        [
-            transforms.ToTensor(),
-        ]
-    )
-    img = to_tensor(img)
+        img = np.asarray(img)
     assert len(img.shape) == 3, "input must be dim=3"
-    assert img.shape[0] == 3, "input must be HWC"
+    assert img.shape[-1] == 3, "input must be HWC"
+    img = np.transpose(img, (2, 0, 1))
     return img
-
-
-def postprocess(
-    img: torch.Tensor,
-    to_cv2: bool = False,
-) -> Union[np.ndarray, Image.Image]:
-    if to_cv2:
-        img = np.asarray(img.to("cpu").numpy() * 255, dtype=np.uint8)
-        img = np.transpose(img, (1, 2, 0))
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        return img
-    else:
-        to_PIL = transforms.Compose(
-            [
-                transforms.ToPILImage(),
-            ]
-        )
-        img = img.to("cpu")
-        img = to_PIL(img)
-        return img
 
 
 def test_video(
@@ -80,8 +51,13 @@ def test_video(
     yaw = 0
 
     # Initialize equi2pers
-    equi2pers = TorchEqui2Pers(w_pers=w_pers, h_pers=h_pers, fov_x=fov_x)
-    device = torch.device("cuda")
+    equi2pers = Equi2Pers(
+        w_pers=w_pers,
+        h_pers=h_pers,
+        fov_x=fov_x,
+        sampling_method="faster",
+        mode="bilinear",
+    )
 
     times = []
     cap = cv2.VideoCapture(path)
@@ -99,18 +75,17 @@ def test_video(
             break
 
         s = time.time()
-        equi_img = preprocess(frame, is_cv2=True).to(device)
+        equi_img = preprocess(frame, is_cv2=True)
         pers_img = equi2pers(
             equi=equi_img,
             rot=rot,
-            sampling_method="torch",
-            mode="bilinear",
         )
-        pers_img = postprocess(pers_img, to_cv2=True)
+        pers_img = np.transpose(pers_img, (1, 2, 0))
+        pers_img = cv2.cvtColor(pers_img, cv2.COLOR_RGB2BGR)
         e = time.time()
         times.append(e - s)
 
-        # cv2.imshow("video", pers_img)
+        # cv2.imshow("video", pers)
 
         # change direction `wasd` or exit with `q`
         k = cv2.waitKey(1)
@@ -131,7 +106,7 @@ def test_video(
     print(sum(times) / len(times))
     x_axis = list(range(len(times)))
     plt.plot(x_axis, times)
-    save_path = osp.join("./results", "times_equi2pers_torch_video.png")
+    save_path = osp.join("./results", "times_equi2pers_numpy_video.png")
     plt.savefig(save_path)
 
 
@@ -150,22 +125,27 @@ def test_image(
     }
 
     # Initialize equi2pers
-    equi2pers = TorchEqui2Pers(w_pers=w_pers, h_pers=h_pers, fov_x=fov_x)
-    device = torch.device("cuda")
+    equi2pers = Equi2Pers(
+        w_pers=w_pers,
+        h_pers=h_pers,
+        fov_x=fov_x,
+        sampling_method="faster",
+        mode="bilinear",
+    )
 
     # Open Image
     equi_img = Image.open(path)
-    equi_img = preprocess(equi_img).to(device)
+    equi_img = preprocess(equi_img)
 
     pers_img = equi2pers(
         equi_img,
         rot=rot,
-        sampling_method="torch",
-        mode="bilinear",
     )
-    pers_img = postprocess(pers_img)
 
-    pers_path = osp.join("./results", "output_equi2pers_torch_image.jpg")
+    pers_img = np.transpose(pers_img, (1, 2, 0))
+    pers_img = Image.fromarray(pers_img)
+
+    pers_path = osp.join("./results", "output_equi2pers_numpy_image.jpg")
     pers_img.save(pers_path)
 
 

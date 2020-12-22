@@ -7,24 +7,14 @@ import numpy as np
 from equilib.grid_sample import numpy_func
 from equilib.common.numpy_utils import create_rotation_matrix
 
-from .base import BaseEqui2Pers
 
-__all__ = ["Equi2Pers"]
-
-
-def create_K(
-    height: int,
-    width: int,
+def intrinsic_matrix(
+    w_pers: int,
+    h_pers: int,
     fov_x: float,
-    skew: float = 0.0,
+    skew: float,
 ) -> np.ndarray:
     r"""Create Intrinsic Matrix
-
-    params:
-        height: int
-        width: int
-        fov_x: float
-        skew: float
 
     return:
         K: 3x3 matrix numpy.ndarray
@@ -33,13 +23,36 @@ def create_K(
         ref: http://ksimek.github.io/2013/08/13/intrinsic/
     """
     # perspective projection (focal length)
-    f = width / (2.0 * np.tan(np.radians(fov_x) / 2.0))
+    f = w_pers / (2.0 * np.tan(np.radians(fov_x) / 2.0))
     # transform between camera frame and pixel coordinates
-    K = np.array([[f, skew, width / 2], [0.0, f, height / 2], [0.0, 0.0, 1.0]])
+    K = np.array(
+        [
+            [f, skew, w_pers / 2],
+            [0.0, f, h_pers / 2],
+            [0.0, 0.0, 1.0],
+        ]
+    )
     return K
 
 
-def create_rot_mat(
+def perspective_coordinate(
+    w_pers: int,
+    h_pers: int,
+) -> np.ndarray:
+    r"""Create mesh coordinate grid with perspective height and width
+
+    return:
+        coordinate: numpy.ndarray
+    """
+    _xs = np.linspace(0, w_pers - 1, w_pers)
+    _ys = np.linspace(0, h_pers - 1, h_pers)
+    xs, ys = np.meshgrid(_xs, _ys)
+    zs = np.ones_like(xs)
+    coord = np.stack((xs, ys, zs), axis=2)
+    return coord
+
+
+def rotation_matrix(
     roll: float,
     pitch: float,
     yaw: float,
@@ -54,224 +67,148 @@ def create_rot_mat(
     return:
         rotation matrix: numpy.ndarray
 
-    Camera coordinates -> z-axis points forward, y-axis points upward
-    Global coordinates -> x-axis points forward, z-axis poitns upward
+    Global coordinates -> x-axis points forward, z-axis points upward
     """
-
-    # default rotation that changes global to camera coordinates
-    x = np.pi
-    y = np.pi
-    z = np.pi
-    R = create_rotation_matrix(x=x, y=y, z=z)
-
-    # rotation matrix
-    R = R @ create_rotation_matrix(x=roll, y=pitch, z=yaw)
+    R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
     return R
 
 
-def pixel_wise_rot(M: np.ndarray) -> Tuple[np.ndarray]:
-    r"""Rotation coordinates to phi/theta of the equirectangular image
+def global2camera_rotation_matrix() -> np.ndarray:
+    r"""Default rotation that changes global to camera coordinates"""
+    R_XY = np.array(
+        [  # X <-> Y
+            [0.0, 1.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0],
+        ]
+    )
+    R_YZ = np.array(
+        [  # Y <-> Z
+            [1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0],
+            [0.0, 1.0, 0.0],
+        ]
+    )
+    return R_XY @ R_YZ
+
+
+def _get_img_size(img: np.ndarray) -> Tuple[int]:
+    r"""Return height and width"""
+    return img.shape[-2:]
+
+
+def _run_single(
+    equi: np.ndarray,
+    rot: Dict[str, float],
+    w_pers: int,
+    h_pers: int,
+    fov_x: float,
+    skew: float,
+    sampling_method: str,
+    mode: str,
+) -> np.ndarray:
+
+    # NOTE: Precomputable variables
+    m = perspective_coordinate(w_pers=w_pers, h_pers=h_pers)
+    K = intrinsic_matrix(
+        w_pers=w_pers,
+        h_pers=h_pers,
+        fov_x=fov_x,
+        skew=skew,
+    )
+    g2c_rot = global2camera_rotation_matrix()
+
+    # Compute variables
+    R = rotation_matrix(**rot)
+    h_equi, w_equi = _get_img_size(equi)
+
+    # conversion
+    K_inv = np.linalg.inv(K)
+    m = m[:, :, :, np.newaxis]
+    M = R @ g2c_rot @ K_inv @ m
+    M = M.squeeze(3)
+
+    # calculate rotations per perspective coordinates
+    # phi = np.arcsin(M[:, :, 1] / np.linalg.norm(M, axis=-1))
+    # theta = np.arctan2(M[:, :, 0], M[:, :, 2])
+    phi = np.arcsin(M[:, :, 2] / np.linalg.norm(M, axis=-1))
+    theta = np.arctan2(M[:, :, 1], M[:, :, 0])
+
+    # center the image and convert to pixel location
+    ui = (theta - np.pi) * w_equi / (2 * np.pi)
+    uj = (phi - np.pi / 2) * h_equi / np.pi
+    # out-of-bounds calculations
+    ui = np.where(ui < 0, ui + w_equi, ui)
+    ui = np.where(ui >= w_equi, ui - w_equi, ui)
+    uj = np.where(uj < 0, uj + h_equi, uj)
+    uj = np.where(uj >= h_equi, uj - h_equi, uj)
+    grid = np.stack((uj, ui), axis=0)
+
+    # grid sample
+    grid_sample = getattr(numpy_func, sampling_method, "default")
+    sampled = grid_sample(equi, grid, mode=mode)
+    return sampled
+
+
+def run(
+    equi: Union[np.ndarray, List[np.ndarray]],
+    rot: Union[Dict[str, float], List[Dict[str, float]]],
+    w_pers: int,
+    h_pers: int,
+    fov_x: float,
+    skew: float,
+    sampling_method: str,
+    mode: str,
+) -> np.ndarray:
+    r"""Run Equi2Pers
 
     params:
-        M: np.ndarray
+        equi: equirectangular image np.ndarray[C, H, W]
+        rot: Dict[str, float]
+        sampling_method: str
+        mode: str
 
-    return:
-        phis: np.ndarray
-        thetas: np.ndarray
+    returns:
+        pers: perspective image np.ndarray[C, H, W]
+
+    NOTE: input can be batched [B, C, H, W] or List[np.ndarray]
+    NOTE: when using batches, the output types match
     """
-    phis = np.arcsin(M[:, :, 1] / np.linalg.norm(M, axis=-1))
-    thetas = np.arctan2(M[:, :, 0], M[:, :, 2])
-    return phis, thetas
-
-
-class Equi2Pers(BaseEqui2Pers):
-    def __init__(self, **kwargs) -> None:
-        r"""Equi2Pers Numpy"""
-        super().__init__(**kwargs)
-
-        # initialize intrinsic matrix
-        _ = self.intrinsic_matrix
-        # initialize global to camera rotation matrix
-        _ = self.global2camera_rotation_matrix
-
-    @property
-    def intrinsic_matrix(self) -> np.ndarray:
-        r"""Create Intrinsic Matrix
-
-        return:
-            K: 3x3 matrix numpy.ndarray
-
-        NOTE:
-            ref: http://ksimek.github.io/2013/08/13/intrinsic/
-        """
-        if not hasattr(self, "_K"):
-            # perspective projection (focal length)
-            f = self.w_pers / (2.0 * np.tan(np.radians(self.fov_x) / 2.0))
-            # transform between camera frame and pixel coordinates
-            self._K = np.array(
-                [
-                    [f, self.skew, self.w_pers / 2],
-                    [0.0, f, self.h_pers / 2],
-                    [0.0, 0.0, 1.0],
-                ]
-            )
-        return self._K
-
-    @property
-    def perspective_coordinate(self) -> np.ndarray:
-        r"""Create mesh coordinate grid with perspective height and width
-
-        return:
-            coordinate: numpy.ndarray
-        """
-        _xs = np.linspace(0, self.w_pers - 1, self.w_pers)
-        _ys = np.linspace(0, self.h_pers - 1, self.h_pers)
-        xs, ys = np.meshgrid(_xs, _ys)
-        zs = np.ones_like(xs)
-        coord = np.stack((xs, ys, zs), axis=2)
-        return coord
-
-    @property
-    def global2camera_rotation_matrix(self) -> np.ndarray:
-        r"""Default rotation that changes global to camera coordinates"""
-        if not hasattr(self, "_g2c_rot"):
-            R_XY = np.array(
-                [  # X <-> Y
-                    [0.0, 1.0, 0.0],
-                    [1.0, 0.0, 0.0],
-                    [0.0, 0.0, 1.0],
-                ]
-            )
-            R_YZ = np.array(
-                [  # Y <-> Z
-                    [1.0, 0.0, 0.0],
-                    [0.0, 0.0, 1.0],
-                    [0.0, 1.0, 0.0],
-                ]
-            )
-            self._g2c_rot = R_XY @ R_YZ
-
-        return self._g2c_rot
-
-    def rotation_matrix(
-        self,
-        roll: float,
-        pitch: float,
-        yaw: float,
-    ) -> np.ndarray:
-        r"""Create Rotation Matrix
-
-        params:
-            roll: x-axis rotation float
-            pitch: y-axis rotation float
-            yaw: z-axis rotation float
-
-        return:
-            rotation matrix: numpy.ndarray
-
-        Camera coordinates -> z-axis points forward, y-axis points upward
-        Global coordinates -> x-axis points forward, z-axis points upward
-        """
-        R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-        return R
-
-    @staticmethod
-    def _get_img_size(img: np.ndarray) -> Tuple[int]:
-        r"""Return height and width"""
-        return img.shape[-2:]
-
-    def _run_single(
-        self,
-        equi: np.ndarray,
-        rot: Dict[str, float],
-        sampling_method: str,
-        mode: str,
-    ) -> np.ndarray:
-        # define variables
-        h_equi, w_equi = self._get_img_size(equi)
-        m = self.perspective_coordinate
-        K = self.intrinsic_matrix
-        R = self.rotation_matrix(**rot)
-
-        # conversion:
-        K_inv = np.linalg.inv(K)
-        m = m[:, :, :, np.newaxis]
-        M = R @ self._g2c_rot @ K_inv @ m
-        M = M.squeeze(3)
-
-        # calculate rotations per perspective coordinates
-        # phi = np.arcsin(M[:, :, 1] / np.linalg.norm(M, axis=-1))
-        # theta = np.arctan2(M[:, :, 0], M[:, :, 2])
-        phi = np.arcsin(M[:, :, 2] / np.linalg.norm(M, axis=-1))
-        theta = np.arctan2(M[:, :, 1], M[:, :, 0])
-
-        # center the image and convert to pixel location
-        ui = (theta - np.pi) * w_equi / (2 * np.pi)
-        uj = (phi - np.pi / 2) * h_equi / np.pi
-        # out-of-bounds calculations
-        ui = np.where(ui < 0, ui + w_equi, ui)
-        ui = np.where(ui >= w_equi, ui - w_equi, ui)
-        uj = np.where(uj < 0, uj + h_equi, uj)
-        uj = np.where(uj >= h_equi, uj - h_equi, uj)
-        grid = np.stack((uj, ui), axis=0)
-
-        # grid sample
-        grid_sample = getattr(numpy_func, sampling_method, "faster")
-        sampled = grid_sample(equi, grid, mode=mode)
-        return sampled
-
-    def run(
-        self,
-        equi: Union[np.ndarray, List[np.ndarray]],
-        rot: Union[Dict[str, float], List[Dict[str, float]]],
-        sampling_method: str = "faster",
-        mode: str = "bilinear",
-    ) -> np.ndarray:
-        r"""Run Equi2Pers
-
-        params:
-            equi: equirectangular image np.ndarray[C, H, W]
-            rot: Dict[str, float]
-            sampling_method: str (default="faster")
-            mode: str (default="bilinear")
-
-        returns:
-            pers: perspective image np.ndarray[C, H, W]
-
-        NOTE: input can be batched [B, C, H, W] or List[np.ndarray]
-        NOTE: when using batches, the output types match
-        """
-        _return_type = type(equi)
-        _original_shape_len = len(equi.shape)
-        if _return_type == np.ndarray:
-            assert (
-                _original_shape_len >= 3
-            ), "ERR: got {} for input equi".format(_original_shape_len)
-            if _original_shape_len == 3:
-                equi = equi[np.newaxis, :, :, :]
-                rot = [rot]
-
-        assert len(equi) == len(
-            rot
-        ), "ERR: length of equi and rot differs {} vs {}".format(
-            len(equi), len(rot)
+    _return_type = type(equi)
+    _original_shape_len = len(equi.shape)
+    if _return_type == np.ndarray:
+        assert _original_shape_len >= 3, "ERR: got {} for input equi".format(
+            _original_shape_len
         )
+        if _original_shape_len == 3:
+            equi = equi[np.newaxis, :, :, :]
+            rot = [rot]
 
-        samples = []
-        for p, r in zip(equi, rot):
-            # iterate through batches
-            # TODO: batch implementation
-            sample = self._run_single(
-                equi=p,
-                rot=r,
-                sampling_method=sampling_method,
-                mode=mode,
-            )
-            samples.append(sample)
+    assert len(equi) == len(
+        rot
+    ), "ERR: length of equi and rot differs {} vs {}".format(
+        len(equi), len(rot)
+    )
 
-        if _return_type == np.ndarray:
-            samples = np.stack(samples, axis=0)
-            if _original_shape_len == 3:
-                samples = np.squeeze(samples, axis=0)
+    samples = []
+    for p, r in zip(equi, rot):
+        # iterate through batches
+        # TODO: batch implementation
+        sample = _run_single(
+            equi=p,
+            rot=r,
+            w_pers=w_pers,
+            h_pers=h_pers,
+            fov_x=fov_x,
+            skew=skew,
+            sampling_method=sampling_method,
+            mode=mode,
+        )
+        samples.append(sample)
 
-        return samples
+    if _return_type == np.ndarray:
+        samples = np.stack(samples, axis=0)
+        if _original_shape_len == 3:
+            samples = np.squeeze(samples, axis=0)
+
+    return samples
