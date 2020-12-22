@@ -145,7 +145,7 @@ pers_img = equi2pers(
 </table>
 
 For more information about how each APIs work, take a look in [.readme](.readme/) or go through example codes in the `tests` or `demo`.
-See performance and benchmarking results of the APIs in [.readme/benchmark.md](.readme/benchmark.md).
+See performance and benchmarking results of the APIs in [.readme/benchmarks.md](.readme/benchmarks.md).
 
 
 ### Coordinate System:
