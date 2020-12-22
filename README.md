@@ -106,7 +106,6 @@ pers_img = equi2pers(
 
 </pre>
 </td>
-<td>
 
 <td>
 <pre>
