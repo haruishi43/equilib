@@ -143,8 +143,6 @@ pers_img = equi2pers(
 
 </pre>
 </td>
-<td>
-</tr>
 </table>
 
 For more information about how each APIs work, take a look in [.readme](.readme/) or go through example codes in the `tests` or `demo`.
