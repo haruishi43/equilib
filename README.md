@@ -62,8 +62,8 @@ An example for `Equi2Pers`/`equi2pers`:
 
 <table>
 <tr>
-<td><pre>`Equi2Pers`</pre></td>
-<td><pre>`equi2pers`</pre></td>
+<td><pre>Equi2Pers</pre></td>
+<td><pre>equi2pers</pre></td>
 </tr>
 
 <tr>
@@ -127,7 +127,7 @@ rot = {
     'yaw': np.pi/4,  # rotate horizontal
 }
 
-# Intialize equi2pers
+# Run equi2pers
 pers_img = equi2pers(
     equi=equi_img,
     rot=rot,
@@ -187,7 +187,8 @@ Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
 
 - [ ] Documentations for each transform
 - [x] Add table and statistics for speed improvements
-
+- [ ] Batch processing for Numpy
+- [ ] Mixed precision for PyTorch
 
 ## Acknowledgements:
 
