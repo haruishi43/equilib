@@ -16,9 +16,9 @@
 <img src=".img/equilib.png" alt="equilib" width="720"/>
 
 - A library for processing equirectangular image that runs on Python.
-- Developed using `numpy`, `pytorch`, and `c++`.
+- Developed using `numpy` and `torch` (`c++` is WIP).
 - Able to use GPU for faster processing.
-- No need for other dependencies except for `numpy` and `pytorch`.
+- No need for other dependencies except for `numpy` and `torch`.
 - Added functionality like creating rotation matrices, batched processing, and automatic type detection.
 - Highly modular
 
@@ -162,13 +162,13 @@ See demo scripts under `scripts`.
 
 To process equirectangular images fast, whether to crop perspective images from the equirectangular image, the library takes advantage of grid sampling techniques.
 Some sampling techniques are already implemented, such as `scipy.ndimage.map_coordiantes` and `cv2.remap`.
-This project's goal was to reduce these dependencies and use `cuda` and batch processing with `pytorch` and `c++` for a faster processing of equirectangular images.
+This project's goal was to reduce these dependencies and use `cuda` and batch processing with `torch` and `c++` for a faster processing of equirectangular images.
 There were not many projects online for these purposes.
-In this library, we implement varieties of methods using `c++`, `numpy`, and `pytorch`.
+In this library, we implement varieties of methods using `c++`, `numpy`, and `torch`.
 This part of the code needs `cuda` acceleration because grid sampling is parallelizable.
-For `c++` and `pytorch`, I tried to take advantage of `cuda`.
+For `c++` and `torch`, I tried to take advantage of `cuda`.
 For `numpy`, I implemented `naive` and `faster` approaches for learning purposes.
-Developing _faster_ `c++` and `pytorch` approaches are __WIP__.
+Developing _faster_ `c++` and `torch` approaches are __WIP__.
 Currently, `sampling_method` defaults to the fastest methods which are named `"default"`.
 See [here](equilib/grid_sample/README.md) for more info on implementations.
 
@@ -187,10 +187,11 @@ Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
 
 - [ ] Documentations for each transform
 - [x] Add table and statistics for speed improvements
-- [ ] Batch processing for Numpy
-- [ ] Mixed precision for PyTorch
+- [ ] Batch processing for `numpy`
+- [ ] Mixed precision for `torch`
+- [ ] `c++` version of grid sampling
 
 ## Acknowledgements:
 
 - [py360convert](https://github.com/sunset1995/py360convert)
-- [Perspective-and-Equirectangular](https://github.com/timy90022/Perspective-and-Equirectangular/tree/master/lib)
+- [Perspective-and-Equirectangular](https://github.com/timy90022/Perspective-and-Equirectangular)
