@@ -13,7 +13,19 @@ __all__ = ["Equi2Equi", "equi2equi"]
 
 
 class Equi2Equi(object):
-    r"""Equi2Equi"""
+    r"""
+    init params:
+    - w_out, h_out (optional int): equi image size
+    - sampling_method (str): defaults to "default"
+    - mode (str): interpolation mode, defaults to "bilinear"
+
+    input params:
+    - src (np.ndarray, torch.Tensor, list)
+    - rot (dict, list[dict])
+
+    return:
+    - equi (np.ndarray, torch.Tensor)
+    """
 
     def __init__(
         self,
@@ -22,12 +34,6 @@ class Equi2Equi(object):
         sampling_method: str = "default",
         mode: str = "bilinear",
     ) -> None:
-        r"""
-        params:
-            w_out, h_out (optional int): equi image size
-            sampling_method (str): defaults to "default"
-            mode (str): interpolation mode, defaults to "bilinear"
-        """
         self.w_out = w_out
         self.h_out = h_out
         self.sampling_method = sampling_method
@@ -68,6 +74,14 @@ def equi2equi(
     w_out: Optional[int] = None,
     h_out: Optional[int] = None,
 ) -> Union[np.ndarray, torch.Tensor]:
+    r"""
+    init params:
+    - src (np.ndarray, torch.Tensor, list)
+    - rot (dict, list[dict])
+    - w_out, h_out (optional int): equi image size
+    - sampling_method (str): defaults to "default"
+    - mode (str): interpolation mode, defaults to "bilinear"
+    """
 
     # Try and detect which type it is ("numpy" or "torch")
     # FIXME: any cleaner way of detecting?

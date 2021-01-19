@@ -12,7 +12,7 @@ def create_coordinate(h_out: int, w_out: int) -> np.ndarray:
     r"""Create mesh coordinate grid with height and width
 
     return:
-        coordinate: numpy.ndarray
+    - coordinate (np.ndarray)
     """
     xs = np.linspace(0, w_out - 1, w_out)
     theta = xs * 2 * np.pi / w_out - np.pi
@@ -31,12 +31,12 @@ def rotation_matrix(
     r"""Create Rotation Matrix
 
     params:
-        roll: x-axis rotation float
-        pitch: y-axis rotation float
-        yaw: z-axis rotation float
+    - roll: x-axis rotation float
+    - pitch: y-axis rotation float
+    - yaw: z-axis rotation float
 
     return:
-        rotation matrix: numpy.ndarray
+    - rotation matrix (np.ndarray)
 
     Global coordinates -> x-axis points forward, z-axis points upward
     """
@@ -109,13 +109,13 @@ def run(
     r"""Run Equi2Pers
 
     params:
-        src: equirectangular image np.ndarray[C, H, W]
-        rot: Dict[str, float]
-        sampling_method: str (default="faster")
-        mode: str (default="bilinear")
+    - src: equirectangular image np.ndarray[C, H, W]
+    - rot (Dict[str, float])
+    - sampling_method (str): (default="faster")
+    - mode (str): (default="bilinear")
 
     returns:
-        pers: perspective image np.ndarray[C, H, W]
+    - pers: perspective image np.ndarray[C, H, W]
 
     NOTE: input can be batched [B, C, H, W] or List[np.ndarray]
     NOTE: when using batches, the output types match

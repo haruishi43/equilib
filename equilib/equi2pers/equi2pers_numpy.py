@@ -17,10 +17,10 @@ def intrinsic_matrix(
     r"""Create Intrinsic Matrix
 
     return:
-        K: 3x3 matrix numpy.ndarray
+    - K (np.ndarray): 3x3 matrix
 
     NOTE:
-        ref: http://ksimek.github.io/2013/08/13/intrinsic/
+    - ref: http://ksimek.github.io/2013/08/13/intrinsic/
     """
     # perspective projection (focal length)
     f = w_pers / (2.0 * np.tan(np.radians(fov_x) / 2.0))
@@ -42,7 +42,7 @@ def perspective_coordinate(
     r"""Create mesh coordinate grid with perspective height and width
 
     return:
-        coordinate: numpy.ndarray
+    - coordinate (np.ndarray)
     """
     _xs = np.linspace(0, w_pers - 1, w_pers)
     _ys = np.linspace(0, h_pers - 1, h_pers)
@@ -60,12 +60,12 @@ def rotation_matrix(
     r"""Create Rotation Matrix
 
     params:
-        roll: x-axis rotation float
-        pitch: y-axis rotation float
-        yaw: z-axis rotation float
+    - roll: x-axis rotation float
+    - pitch: y-axis rotation float
+    - yaw: z-axis rotation float
 
     return:
-        rotation matrix: numpy.ndarray
+    - rotation matrix (np.ndarray)
 
     Global coordinates -> x-axis points forward, z-axis points upward
     """
@@ -163,13 +163,13 @@ def run(
     r"""Run Equi2Pers
 
     params:
-        equi: equirectangular image np.ndarray[C, H, W]
-        rot: Dict[str, float]
-        sampling_method: str
-        mode: str
+    - equi: equirectangular image np.ndarray[C, H, W]
+    - rot (dict, list): Dict[str, float]
+    - sampling_method (str)
+    - mode (str)
 
     returns:
-        pers: perspective image np.ndarray[C, H, W]
+    - pers: perspective image np.ndarray[C, H, W]
 
     NOTE: input can be batched [B, C, H, W] or List[np.ndarray]
     NOTE: when using batches, the output types match

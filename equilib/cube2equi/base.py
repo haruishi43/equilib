@@ -13,7 +13,19 @@ __all__ = ["Cube2Equi", "cube2equi"]
 
 
 class Cube2Equi(object):
-    r"""Cube2Equi"""
+    r"""
+    params:
+    - w_out, h_out (int): equirectangular image size
+    - cube_format (str): input cube format("dice", "horizon", "dict", "list")
+    - sampling_method (str): defaults to "default"
+    - mode (str): interpolation mode, defaults to "bilinear"
+
+    inputs:
+    - cubemap (np.ndarray, torch.Tensor, dict, list)
+
+    returns:
+    - equi (np.ndarray, torch.Tensor)
+    """
 
     def __init__(
         self,
@@ -23,13 +35,6 @@ class Cube2Equi(object):
         sampling_method: str = "default",
         mode: str = "bilinear",
     ) -> None:
-        r"""
-        params:
-            w_out, h_out (int): equirectangular image size
-            cube_format (str): input cube format("dice", "horizon", "dict", "list")
-            sampling_method (str): defaults to "default"
-            mode (str): interpolation mode, defaults to "bilinear"
-        """
         assert w_out % 8 == 0 and h_out % 8 == 0
         self.w_out = w_out
         self.h_out = h_out
@@ -69,6 +74,22 @@ def cube2equi(
     sampling_method: str = "default",
     mode: str = "bilinear",
 ) -> Union[np.ndarray, torch.Tensor]:
+    r"""
+    params:
+    - cubemap: Union[
+        np.ndarray,
+        torch.Tensor,
+        Dict[str, Union[np.ndarray, torch.Tensor]],
+        List[Union[np.ndarray, torch.Tensor]]]
+    - cube_format (str): ("dice", "horizon", "dict", "list")
+    - w_out (int):
+    - h_out (int):
+    - sampling_method (str): "default"
+    - mode (str): "bilinear"
+
+    return:
+    - equi (np.ndarray, torch.Tensor)
+    """
 
     # Try and detect which type it is ("numpy" or "torch")
     # FIXME: any cleaner way of detecting?

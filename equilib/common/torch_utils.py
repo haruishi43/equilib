@@ -48,12 +48,12 @@ def create_rotation_matrix(
     r"""Create Rotation Matrix
 
     params:
-        x: x-axis rotation float
-        y: y-axis rotation float
-        z: z-axis rotation float
+    - x: x-axis rotation float
+    - y: y-axis rotation float
+    - z: z-axis rotation float
 
     return:
-        rotation matrix: torch.Tensor
+    - rotation matrix (torch.Tensor)
     """
     # calculate rotation about the x-axis
     R_x = torch.tensor(

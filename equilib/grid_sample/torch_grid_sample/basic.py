@@ -37,13 +37,13 @@ def grid_sample(
     r"""Torch Grid Sample (Custom)
 
     params:
-        img: Tensor[B, C, H, W]  or Tensor[C, H, W]
-        grid: Tensor[B, 2, H, W] or Tensor[2, H, W]
-        mode: `bilinear` or `nearest`
+    - img: Tensor[B, C, H, W]  or Tensor[C, H, W]
+    - grid: Tensor[B, 2, H, W] or Tensor[2, H, W]
+    - mode: `bilinear` or `nearest`
 
     returns:
-        out: Tensor[B, C, H, W] or Tensor[C, H, W]
-            where H, W are grid size
+    - out: Tensor[B, C, H, W] or Tensor[C, H, W]
+        where H, W are grid size
     """
     assert len(img.shape) == len(grid.shape), "ERR: img and grid does not match"
     assert len(img.shape) > 2, "ERR: dim needs to be 3 or 4"

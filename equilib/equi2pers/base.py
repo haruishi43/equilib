@@ -13,7 +13,19 @@ __all__ = ["Equi2Pers", "equi2pers"]
 
 
 class Equi2Pers(object):
-    r"""Equi2Pers"""
+    r"""
+    params:
+    - w_pers, h_pers (int): perspective size
+    - fov_x (float): perspective image fov of x-axis
+    - skew (float): skew intrinsic parameter
+
+    inputs:
+    - equi (np.ndarray, torch.Tensor, list)
+    - rot (dict, list): Dict[str, float]
+
+    returns:
+    - pers (np.ndarray, torch.Tensor)
+    """
 
     def __init__(
         self,
@@ -24,12 +36,7 @@ class Equi2Pers(object):
         sampling_method: str = "default",
         mode: str = "bilinear",
     ) -> None:
-        r"""
-        params:
-            w_pers, h_pers (int): perspective size
-            fov_x (float): perspective image fov of x-axis
-            skew (float): skew intrinsic parameter
-        """
+        r""""""
         self.w_pers = w_pers
         self.h_pers = h_pers
         self.fov_x = fov_x
@@ -78,6 +85,17 @@ def equi2pers(
     sampling_method: str = "default",
     mode: str = "bilinear",
 ) -> Union[np.ndarray, torch.Tensor]:
+    r"""
+    params:
+    - equi (np.ndarray, torch.Tensor, list)
+    - rot (dict, list): Dict[str, float]
+    - w_pers, h_pers (int): perspective size
+    - fov_x (float): perspective image fov of x-axis
+    - skew (float): skew intrinsic parameter
+
+    returns:
+    - pers (np.ndarray, torch.Tensor)
+    """
 
     # Try and detect which type it is ("numpy" or "torch")
     # FIXME: any cleaner way of detecting?

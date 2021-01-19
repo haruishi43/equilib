@@ -19,11 +19,11 @@ def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
     r"""Rotation coordinates to phi/theta of the equirectangular image
 
     params:
-        M: torch.Tensor
+    - M: torch.Tensor
 
     return:
-        phis: torch.Tensor
-        thetas: torch.Tensor
+    - phis: torch.Tensor
+    - thetas: torch.Tensor
     """
     if len(M.shape) == 3:
         M = M.unsqueeze(0)
@@ -42,7 +42,7 @@ def create_coordinate(h_out: int, w_out: int) -> np.ndarray:
     r"""Create mesh coordinate grid with height and width
 
     return:
-        coordinate: numpy.ndarray
+    - coordinate (np.ndarray)
     """
     xs = torch.linspace(0, w_out - 1, w_out)
     theta = xs * 2 * math.pi / w_out - math.pi
@@ -63,12 +63,12 @@ def rotation_matrix(
     r"""Create Rotation Matrix
 
     params:
-        roll: x-axis rotation float
-        pitch: y-axis rotation float
-        yaw: z-axis rotation float
+    - roll: x-axis rotation float
+    - pitch: y-axis rotation float
+    - yaw: z-axis rotation float
 
     return:
-        rotation matrix: numpy.ndarray
+    - rotation matrix (np.ndarray)
 
     Global coordinates -> x-axis points forward, z-axis points upward
     """
@@ -94,13 +94,13 @@ def run(
     r"""Run Equi2Pers
 
     params:
-        src: equirectangular image torch.Tensor[(B), C, H, W]
-        rot: Dict[str, float] or List[Dict[str, float]]
-        sampling_method: str (default="torch")
-        mode: str (default="bilinear")
+    - src: equirectangular image torch.Tensor[(B), C, H, W]
+    - rot: Dict[str, float] or List[Dict[str, float]]
+    - sampling_method (str): (default="torch")
+    - mode (str): (default="bilinear")
 
     returns:
-        pers: perspective image torch.Tensor[C, H, W]
+    - pers: perspective image torch.Tensor[C, H, W]
 
     NOTE: input can be batched [B, C, H, W] or single [C, H, W]
     NOTE: when using batches, the output types match

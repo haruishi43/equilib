@@ -8,18 +8,18 @@ def grid_sample(
     img: torch.Tensor, grid: torch.Tensor, mode: str = "bilinear", **kwargs
 ) -> torch.Tensor:
     r"""Torch Grid Sample (default)
-        Uses `torch.nn.functional.grid_sample`
-        By far the best way to sample
+    - Uses `torch.nn.functional.grid_sample`
+    - By far the best way to sample
 
     params:
-        img: Tensor[B, C, H, W]  or Tensor[C, H, W]
-        grid: Tensor[B, 2, H, W] or Tensor[2, H, W]
-        device: torch.device
-        mode: `bilinear` or `nearest`
+    - img: Tensor[B, C, H, W]  or Tensor[C, H, W]
+    - grid: Tensor[B, 2, H, W] or Tensor[2, H, W]
+    - device: torch.device
+    - mode: `bilinear` or `nearest`
 
     returns:
-        out: Tensor[B, C, H, W] or Tensor[C, H, W]
-            where H, W are grid size
+    - out: Tensor[B, C, H, W] or Tensor[C, H, W]
+        where H, W are grid size
     """
     if len(img.shape) == 3:
         img = img.unsqueeze(0)

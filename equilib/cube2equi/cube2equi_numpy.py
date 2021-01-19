@@ -25,7 +25,7 @@ def cube_dice2h(cube_dice: np.ndarray) -> np.ndarray:
     r"""dice to horizion
 
     params:
-    cube_dice: (C, H, W)
+    - cube_dice: (C, H, W)
     """
     # Order: F R B L U D
     sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
@@ -148,10 +148,10 @@ def run(
     r"""Run cube to equirectangular image transformation
 
     params:
-        cubemap: np.ndarray
-        cube_format: ('dice', 'horizon', 'list', 'dict')
-        sampling_method: str
-        mode: str
+    - cubemap: np.ndarray
+    - cube_format: ('dice', 'horizon', 'list', 'dict')
+    - sampling_method: str
+    - mode: str
     """
 
     # Convert all cubemap format to `horizon` and batched

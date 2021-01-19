@@ -76,12 +76,12 @@ def rotation_matrix(
     r"""Create Rotation Matrix
 
     params:
-        roll: x-axis rotation float
-        pitch: y-axis rotation float
-        yaw: z-axis rotation float
+    - roll: x-axis rotation float
+    - pitch: y-axis rotation float
+    - yaw: z-axis rotation float
 
     return:
-        rotation matrix: torch.Tensor
+    - rotation matrix (torch.Tensor)
     """
     R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
     return R
@@ -160,12 +160,12 @@ def run(
     r"""Call Equi2Cube
 
     params:
-        equi: Union[torch.Tensor, List[torch.Tensor]]
-        rot: Union[Dict[str, float], List[Dict[str, float]]]
-        w_face: int
-        cube_format: str ('list', 'dict', 'dice')
-        sampling_method: str
-        mode: str
+    - equi (Union[torch.Tensor, List[torch.Tensor]])
+    - rot (Union[Dict[str, float], List[Dict[str, float]]])
+    - w_face (int)
+    - cube_format (str): ('list', 'dict', 'dice')
+    - sampling_method (str)
+    - mode (str)
     """
 
     assert (

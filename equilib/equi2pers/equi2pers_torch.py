@@ -25,10 +25,10 @@ def intrinsic_matrix(
     r"""Create Intrinsic Matrix
 
     return:
-        K: 3x3 matrix torch.Tensor
+    - K (torch.Tensor): 3x3 matrix
 
     NOTE:
-        ref: http://ksimek.github.io/2013/08/13/intrinsic/
+    - ref: http://ksimek.github.io/2013/08/13/intrinsic/
     """
     fov_x = torch.tensor(fov_x)
     f = w_pers / (2 * torch.tan(deg2rad(fov_x) / 2))
@@ -49,7 +49,7 @@ def perspective_coordinate(
     r"""Create mesh coordinate grid with perspective height and width
 
     return:
-        coordinate: torch.Tensor
+    - coordinate (torch.Tensor)
     """
     _xs = torch.linspace(0, w_pers - 1, w_pers)
     _ys = torch.linspace(0, h_pers - 1, h_pers)
@@ -69,12 +69,12 @@ def rotation_matrix(
     r"""Create Rotation Matrix
 
     params:
-        roll: x-axis rotation float
-        pitch: y-axis rotation float
-        yaw: z-axis rotation float
+    - roll: x-axis rotation float
+    - pitch: y-axis rotation float
+    - yaw: z-axis rotation float
 
     return:
-        rotation matrix: numpy.ndarray
+    - rotation matrix (torch.Tensor)
 
     Global coordinates -> x-axis points forward, z-axis points upward
     """
@@ -121,13 +121,13 @@ def run(
     r"""Run Equi2Pers
 
     params:
-        equi: equirectangular image torch.Tensor[(B), C, H, W]
-        rot: Dict[str, float] or List[Dict[str, float]]
-        sampling_method: str
-        mode: str
+    - equi: equirectangular image torch.Tensor[(B), C, H, W]
+    - rot: Dict[str, float] or List[Dict[str, float]]
+    - sampling_method (str)
+    - mode (str)
 
     returns:
-        pers: perspective image torch.Tensor[C, H, W]
+    - pers: perspective image torch.Tensor[C, H, W]
 
     NOTE: input can be batched [B, C, H, W] or single [C, H, W]
     NOTE: when using batches, the output types match

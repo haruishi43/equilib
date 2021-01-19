@@ -14,7 +14,20 @@ __all__ = ["Equi2Cube", "equi2cube"]
 
 
 class Equi2Cube(object):
-    r"""Equi2Cube"""
+    r"""
+    params:
+    - w_face (int): cube face width
+    - cube_format (str): ("dice", "horizon", "dict", "list")
+    - sampling_method (str)
+    - mode (str)
+
+    inputs:
+    - equi (np.ndarray, torch.Tensor, list, dict)
+    - rot: (dict, list[dict]): {"roll", "pitch", "yaw"}
+
+    returns:
+    - cube (np.ndarray, torch.Tensor, list, dict)
+    """
 
     def __init__(
         self,
@@ -23,10 +36,6 @@ class Equi2Cube(object):
         sampling_method: str = "default",
         mode: str = "bilinear",
     ) -> None:
-        r"""
-        params:
-            w_face: cube face width (int)
-        """
         self.w_face = w_face
         self.cube_format = cube_format
         self.sampling_method = sampling_method
@@ -79,6 +88,18 @@ def equi2cube(
     Dict[str, Union[np.ndarray, torch.Tensor]],
     List[Union[np.ndarray, torch.Tensor]],
 ]:
+    r"""
+    params:
+    - equi (np.ndarray, torch.Tensor, list, dict)
+    - rot: (dict, list[dict]): {"roll", "pitch", "yaw"}
+    - w_face (int): cube face width
+    - cube_format (str): ("dice", "horizon", "dict", "list")
+    - sampling_method (str)
+    - mode (str)
+
+    returns:
+    - cube (np.ndarray, torch.Tensor, dict, list)
+    """
 
     # Try and detect which type it is ("numpy" or "torch")
     # FIXME: any cleaner way of detecting?

@@ -42,12 +42,12 @@ def rotation_matrix(
     r"""Create Rotation Matrix
 
     params:
-        roll: x-axis rotation float
-        pitch: y-axis rotation float
-        yaw: z-axis rotation float
+    - roll: x-axis rotation float
+    - pitch: y-axis rotation float
+    - yaw: z-axis rotation float
 
     return:
-        rotation matrix: numpy.ndarray
+    - rotation matrix (np.ndarray)
 
     Global coordinates -> x-axis points forward, z-axis points upward
     """
@@ -118,11 +118,11 @@ def _run_single(
     r"""Call a single run
 
     params:
-        equi: np.ndarray
-        rot: Dict[str, float]
-        w_face: int
-        cube_format: str
-        mode: str
+    - equi: np.ndarray
+    - rot: Dict[str, float]
+    - w_face: int
+    - cube_format: str
+    - mode: str
     """
 
     assert len(equi.shape) == 3, "ERR: {} is not a valid array".format(
@@ -178,12 +178,12 @@ def run(
     r"""Call Equi2Cube
 
     params:
-        equi: Union[np.ndarray, List[np.ndarray]]
-        rot: Union[Dict[str, float], List[Dict[str, float]]]
-        w_face: int,
-        cube_format: str ('list', 'dict', 'dice')
-        sampling_method: str
-        mode: str
+    - equi (Union[np.ndarray, List[np.ndarray]])
+    - rot (Union[Dict[str, float], List[Dict[str, float]]])
+    - w_face (int)
+    - cube_format (str): ('list', 'dict', 'dice')
+    - sampling_method (str)
+    - mode (str)
     """
 
     _return_type = type(equi)

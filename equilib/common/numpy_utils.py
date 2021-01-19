@@ -12,11 +12,11 @@ def create_coord(
     `z-axis` scale is `1`
 
     params:
-        height: int
-        width: int
+    - height (int)
+    - width (int)
 
     return:
-        coordinate: numpy.ndarray
+    - coordinate (np.ndarray)
     """
     _xs = np.linspace(0, width - 1, width)
     _ys = np.linspace(0, height - 1, height)
@@ -34,12 +34,12 @@ def create_rotation_matrix(
     r"""Create Rotation Matrix
 
     params:
-        x: x-axis rotation float
-        y: y-axis rotation float
-        z: z-axis rotation float
+    - x: x-axis rotation float
+    - y: y-axis rotation float
+    - z: z-axis rotation float
 
     return:
-        rotation matrix: numpy.ndarray
+    - rotation matrix (np.ndarray)
     """
     # calculate rotation about the x-axis
     R_x = np.array(
