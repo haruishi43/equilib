@@ -39,7 +39,7 @@ jobs:
         python -m pip install --upgrade pip
     - name: Install main
       run: |
-        pip install .
+        pip install .  --use-feature=in-tree-build
     - name: Flake8
       run: |
         pip install hacking
