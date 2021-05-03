@@ -69,7 +69,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Haruya Ishikawa",
     author_email="www.haru.ishi43@gmail.com",
-    license="MIT",
+    license="AGPL-3.0",
     url="https://github.com/haruishi43/equilib",
     install_requires=get_requirements(),
     keywords=["Equirectangular", "Computer Vision"],
