@@ -36,7 +36,7 @@ class Equi2Pers(object):
         sampling_method: str = "default",
         mode: str = "bilinear",
     ) -> None:
-        r""""""
+        r""" """
         self.w_pers = w_pers
         self.h_pers = h_pers
         self.fov_x = fov_x
