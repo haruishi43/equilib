@@ -40,6 +40,8 @@ cd equilib
 
 pip install -r requirements.txt
 
+pip install -e .
+# or
 python setup.py develop
 ```
 

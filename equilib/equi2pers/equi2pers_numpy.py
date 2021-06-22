@@ -9,10 +9,12 @@ from equilib.grid_sample import numpy_func
 from equilib.utils import (
     create_global2camera_rotation_matrix,
     create_intrinsic_matrix,
-    create_rotation_matrix
+    create_rotation_matrix,
 )
 
-_create_global2camera_rotation_matrix = partial(create_global2camera_rotation_matrix, is_torch=False)
+_create_global2camera_rotation_matrix = partial(
+    create_global2camera_rotation_matrix, is_torch=False
+)
 _create_intrinsic_matrix = partial(create_intrinsic_matrix, is_torch=False)
 _create_rotation_matrix = partial(create_rotation_matrix, is_torch=False)
 

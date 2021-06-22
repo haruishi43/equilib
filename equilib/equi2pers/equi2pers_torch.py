@@ -14,7 +14,9 @@ from equilib.utils import (
     torch_utils,
 )
 
-_create_global2camera_rotation_matrix = partial(create_global2camera_rotation_matrix, is_torch=True)
+_create_global2camera_rotation_matrix = partial(
+    create_global2camera_rotation_matrix, is_torch=True
+)
 _create_intrinsic_matrix = partial(create_intrinsic_matrix, is_torch=True)
 _create_rotation_matrix = partial(create_rotation_matrix, is_torch=True)
 

@@ -34,7 +34,7 @@ class Equi2Equi(object):
         h_out: Optional[int] = None,
         sampling_method: str = "default",
         mode: str = "bilinear",
-        z_down: bool = False
+        z_down: bool = False,
     ) -> None:
         self.w_out = w_out
         self.h_out = h_out
