@@ -20,7 +20,7 @@ from tests.common.timer import timer
 WIDTH, HEIGHT = (640, 320)  # Output panorama shape
 SAMPLING_METHOD = "default"  # Sampling method
 MODE = "bilinear"  # Sampling mode
-Z_DOWN = True  # z-axis control
+Z_DOWN = False  # z-axis control
 USE_CLASS = True  # Class or function
 
 # Paths
