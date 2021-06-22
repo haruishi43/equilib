@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
+from functools import partial
 import math
 from typing import Dict, List, Tuple, Union
 
 import torch
 
 from equilib.grid_sample import torch_func
-from equilib.common.torch_utils import (
+from equilib.utils import (
     create_rotation_matrix,
-    get_device,
-    sizeof,
+    torch_utils,
 )
+
+_create_rotation_matrix = partial(create_rotation_matrix, is_torch=True)
 
 
 def cube_h2list(cube_h: torch.Tensor) -> List[torch.Tensor]:
@@ -68,27 +70,8 @@ def cube_h2dice(cube_h: torch.Tensor) -> torch.Tensor:
     return cube_dice
 
 
-def rotation_matrix(
-    roll: float,
-    pitch: float,
-    yaw: float,
-) -> torch.Tensor:
-    r"""Create Rotation Matrix
-
-    params:
-    - roll: x-axis rotation float
-    - pitch: y-axis rotation float
-    - yaw: z-axis rotation float
-
-    return:
-    - rotation matrix (torch.Tensor)
-    """
-    R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-    return R
-
-
 def create_xyz(w_face: int) -> torch.Tensor:
-    r"""xyz coordinates of the faces of the cube"""
+    """xyz coordinates of the faces of the cube"""
     _dtype = torch.float32
     out = torch.zeros((w_face, w_face * 6, 3), dtype=_dtype)
     rng = torch.linspace(-0.5, 0.5, w_face, dtype=_dtype)
@@ -136,7 +119,7 @@ def create_xyz(w_face: int) -> torch.Tensor:
 
 
 def xyz2rot(xyz) -> Tuple[torch.Tensor]:
-    r"""Return rotation (theta, phi) from xyz"""
+    """Return rotation (theta, phi) from xyz"""
     norm = torch.norm(xyz, dim=-1)
     phi = torch.asin(xyz[:, :, :, 2] / norm)
     theta = torch.atan2(xyz[:, :, :, 1], xyz[:, :, :, 0])
@@ -150,6 +133,7 @@ def run(
     cube_format: str,
     sampling_method: str,
     mode: str,
+    z_down: bool,
     debug: bool = False,
 ) -> Union[
     torch.Tensor,
@@ -157,7 +141,7 @@ def run(
     List[Dict[str, torch.Tensor]],
     Dict[str, torch.Tensor],
 ]:
-    r"""Call Equi2Cube
+    """Call Equi2Cube
 
     params:
     - equi (Union[torch.Tensor, List[torch.Tensor]])
@@ -166,6 +150,7 @@ def run(
     - cube_format (str): ('list', 'dict', 'dice')
     - sampling_method (str)
     - mode (str)
+    - z_down (bool)
     """
 
     assert (
@@ -183,17 +168,22 @@ def run(
 
     h_equi, w_equi = equi.shape[-2:]
     if debug:
-        print("equi: ", sizeof(equi) / 10e6, "mb")
+        print("equi: ", torch_utils.sizeof(equi) / 10e6, "mb")
 
     # get device
-    device = get_device(equi)
+    device = torch_utils.get_device(equi)
+
+    # FIXME: not sure why, but z-axis is facing the opposite
+    # probably I need to change the way I choose the xyz coordinates
+    # this is a temporary fix for now
+    z_down = not z_down
 
     # define variables
     xyz = []
     for r in rot:
         # for each rotations calculate M
         _xyz = create_xyz(w_face)
-        xyz_ = rotation_matrix(**r) @ _xyz.unsqueeze(3)
+        xyz_ = _create_rotation_matrix(**r, z_down=z_down) @ _xyz.unsqueeze(3)
         xyz_ = xyz_.squeeze(3)
         xyz.append(xyz_)
     xyz = torch.stack(xyz, dim=0).to(device)

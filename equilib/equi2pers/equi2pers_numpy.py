@@ -1,45 +1,27 @@
 #!/usr/bin/env python3
 
+from functools import partial
 from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
 from equilib.grid_sample import numpy_func
-from equilib.common.numpy_utils import create_rotation_matrix
+from equilib.utils import (
+    create_global2camera_rotation_matrix,
+    create_intrinsic_matrix,
+    create_rotation_matrix
+)
 
-
-def intrinsic_matrix(
-    w_pers: int,
-    h_pers: int,
-    fov_x: float,
-    skew: float,
-) -> np.ndarray:
-    r"""Create Intrinsic Matrix
-
-    return:
-    - K (np.ndarray): 3x3 matrix
-
-    NOTE:
-    - ref: http://ksimek.github.io/2013/08/13/intrinsic/
-    """
-    # perspective projection (focal length)
-    f = w_pers / (2.0 * np.tan(np.radians(fov_x) / 2.0))
-    # transform between camera frame and pixel coordinates
-    K = np.array(
-        [
-            [f, skew, w_pers / 2],
-            [0.0, f, h_pers / 2],
-            [0.0, 0.0, 1.0],
-        ]
-    )
-    return K
+_create_global2camera_rotation_matrix = partial(create_global2camera_rotation_matrix, is_torch=False)
+_create_intrinsic_matrix = partial(create_intrinsic_matrix, is_torch=False)
+_create_rotation_matrix = partial(create_rotation_matrix, is_torch=False)
 
 
 def perspective_coordinate(
     w_pers: int,
     h_pers: int,
 ) -> np.ndarray:
-    r"""Create mesh coordinate grid with perspective height and width
+    """Create mesh coordinate grid with perspective height and width
 
     return:
     - coordinate (np.ndarray)
@@ -52,48 +34,8 @@ def perspective_coordinate(
     return coord
 
 
-def rotation_matrix(
-    roll: float,
-    pitch: float,
-    yaw: float,
-) -> np.ndarray:
-    r"""Create Rotation Matrix
-
-    params:
-    - roll: x-axis rotation float
-    - pitch: y-axis rotation float
-    - yaw: z-axis rotation float
-
-    return:
-    - rotation matrix (np.ndarray)
-
-    Global coordinates -> x-axis points forward, z-axis points upward
-    """
-    R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-    return R
-
-
-def global2camera_rotation_matrix() -> np.ndarray:
-    r"""Default rotation that changes global to camera coordinates"""
-    R_XY = np.array(
-        [  # X <-> Y
-            [0.0, 1.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0],
-        ]
-    )
-    R_YZ = np.array(
-        [  # Y <-> Z
-            [1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0],
-            [0.0, 1.0, 0.0],
-        ]
-    )
-    return R_XY @ R_YZ
-
-
 def _get_img_size(img: np.ndarray) -> Tuple[int]:
-    r"""Return height and width"""
+    """Return height and width"""
     return img.shape[-2:]
 
 
@@ -106,20 +48,21 @@ def _run_single(
     skew: float,
     sampling_method: str,
     mode: str,
+    z_down: bool,
 ) -> np.ndarray:
 
     # NOTE: Precomputable variables
     m = perspective_coordinate(w_pers=w_pers, h_pers=h_pers)
-    K = intrinsic_matrix(
+    K = _create_intrinsic_matrix(
         w_pers=w_pers,
         h_pers=h_pers,
         fov_x=fov_x,
         skew=skew,
     )
-    g2c_rot = global2camera_rotation_matrix()
+    g2c_rot = _create_global2camera_rotation_matrix()
 
     # Compute variables
-    R = rotation_matrix(**rot)
+    R = _create_rotation_matrix(**rot, z_down=z_down)
     h_equi, w_equi = _get_img_size(equi)
 
     # conversion
@@ -159,14 +102,16 @@ def run(
     skew: float,
     sampling_method: str,
     mode: str,
+    z_down: bool,
 ) -> np.ndarray:
-    r"""Run Equi2Pers
+    """Run Equi2Pers
 
     params:
     - equi: equirectangular image np.ndarray[C, H, W]
     - rot (dict, list): Dict[str, float]
     - sampling_method (str)
     - mode (str)
+    - z_down (bool)
 
     returns:
     - pers: perspective image np.ndarray[C, H, W]
@@ -203,6 +148,7 @@ def run(
             skew=skew,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
         )
         samples.append(sample)
 

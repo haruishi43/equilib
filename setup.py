@@ -16,10 +16,38 @@ def readme():
 
 
 def find_version():
-    version_file = "equilib/__init__.py"
+    version_file = "equilib/info.py"
     with open(version_file, "r") as f:
         exec(compile(f.read(), version_file, "exec"))
     return locals()["__version__"]
+
+
+def find_author():
+    version_file = "equilib/info.py"
+    with open(version_file, "r") as f:
+        exec(compile(f.read(), version_file, "exec"))
+    return locals()["__author__"]
+
+
+def find_email():
+    version_file = "equilib/info.py"
+    with open(version_file, "r") as f:
+        exec(compile(f.read(), version_file, "exec"))
+    return locals()["__email__"]
+
+
+def find_description():
+    version_file = "equilib/info.py"
+    with open(version_file, "r") as f:
+        exec(compile(f.read(), version_file, "exec"))
+    return locals()["__description__"]
+
+
+def find_url():
+    version_file = "equilib/info.py"
+    with open(version_file, "r") as f:
+        exec(compile(f.read(), version_file, "exec"))
+    return locals()["__url__"]
 
 
 def get_requirements(filename="requirements.txt"):
@@ -64,13 +92,13 @@ setup(
     name="pyequilib",
     version=find_version(),
     packages=find_packages(exclude=["github2pypi"]),
-    description="equirectangular image processing with python",
+    description=find_description(),
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
-    author="Haruya Ishikawa",
-    author_email="www.haru.ishi43@gmail.com",
+    author=find_author(),
+    author_email=find_email(),
     license="AGPL-3.0",
-    url="https://github.com/haruishi43/equilib",
+    url=find_url(),
     install_requires=get_requirements(),
     keywords=["Equirectangular", "Computer Vision"],
     classifiers=[

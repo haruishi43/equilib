@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple, Union
 import torch
 
 from equilib.grid_sample import torch_func
-from equilib.common.torch_utils import get_device
+from equilib.utils import torch_utils
 
 
 def cube_list2h(cube_list: List[torch.Tensor]) -> torch.Tensor:
@@ -24,7 +24,7 @@ def cube_dict2h(
 
 
 def cube_dice2h(cube_dice: torch.Tensor) -> torch.Tensor:
-    r"""dice to horizion
+    """dice to horizion
 
     params:
     - cube_dice: (C, H, W)
@@ -62,7 +62,7 @@ def _to_horizon(
 
 
 def _equirect_facetype(h: int, w: int) -> torch.Tensor:
-    r"""0F 1R 2B 3L 4U 5D"""
+    """0F 1R 2B 3L 4U 5D"""
     tp = torch.roll(
         torch.arange(4)  # 1
         .repeat_interleave(w // 4)  # 2 same as np.repeat
@@ -107,13 +107,13 @@ def run(
     sampling_method: str,
     mode: str,
 ) -> torch.Tensor:
-    r"""Run cube to equirectangular image transformation
+    """Run cube to equirectangular image transformation
 
     params:
-    - cubemap: np.ndarray
-    - cube_format: ('dice', 'horizon', 'list', 'dict')
-    - sampling_method: str
-    - mode: str
+    - cubemap (np.ndarray)
+    - cube_format (str): ('dice', 'horizon', 'list', 'dict')
+    - sampling_method (str)
+    - mode (str)
     """
 
     # Convert all cubemap format to `horizon` and batched
@@ -151,7 +151,7 @@ def run(
     cubemap = torch.stack(cubemap, 0)
 
     # get device
-    device = get_device(cubemap)
+    device = torch_utils.get_device(cubemap)
     w_face = cubemap.shape[-2]
 
     theta, phi = create_equi_grid(h_out, w_out)

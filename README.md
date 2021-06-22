@@ -155,6 +155,8 @@ __Right-handed rule XYZ global coordinate system__. `x-axis` faces forward and `
 - `pitch`: counter-clockwise rotation about the `y-axis`
 - `yaw`: counter-clockwise rotation about the `z-axis`
 
+You can chnage the right-handed coordinate system so that the `z-axis` faces down by adding `z_down=True` as a parameter.
+
 See demo scripts under `scripts`.
 
 
@@ -187,7 +189,7 @@ Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
 
 - [ ] Documentations for each transform
 - [x] Add table and statistics for speed improvements
-- [ ] Batch processing for `numpy`
+- [ ] Batch processing for `numpy` (uses too much memory; alternative will be `multiprocessing`)
 - [ ] Mixed precision for `torch`
 - [ ] `c++` version of grid sampling
 

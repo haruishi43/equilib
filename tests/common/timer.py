@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import time
+from typing import Callable
 
 
-def timer(func):
-    r"""Decorator that reports the execution time."""
+def timer(func: Callable):
+    """Decorator that reports the execution time"""
 
     def wrap(*args, **kwargs):
         tic = time.perf_counter()

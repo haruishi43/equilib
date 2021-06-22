@@ -13,11 +13,14 @@ __all__ = ["Equi2Pers", "equi2pers"]
 
 
 class Equi2Pers(object):
-    r"""
+    """
     params:
     - w_pers, h_pers (int): perspective size
     - fov_x (float): perspective image fov of x-axis
     - skew (float): skew intrinsic parameter
+    - sampling_method (str)
+    - mode (str)
+    - z_down (bool)
 
     inputs:
     - equi (np.ndarray, torch.Tensor, list)
@@ -35,14 +38,15 @@ class Equi2Pers(object):
         skew: float = 0.0,
         sampling_method: str = "default",
         mode: str = "bilinear",
+        z_down: bool = False,
     ) -> None:
-        r""" """
         self.w_pers = w_pers
         self.h_pers = h_pers
         self.fov_x = fov_x
         self.skew = skew
         self.sampling_method = sampling_method
         self.mode = mode
+        self.z_down = z_down
 
     def __call__(
         self,
@@ -65,6 +69,7 @@ class Equi2Pers(object):
             skew=self.skew,
             sampling_method=self.sampling_method,
             mode=self.mode,
+            z_down=self.z_down,
         )
 
 
@@ -84,14 +89,16 @@ def equi2pers(
     skew: float = 0.0,
     sampling_method: str = "default",
     mode: str = "bilinear",
+    z_down: bool = False,
 ) -> Union[np.ndarray, torch.Tensor]:
-    r"""
+    """
     params:
     - equi (np.ndarray, torch.Tensor, list)
     - rot (dict, list): Dict[str, float]
     - w_pers, h_pers (int): perspective size
     - fov_x (float): perspective image fov of x-axis
     - skew (float): skew intrinsic parameter
+    - z_down (bool)
 
     returns:
     - pers (np.ndarray, torch.Tensor)
@@ -124,6 +131,7 @@ def equi2pers(
             skew=skew,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
         )
     elif _type == "torch":
         return run_torch(
@@ -135,6 +143,7 @@ def equi2pers(
             skew=skew,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
         )
     else:
         raise ValueError

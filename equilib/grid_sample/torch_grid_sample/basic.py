@@ -4,7 +4,7 @@ from typing import List
 
 import torch
 
-from equilib.common.torch_utils import get_device
+from equilib.utils import torch_utils
 
 from .interp import linear_interp
 
@@ -15,12 +15,12 @@ def interp2d(
     dx: torch.Tensor,
     mode: str = "bilinear",
 ) -> torch.Tensor:
-    r"""Naive Interpolation
+    """Naive Interpolation
     (y,x): target pixel
     mode: interpolation mode
     """
     q00, q10, q01, q11 = Q
-    L = torch.tensor(1.0).to(get_device(Q))
+    L = torch.tensor(1.0).to(torch_utils.get_device(Q))
     if mode == "bilinear":
         f0 = linear_interp(q00, q01, dx, L)
         f1 = linear_interp(q10, q11, dx, L)
@@ -34,7 +34,7 @@ def grid_sample(
     grid: torch.Tensor,
     mode: str = "bilinear",
 ) -> torch.Tensor:
-    r"""Torch Grid Sample (Custom)
+    """Torch Grid Sample (Custom)
 
     params:
     - img: Tensor[B, C, H, W]  or Tensor[C, H, W]
@@ -53,12 +53,12 @@ def grid_sample(
     batches, channels, h_in, w_in = img.shape
     _, _, h_out, w_out = grid.shape
 
-    assert get_device(img) == get_device(
+    assert torch_utils.get_device(img) == torch_utils.get_device(
         grid
     ), "ERR: img and grid does not match device " "{} vs {}".format(
-        get_device(img), get_device(grid)
+        torch_utils.get_device(img), torch_utils.get_device(grid)
     )
-    device = get_device(img)
+    device = torch_utils.get_device(img)
 
     _dtype = img.dtype
     _max = torch.tensor(1.0, device=device)

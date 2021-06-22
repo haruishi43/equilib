@@ -13,7 +13,7 @@ def interp2d(
     dx: float,
     mode: str = "bilinear",
 ) -> np.ndarray:
-    r"""Naive Interpolation
+    """Naive Interpolation
     (y,x): target pixel
     mode: interpolation mode
     """
@@ -31,7 +31,7 @@ def grid_sample(
     grid: np.ndarray,
     mode: str = "bilinear",
 ) -> np.ndarray:
-    r"""Naive grid sample algorithm"""
+    """Naive grid sample algorithm"""
     channels, h_in, w_in = img.shape
     _, h_out, w_out = grid.shape
 

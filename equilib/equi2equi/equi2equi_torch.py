@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 
+from functools import partial
 import math
 from typing import Dict, List, Tuple, Union
-
-import numpy as np
 
 import torch
 
 from equilib.grid_sample import torch_func
-from equilib.common.torch_utils import (
+from equilib.utils import (
     create_rotation_matrix,
-    get_device,
-    sizeof,
+    torch_utils,
 )
+
+_create_rotation_matrix = partial(create_rotation_matrix, is_torch=True)
 
 
 def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
-    r"""Rotation coordinates to phi/theta of the equirectangular image
+    """Rotation coordinates to phi/theta of the equirectangular image
 
     params:
     - M: torch.Tensor
@@ -38,8 +38,8 @@ def pixel_wise_rot(M: torch.Tensor) -> Tuple[torch.Tensor]:
     return phis, thetas
 
 
-def create_coordinate(h_out: int, w_out: int) -> np.ndarray:
-    r"""Create mesh coordinate grid with height and width
+def create_coordinate(h_out: int, w_out: int) -> torch.Tensor:
+    """Create mesh coordinate grid with height and width
 
     return:
     - coordinate (np.ndarray)
@@ -55,29 +55,8 @@ def create_coordinate(h_out: int, w_out: int) -> np.ndarray:
     return coord
 
 
-def rotation_matrix(
-    roll: float,
-    pitch: float,
-    yaw: float,
-) -> np.ndarray:
-    r"""Create Rotation Matrix
-
-    params:
-    - roll: x-axis rotation float
-    - pitch: y-axis rotation float
-    - yaw: z-axis rotation float
-
-    return:
-    - rotation matrix (np.ndarray)
-
-    Global coordinates -> x-axis points forward, z-axis points upward
-    """
-    R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-    return R
-
-
 def _get_img_size(img: torch.Tensor) -> Tuple[int]:
-    r"""Return height and width"""
+    """Return height and width"""
     # batch, channel, height, width
     return img.shape[-2:]
 
@@ -89,9 +68,10 @@ def run(
     h_out: int,
     sampling_method: str = "torch",
     mode: str = "bilinear",
+    z_down: bool = False,
     debug: bool = False,
 ) -> torch.Tensor:
-    r"""Run Equi2Pers
+    """Run Equi2Pers
 
     params:
     - src: equirectangular image torch.Tensor[(B), C, H, W]
@@ -124,10 +104,10 @@ def run(
         w_out = w_equi
 
     if debug:
-        print("size of src: ", sizeof(src) / 10e6, "mb")
+        print("size of src: ", torch_utils.sizeof(src) / 10e6, "mb")
 
     # get device
-    device = get_device(src)
+    device = torch_utils.get_device(src)
 
     # define variables
     B = []
@@ -138,7 +118,7 @@ def run(
         y = norm_A * torch.cos(a[:, :, 1]) * torch.sin(a[:, :, 0])
         z = norm_A * torch.sin(a[:, :, 1])
         A = torch.stack((x, y, z), dim=-1)
-        R = rotation_matrix(**r)
+        R = _create_rotation_matrix(**r, z_down=z_down)
         _B = R @ A.unsqueeze(3)
         _B = _B.squeeze(3)
         B.append(_B)

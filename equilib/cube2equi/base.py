@@ -13,7 +13,7 @@ __all__ = ["Cube2Equi", "cube2equi"]
 
 
 class Cube2Equi(object):
-    r"""
+    """
     params:
     - w_out, h_out (int): equirectangular image size
     - cube_format (str): input cube format("dice", "horizon", "dict", "list")
@@ -74,18 +74,19 @@ def cube2equi(
     sampling_method: str = "default",
     mode: str = "bilinear",
 ) -> Union[np.ndarray, torch.Tensor]:
-    r"""
+    """
     params:
-    - cubemap: Union[
+    - cubemap (Union[
         np.ndarray,
         torch.Tensor,
         Dict[str, Union[np.ndarray, torch.Tensor]],
-        List[Union[np.ndarray, torch.Tensor]]]
+        List[Union[np.ndarray, torch.Tensor]]])
     - cube_format (str): ("dice", "horizon", "dict", "list")
     - w_out (int):
     - h_out (int):
     - sampling_method (str): "default"
     - mode (str): "bilinear"
+    - z_down (bool): False
 
     return:
     - equi (np.ndarray, torch.Tensor)

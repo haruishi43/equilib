@@ -1,52 +1,29 @@
 #!/usr/bin/env python3
 
+from functools import partial
 import math
 from typing import Dict, List, Tuple, Union
-
-import numpy as np
 
 import torch
 
 from equilib.grid_sample import torch_func
-from equilib.common.torch_utils import (
+from equilib.utils import (
+    create_global2camera_rotation_matrix,
+    create_intrinsic_matrix,
     create_rotation_matrix,
-    deg2rad,
-    get_device,
-    sizeof,
+    torch_utils,
 )
 
-
-def intrinsic_matrix(
-    w_pers: int,
-    h_pers: int,
-    fov_x: float,
-    skew: float,
-) -> torch.Tensor:
-    r"""Create Intrinsic Matrix
-
-    return:
-    - K (torch.Tensor): 3x3 matrix
-
-    NOTE:
-    - ref: http://ksimek.github.io/2013/08/13/intrinsic/
-    """
-    fov_x = torch.tensor(fov_x)
-    f = w_pers / (2 * torch.tan(deg2rad(fov_x) / 2))
-    K = torch.tensor(
-        [
-            [f, skew, w_pers / 2],
-            [0.0, f, h_pers / 2],
-            [0.0, 0.0, 1.0],
-        ]
-    )
-    return K
+_create_global2camera_rotation_matrix = partial(create_global2camera_rotation_matrix, is_torch=True)
+_create_intrinsic_matrix = partial(create_intrinsic_matrix, is_torch=True)
+_create_rotation_matrix = partial(create_rotation_matrix, is_torch=True)
 
 
 def perspective_coordinate(
     w_pers: int,
     h_pers: int,
 ) -> torch.Tensor:
-    r"""Create mesh coordinate grid with perspective height and width
+    """Create mesh coordinate grid with perspective height and width
 
     return:
     - coordinate (torch.Tensor)
@@ -61,48 +38,8 @@ def perspective_coordinate(
     return coord
 
 
-def rotation_matrix(
-    roll: float,
-    pitch: float,
-    yaw: float,
-) -> np.ndarray:
-    r"""Create Rotation Matrix
-
-    params:
-    - roll: x-axis rotation float
-    - pitch: y-axis rotation float
-    - yaw: z-axis rotation float
-
-    return:
-    - rotation matrix (torch.Tensor)
-
-    Global coordinates -> x-axis points forward, z-axis points upward
-    """
-    R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-    return R
-
-
-def global2camera_rotation_matrix() -> torch.Tensor:
-    r"""Default rotation that changes global to camera coordinates"""
-    R_XY = torch.tensor(
-        [  # X <-> Y
-            [0.0, 1.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0],
-        ]
-    )
-    R_YZ = torch.tensor(
-        [  # Y <-> Z
-            [1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0],
-            [0.0, 1.0, 0.0],
-        ]
-    )
-    return R_XY @ R_YZ
-
-
 def _get_img_size(img: torch.Tensor) -> Tuple[int]:
-    r"""Return height and width"""
+    """Return height and width"""
     # batch, channel, height, width
     return img.shape[-2:]
 
@@ -116,15 +53,17 @@ def run(
     skew: float,
     sampling_method: str,
     mode: str,
+    z_down: bool,
     debug: bool = False,
 ) -> torch.Tensor:
-    r"""Run Equi2Pers
+    """Run Equi2Pers
 
     params:
     - equi: equirectangular image torch.Tensor[(B), C, H, W]
     - rot: Dict[str, float] or List[Dict[str, float]]
     - sampling_method (str)
     - mode (str)
+    - z_down (bool)
 
     returns:
     - pers: perspective image torch.Tensor[C, H, W]
@@ -147,10 +86,10 @@ def run(
 
     h_equi, w_equi = _get_img_size(equi)
     if debug:
-        print("equi: ", sizeof(equi) / 10e6, "mb")
+        print("equi: ", torch_utils.sizeof(equi) / 10e6, "mb")
 
     # get device
-    device = get_device(equi)
+    device = torch_utils.get_device(equi)
 
     # define variables
     # FIXME: methods without using loop
@@ -161,14 +100,14 @@ def run(
             w_pers=w_pers,
             h_pers=h_pers,
         )
-        K = intrinsic_matrix(
+        K = _create_intrinsic_matrix(
             w_pers=w_pers,
             h_pers=h_pers,
             fov_x=fov_x,
             skew=skew,
         )
-        g2c_rot = global2camera_rotation_matrix()
-        R = rotation_matrix(**r)
+        g2c_rot = _create_global2camera_rotation_matrix()
+        R = _create_rotation_matrix(**r, z_down=z_down)
         _M = R @ g2c_rot @ K.inverse() @ m.unsqueeze(3)
         _M = _M.squeeze(3)
         M.append(_M)

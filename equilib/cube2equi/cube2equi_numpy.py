@@ -22,7 +22,7 @@ def cube_dict2h(
 
 
 def cube_dice2h(cube_dice: np.ndarray) -> np.ndarray:
-    r"""dice to horizion
+    """dice to horizion
 
     params:
     - cube_dice: (C, H, W)
@@ -57,7 +57,7 @@ def _to_horizon(cubemap: np.ndarray, cube_format: str) -> np.ndarray:
 
 
 def _equirect_facetype(h: int, w: int) -> np.ndarray:
-    r"""0F 1R 2B 3L 4U 5D"""
+    """0F 1R 2B 3L 4U 5D"""
 
     tp = np.roll(
         np.arange(4).repeat(w // 4)[None, :].repeat(h, 0), 3 * w // 8, 1
@@ -92,7 +92,7 @@ def _run_single(
     sampling_method: str,
     mode: str,
 ) -> np.ndarray:
-    r"""Run a single batch of transformation"""
+    """Run a single batch of transformation"""
     w_face = cubemap.shape[-2]
 
     theta, phi = create_equi_grid(h_out, w_out)
@@ -145,7 +145,7 @@ def run(
     sampling_method: str,
     mode: str,
 ) -> np.ndarray:
-    r"""Run cube to equirectangular image transformation
+    """Run cube to equirectangular image transformation
 
     params:
     - cubemap: np.ndarray

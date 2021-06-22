@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
+from functools import partial
 from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
 from equilib.grid_sample import numpy_func
-from equilib.common.numpy_utils import create_rotation_matrix
+from equilib.utils import create_rotation_matrix
+
+_create_rotation_matrix = partial(create_rotation_matrix, is_torch=False)
 
 
 def cube_h2list(cube_h: np.ndarray) -> List[np.ndarray]:
@@ -34,29 +37,8 @@ def cube_h2dice(cube_h: np.ndarray) -> np.ndarray:
     return cube_dice
 
 
-def rotation_matrix(
-    roll: float,
-    pitch: float,
-    yaw: float,
-) -> np.ndarray:
-    r"""Create Rotation Matrix
-
-    params:
-    - roll: x-axis rotation float
-    - pitch: y-axis rotation float
-    - yaw: z-axis rotation float
-
-    return:
-    - rotation matrix (np.ndarray)
-
-    Global coordinates -> x-axis points forward, z-axis points upward
-    """
-    R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-    return R
-
-
 def create_xyz(w_face: int) -> np.ndarray:
-    r"""xyz coordinates of the faces of the cube"""
+    """xyz coordinates of the faces of the cube"""
     out = np.zeros((w_face, w_face * 6, 3), np.float32)
     rng = np.linspace(-0.5, 0.5, num=w_face, dtype=np.float32)
 
@@ -100,7 +82,7 @@ def create_xyz(w_face: int) -> np.ndarray:
 
 
 def xyz2rot(xyz) -> Tuple[np.ndarray]:
-    r"""Return rotation (theta, phi) from xyz"""
+    """Return rotation (theta, phi) from xyz"""
     norm = np.linalg.norm(xyz, axis=-1)
     phi = np.arcsin(xyz[:, :, 2] / norm)
     theta = np.arctan2(xyz[:, :, 1], xyz[:, :, 0])
@@ -114,8 +96,9 @@ def _run_single(
     cube_format: str,
     sampling_method: str,
     mode: str,
+    z_down: bool,
 ) -> np.ndarray:
-    r"""Call a single run
+    """Call a single run
 
     params:
     - equi: np.ndarray
@@ -123,6 +106,7 @@ def _run_single(
     - w_face: int
     - cube_format: str
     - mode: str
+    - z
     """
 
     assert len(equi.shape) == 3, "ERR: {} is not a valid array".format(
@@ -135,7 +119,11 @@ def _run_single(
 
     xyz = create_xyz(w_face)
     xyz = xyz[:, :, :, np.newaxis]
-    xyz_ = rotation_matrix(**rot) @ xyz
+    # FIXME: not sure why, but z-axis is facing the opposite
+    # probably I need to change the way I choose the xyz coordinates
+    # this is a temporary fix for now
+    z_down = not z_down
+    xyz_ = _create_rotation_matrix(**rot, z_down=z_down) @ xyz
     xyz_ = xyz_.squeeze(-1)
     theta, phi = xyz2rot(xyz_)
 
@@ -174,6 +162,7 @@ def run(
     cube_format: str,
     sampling_method: str,
     mode: str,
+    z_down: bool,
 ) -> Union[np.ndarray, List[np.ndarray], List[Dict[str, np.ndarray]]]:
     r"""Call Equi2Cube
 
@@ -213,6 +202,7 @@ def run(
             cube_format=cube_format,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
         )
         cubemaps.append(cubemap)
 

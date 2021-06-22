@@ -20,6 +20,7 @@ from tests.common.timer import timer
 WIDTH, HEIGHT = (640, 320)  # Output panorama shape
 SAMPLING_METHOD = "default"  # Sampling method
 MODE = "bilinear"  # Sampling mode
+Z_DOWN = True  # z-axis control
 USE_CLASS = True  # Class or function
 
 # Paths
@@ -41,6 +42,7 @@ def run_equi2equi(
     h_out: int,
     sampling_method: str,
     mode: str,
+    z_down: bool,
     use_class: bool,
 ) -> Union[np.ndarray, torch.Tensor]:
     # h_equi, w_equi = equi.shape[-2:]
@@ -51,6 +53,7 @@ def run_equi2equi(
             h_out=h_out,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
         )
         sample = equi2equi_instance(
             src=equi,
@@ -62,6 +65,7 @@ def run_equi2equi(
             rot=rot,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
             w_out=w_out,
             h_out=h_out,
         )
@@ -243,6 +247,7 @@ def test_numpy_single():
         h_out=HEIGHT,
         sampling_method=SAMPLING_METHOD,
         mode=MODE,
+        z_down=Z_DOWN,
         use_class=USE_CLASS,
     )
     process_single_numpy_output(
@@ -265,6 +270,7 @@ def test_numpy_batch():
         h_out=HEIGHT,
         sampling_method=SAMPLING_METHOD,
         mode=MODE,
+        z_down=Z_DOWN,
         use_class=USE_CLASS,
     )
     process_batch_numpy_output(
@@ -288,6 +294,7 @@ def test_torch_single():
         h_out=HEIGHT,
         sampling_method=SAMPLING_METHOD,
         mode=MODE,
+        z_down=Z_DOWN,
         use_class=USE_CLASS,
     )
     process_single_torch_output(
@@ -309,6 +316,7 @@ def test_torch_batch():
         h_out=HEIGHT,
         sampling_method=SAMPLING_METHOD,
         mode=MODE,
+        z_down=Z_DOWN,
         use_class=USE_CLASS,
     )
     process_batch_torch_output(

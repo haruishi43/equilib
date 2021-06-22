@@ -13,11 +13,12 @@ __all__ = ["Equi2Equi", "equi2equi"]
 
 
 class Equi2Equi(object):
-    r"""
-    init params:
+    """
+    params:
     - w_out, h_out (optional int): equi image size
     - sampling_method (str): defaults to "default"
     - mode (str): interpolation mode, defaults to "bilinear"
+    - z_down (bool)
 
     input params:
     - src (np.ndarray, torch.Tensor, list)
@@ -33,11 +34,13 @@ class Equi2Equi(object):
         h_out: Optional[int] = None,
         sampling_method: str = "default",
         mode: str = "bilinear",
+        z_down: bool = False
     ) -> None:
         self.w_out = w_out
         self.h_out = h_out
         self.sampling_method = sampling_method
         self.mode = mode
+        self.z_down = z_down
 
     def __call__(
         self,
@@ -56,6 +59,7 @@ class Equi2Equi(object):
             rot=rot,
             sampling_method=self.sampling_method,
             mode=self.mode,
+            z_down=self.z_down,
         )
 
 
@@ -71,16 +75,18 @@ def equi2equi(
     ],
     sampling_method: str = "default",
     mode: str = "bilinear",
+    z_down: bool = False,
     w_out: Optional[int] = None,
     h_out: Optional[int] = None,
 ) -> Union[np.ndarray, torch.Tensor]:
-    r"""
-    init params:
+    """
+    params:
     - src (np.ndarray, torch.Tensor, list)
     - rot (dict, list[dict])
     - w_out, h_out (optional int): equi image size
     - sampling_method (str): defaults to "default"
     - mode (str): interpolation mode, defaults to "bilinear"
+    - z_down (bool)
     """
 
     # Try and detect which type it is ("numpy" or "torch")
@@ -106,6 +112,7 @@ def equi2equi(
             rot=rot,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
             w_out=w_out,
             h_out=h_out,
         )
@@ -115,6 +122,7 @@ def equi2equi(
             rot=rot,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
             w_out=w_out,
             h_out=h_out,
         )

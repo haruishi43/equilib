@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 
+from functools import partial
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
 from equilib.grid_sample import numpy_func
-from equilib.common.numpy_utils import create_rotation_matrix
+from equilib.utils import create_rotation_matrix
+
+_create_rotation_matrix = partial(create_rotation_matrix, is_torch=False)
 
 
 def create_coordinate(h_out: int, w_out: int) -> np.ndarray:
-    r"""Create mesh coordinate grid with height and width
+    """Create mesh coordinate grid with height and width
 
     return:
     - coordinate (np.ndarray)
@@ -23,29 +26,8 @@ def create_coordinate(h_out: int, w_out: int) -> np.ndarray:
     return coord
 
 
-def rotation_matrix(
-    roll: float,
-    pitch: float,
-    yaw: float,
-) -> np.ndarray:
-    r"""Create Rotation Matrix
-
-    params:
-    - roll: x-axis rotation float
-    - pitch: y-axis rotation float
-    - yaw: z-axis rotation float
-
-    return:
-    - rotation matrix (np.ndarray)
-
-    Global coordinates -> x-axis points forward, z-axis points upward
-    """
-    R = create_rotation_matrix(x=roll, y=pitch, z=yaw)
-    return R
-
-
 def _get_img_size(img: np.ndarray) -> Tuple[int]:
-    r"""Return height and width"""
+    """Return height and width"""
     return img.shape[-2:]
 
 
@@ -54,6 +36,7 @@ def _run_single(
     rot: Dict[str, float],
     sampling_method: str,
     mode: str,
+    z_down: bool,
     w_out: Optional[int] = None,
     h_out: Optional[int] = None,
 ) -> np.ndarray:
@@ -70,7 +53,7 @@ def _run_single(
     z = norm_A * np.sin(a[:, :, 1])
     A = np.stack((x, y, z), axis=-1)
 
-    R = rotation_matrix(**rot)
+    R = _create_rotation_matrix(**rot, z_down=z_down)
 
     # conversion:
     # B = R @ A
@@ -103,16 +86,18 @@ def run(
     rot: Union[Dict[str, float], List[Dict[str, float]]],
     sampling_method: str,
     mode: str,
+    z_down: bool,
     w_out: Optional[int] = None,
     h_out: Optional[int] = None,
 ) -> np.ndarray:
-    r"""Run Equi2Pers
+    """Run Equi2Pers
 
     params:
     - src: equirectangular image np.ndarray[C, H, W]
     - rot (Dict[str, float])
     - sampling_method (str): (default="faster")
     - mode (str): (default="bilinear")
+    - z_down (bool)
 
     returns:
     - pers: perspective image np.ndarray[C, H, W]
@@ -134,10 +119,11 @@ def run(
         rot
     ), "ERR: length of src and rot differs {} vs {}".format(len(src), len(rot))
 
+    # TODO: batch implementation
+    # TODO: multiprocessing
     samples = []
     for s, r in zip(src, rot):
         # iterate through batches
-        # TODO: batch implementation
         sample = _run_single(
             src=s,
             rot=r,
@@ -145,6 +131,7 @@ def run(
             h_out=h_out,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
         )
         samples.append(sample)
 

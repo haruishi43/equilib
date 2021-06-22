@@ -14,16 +14,17 @@ __all__ = ["Equi2Cube", "equi2cube"]
 
 
 class Equi2Cube(object):
-    r"""
+    """
     params:
     - w_face (int): cube face width
     - cube_format (str): ("dice", "horizon", "dict", "list")
     - sampling_method (str)
     - mode (str)
+    - z_down (bool)
 
     inputs:
     - equi (np.ndarray, torch.Tensor, list, dict)
-    - rot: (dict, list[dict]): {"roll", "pitch", "yaw"}
+    - rot (dict, list[dict]): {"roll", "pitch", "yaw"}
 
     returns:
     - cube (np.ndarray, torch.Tensor, list, dict)
@@ -35,11 +36,13 @@ class Equi2Cube(object):
         cube_format: str,
         sampling_method: str = "default",
         mode: str = "bilinear",
+        z_down: bool = False,
     ) -> None:
         self.w_face = w_face
         self.cube_format = cube_format
         self.sampling_method = sampling_method
         self.mode = mode
+        self.z_down = z_down
 
     def __call__(
         self,
@@ -65,6 +68,7 @@ class Equi2Cube(object):
             cube_format=self.cube_format,
             sampling_method=self.sampling_method,
             mode=self.mode,
+            z_down=self.z_down,
         )
 
 
@@ -82,20 +86,22 @@ def equi2cube(
     cube_format: str,
     sampling_method: str = "default",
     mode: str = "bilinear",
+    z_down: bool = False,
 ) -> Union[
     np.ndarray,
     torch.Tensor,
     Dict[str, Union[np.ndarray, torch.Tensor]],
     List[Union[np.ndarray, torch.Tensor]],
 ]:
-    r"""
+    """
     params:
     - equi (np.ndarray, torch.Tensor, list, dict)
-    - rot: (dict, list[dict]): {"roll", "pitch", "yaw"}
+    - rot (dict, list[dict]): {"roll", "pitch", "yaw"}
     - w_face (int): cube face width
     - cube_format (str): ("dice", "horizon", "dict", "list")
     - sampling_method (str)
     - mode (str)
+    - z_down (bool)
 
     returns:
     - cube (np.ndarray, torch.Tensor, dict, list)
@@ -126,6 +132,7 @@ def equi2cube(
             cube_format=cube_format,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
         )
     elif _type == "torch":
         return run_torch(
@@ -135,6 +142,7 @@ def equi2cube(
             cube_format=cube_format,
             sampling_method=sampling_method,
             mode=mode,
+            z_down=z_down,
         )
     else:
         raise ValueError

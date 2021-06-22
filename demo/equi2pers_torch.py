@@ -27,7 +27,7 @@ def preprocess(
     img: Union[np.ndarray, Image.Image],
     is_cv2: bool = False,
 ) -> torch.Tensor:
-    r"""Preprocesses image"""
+    """Preprocesses image"""
     if isinstance(img, np.ndarray) and is_cv2:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     if isinstance(img, Image.Image):
@@ -71,7 +71,7 @@ def test_video(
     w_pers: int = 640,
     fov_x: float = 90.0,
 ) -> None:
-    r"""Test video"""
+    """Test video"""
     # Rotation:
     pi = np.pi
     inc = pi / 180
@@ -145,7 +145,7 @@ def test_image(
     w_pers: int = 640,
     fov_x: float = 90.0,
 ) -> None:
-    r"""Test single image"""
+    """Test single image"""
     # Rotation:
     rot = {
         "roll": 0,  #
