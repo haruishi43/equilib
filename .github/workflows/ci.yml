@@ -53,6 +53,10 @@ jobs:
       run: |
         pip install pytest
         pip install torch torchvision
+        pip install numba
+        pip install pillow
+        pip install opencv-python
+        pip install scipy
         pytest tests
 
     # - name: Install from dist
