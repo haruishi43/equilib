@@ -233,6 +233,9 @@ def test_rotation_matrices_cpu(dtype):
     assert torch.allclose(coords, gt_coords)
 
 
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="cuda device is not available"
+)
 @pytest.mark.parametrize(
     "dtype",
     [
