@@ -5,7 +5,11 @@
 
 from timeit import timeit
 
-from numba import jit
+try:
+    from numba import jit
+except ImportError:
+    print("numba not available")
+    jit = None
 
 import numpy as np
 

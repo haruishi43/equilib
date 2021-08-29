@@ -4,7 +4,11 @@
 
 """
 
-from numba import njit
+try:
+    from numba import njit
+except ImportError:
+    print("numba not available")
+    njit = None
 
 import numpy as np
 
