@@ -157,7 +157,7 @@ def test_rotation_matrix_gpu(dtype):
     "device",
     [
         torch.device("cpu"),
-        torch.device("cuda"),
+        # torch.device("cuda"),
     ],
 )
 def test_rotation_matrix_down(device):
