@@ -59,7 +59,7 @@ def hdinv(A):
     return invA
 
 
-@jit("float64[:,:](float64[:,:])", cache=True, nopython=True, nogil=True)
+# @jit("float64[:,:](float64[:,:])", cache=True, nopython=True, nogil=True)
 def fast_inverse(A):
     inv = np.empty_like(A)
     a = A[0, 0]
@@ -89,7 +89,7 @@ def fast_inverse(A):
     return inv
 
 
-@jit(cache=True, nopython=True, nogil=True)
+# @jit(cache=True, nopython=True, nogil=True)
 def vecinv(A):
     invA = np.zeros_like(A)
     for i in range(A.shape[0]):
