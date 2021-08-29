@@ -5,11 +5,7 @@
 
 from timeit import timeit
 
-try:
-    from numba import jit
-except ImportError:
-    print("numba not available")
-    jit = None
+from numba import jit
 
 import numpy as np
 
@@ -59,7 +55,7 @@ def hdinv(A):
     return invA
 
 
-# @jit("float64[:,:](float64[:,:])", cache=True, nopython=True, nogil=True)
+@jit("float64[:,:](float64[:,:])", cache=True, nopython=True, nogil=True)
 def fast_inverse(A):
     inv = np.empty_like(A)
     a = A[0, 0]
@@ -89,7 +85,7 @@ def fast_inverse(A):
     return inv
 
 
-# @jit(cache=True, nopython=True, nogil=True)
+@jit(cache=True, nopython=True, nogil=True)
 def vecinv(A):
     invA = np.zeros_like(A)
     for i in range(A.shape[0]):

@@ -4,11 +4,7 @@
 
 """
 
-try:
-    from numba import njit
-except ImportError:
-    print("numba not available")
-    njit = None
+from numba import njit
 
 import numpy as np
 
@@ -80,7 +76,7 @@ def faster_nearest(
     return out
 
 
-# @njit
+@njit
 def run(img, grid, out, b, h, w):
     for i in range(b):
         for y_out in range(h):
