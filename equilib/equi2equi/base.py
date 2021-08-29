@@ -6,10 +6,13 @@ import numpy as np
 
 import torch
 
-from .equi2equi_numpy import run as run_numpy
-from .equi2equi_torch import run as run_torch
+from .numpy import run as run_numpy
+from .torch import run as run_torch
 
 __all__ = ["Equi2Equi", "equi2equi"]
+
+ArrayLike = Union[np.ndarray, torch.Tensor]
+Rot = Union[Dict[str, float], List[Dict[str, float]]]
 
 
 class Equi2Equi(object):
@@ -21,8 +24,8 @@ class Equi2Equi(object):
     - z_down (bool)
 
     input params:
-    - src (np.ndarray, torch.Tensor, list)
-    - rot (dict, list[dict])
+    - src (np.ndarray, torch.Tensor)
+    - rots (dict, list[dict])
 
     return:
     - equi (np.ndarray, torch.Tensor)
@@ -30,101 +33,95 @@ class Equi2Equi(object):
 
     def __init__(
         self,
-        w_out: Optional[int] = None,
-        h_out: Optional[int] = None,
-        sampling_method: str = "default",
+        height: Optional[int] = None,
+        width: Optional[int] = None,
         mode: str = "bilinear",
         z_down: bool = False,
     ) -> None:
-        self.w_out = w_out
-        self.h_out = h_out
-        self.sampling_method = sampling_method
+        self.height = height
+        self.width = width
         self.mode = mode
         self.z_down = z_down
 
     def __call__(
         self,
-        src: Union[
-            np.ndarray,
-            torch.Tensor,
-            List[Union[np.ndarray, torch.Tensor]],
-        ],
-        rot: Union[
-            Dict[str, float],
-            List[Dict[str, float]],
-        ],
-    ) -> Union[np.ndarray, torch.Tensor]:
+        src: ArrayLike,
+        rots: Rot,
+        **kwargs,
+    ) -> ArrayLike:
         return equi2equi(
             src=src,
-            rot=rot,
-            sampling_method=self.sampling_method,
+            rots=rots,
             mode=self.mode,
             z_down=self.z_down,
+            **kwargs,
         )
 
 
 def equi2equi(
-    src: Union[
-        np.ndarray,
-        torch.Tensor,
-        List[Union[np.ndarray, torch.Tensor]],
-    ],
-    rot: Union[
-        Dict[str, float],
-        List[Dict[str, float]],
-    ],
-    sampling_method: str = "default",
+    src: ArrayLike,
+    rots: Rot,
     mode: str = "bilinear",
     z_down: bool = False,
-    w_out: Optional[int] = None,
-    h_out: Optional[int] = None,
-) -> Union[np.ndarray, torch.Tensor]:
+    height: Optional[int] = None,
+    width: Optional[int] = None,
+    **kwargs,
+) -> ArrayLike:
     """
     params:
-    - src (np.ndarray, torch.Tensor, list)
-    - rot (dict, list[dict])
-    - w_out, h_out (optional int): equi image size
-    - sampling_method (str): defaults to "default"
+    - src
+    - rots
     - mode (str): interpolation mode, defaults to "bilinear"
     - z_down (bool)
+    - height, width (optional int): output image size
+
+    returns:
+    - out
+
     """
 
-    # Try and detect which type it is ("numpy" or "torch")
-    # FIXME: any cleaner way of detecting?
     _type = None
-    if isinstance(src, list):
-        if isinstance(src[0], np.ndarray):
-            _type = "numpy"
-        elif isinstance(src[0], torch.Tensor):
-            _type = "torch"
-        else:
-            raise ValueError
-    elif isinstance(src, np.ndarray):
+    if isinstance(src, np.ndarray):
         _type = "numpy"
-    elif isinstance(src, torch.Tensor):
+    elif torch.is_tensor(src):
         _type = "torch"
     else:
         raise ValueError
 
+    if len(src) == 3 and isinstance(rots, dict):
+        # probably the input was a single image
+        src = src[None, ...]
+        rots = [rots]
+    elif len(src) == 3:
+        # probably a grayscale image
+        src = src[:, None, ...]
+
+    assert isinstance(rots, list), "ERR: rots is not a list"
     if _type == "numpy":
-        return run_numpy(
+        out = run_numpy(
             src=src,
-            rot=rot,
-            sampling_method=sampling_method,
+            rots=rots,
             mode=mode,
             z_down=z_down,
-            w_out=w_out,
-            h_out=h_out,
+            height=height,
+            width=width,
+            **kwargs,
         )
     elif _type == "torch":
-        return run_torch(
+        out = run_torch(
             src=src,
-            rot=rot,
-            sampling_method=sampling_method,
+            rots=rots,
             mode=mode,
             z_down=z_down,
-            w_out=w_out,
-            h_out=h_out,
+            height=height,
+            width=width,
+            **kwargs,
         )
     else:
         raise ValueError
+
+    # make sure that the output batch dim is removed if it's only a single image
+    if out.shape[0] == 1:
+        out = out.squeeze(0)
+
+    return out

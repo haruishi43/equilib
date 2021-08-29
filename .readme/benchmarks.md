@@ -1,5 +1,7 @@
 # Benchmarks
 
+TODO: old benchmarks! Need to create new ones.
+
 Environment:
 - CPU: Intel i9-9960X CPU @ 3.10 GHz
 - GPU: Nvidia Qudaro RTX 8000

@@ -91,7 +91,9 @@ if sys.argv[1] == "release":
 setup(
     name="pyequilib",
     version=find_version(),
-    packages=find_packages(exclude=["github2pypi"]),
+    packages=find_packages(
+        exclude=["github2pypi", "tests", "scripts", "results", "data"]
+    ),
     description=find_description(),
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
@@ -110,5 +112,5 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    python_requires=">=3.5",
+    python_requires=">=3.6",
 )

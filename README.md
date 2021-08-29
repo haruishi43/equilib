@@ -83,7 +83,7 @@ equi_img = np.asarray(equi_img)
 equi_img = np.transpose(equi_img, (2, 0, 1))
 
 # rotations
-rot = {
+rots = {
     'roll': 0.,
     'pitch': np.pi/4,  # rotate vertical
     'yaw': np.pi/4,  # rotate horizontal
@@ -91,18 +91,16 @@ rot = {
 
 # Intialize equi2pers
 equi2pers = Equi2Pers(
-    w_pers=640,
-    h_pers=480,
-    fov_x=90,
-    skew=0.0,
-    sampling_method="default",
+    height=480,
+    width=640,
+    fov_x=90.0,
     mode="bilinear",
 )
 
 # obtain perspective image
 pers_img = equi2pers(
     equi=equi_img,
-    rot=rot,
+    rots=rots,
 )
 ```
 
@@ -123,7 +121,7 @@ equi_img = np.asarray(equi_img)
 equi_img = np.transpose(equi_img, (2, 0, 1))
 
 # rotations
-rot = {
+rots = {
     'roll': 0.,
     'pitch': np.pi/4,  # rotate vertical
     'yaw': np.pi/4,  # rotate horizontal
@@ -132,12 +130,10 @@ rot = {
 # Run equi2pers
 pers_img = equi2pers(
     equi=equi_img,
-    rot=rot,
-    w_pers=640,
-    h_pers=480,
-    fov_x=90,
-    skew=0.0,
-    sampling_method="default",
+    rots=rots,
+    height=480,
+    width=640,
+    fov_x=90.0,
     mode="bilinear",
 )
 ```
@@ -146,8 +142,7 @@ pers_img = equi2pers(
 </td>
 </table>
 
-For more information about how each APIs work, take a look in [.readme](.readme/) or go through example codes in the `tests` or `demo`.
-See performance and benchmarking results of the APIs in [.readme/benchmarks.md](.readme/benchmarks.md).
+For more information about how each APIs work, take a look in [.readme](.readme/) or go through example codes in the `tests` or `scripts`.
 
 
 ### Coordinate System:
@@ -170,11 +165,19 @@ This project's goal was to reduce these dependencies and use `cuda` and batch pr
 There were not many projects online for these purposes.
 In this library, we implement varieties of methods using `c++`, `numpy`, and `torch`.
 This part of the code needs `cuda` acceleration because grid sampling is parallelizable.
-For `c++` and `torch`, I tried to take advantage of `cuda`.
-For `numpy`, I implemented `naive` and `faster` approaches for learning purposes.
-Developing _faster_ `c++` and `torch` approaches are __WIP__.
-Currently, `sampling_method` defaults to the fastest methods which are named `"default"`.
+For `torch`, the built-in `torch.nn.functional.grid_sample` function is very fast and reliable.
+I have implemented a _pure_ `torch` implementation of `grid_sample` which is very customizable (might not be fast as the native function).
+For `numpy`, I have implemented grid sampling methods that are faster than `scipy` and more robust than `cv2.remap`.
+Just like with this implementation of `torch`, `numpy` implementation is just as customizable.
+It is also possible to pass the `scipy` and `cv2`'s grid sampling function through the use of `override_func` argument in `grid_sample`.
+Developing _faster_ approaches and `c++` methods are __WIP__.
 See [here](equilib/grid_sample/README.md) for more info on implementations.
+
+Some notes:
+
+- By default, `numpy`'s [`grid_sample`](equilib/grid_sample/numpy/) will use pure `numpy` implementation. It is possible to override this implementation with `scipy` and `cv2`'s implementation using [`override_func`](tests/equi2pers/numpy_run_baselines.py).
+- By default, `torch`'s [`grid_sample`](equilib/grid_sample/torch/) will use the official implementation.
+- Benchmarking codes are stored in `tests/`. For example, benchmarking codes for `numpy`'s `equi2pers` is located in [`tests/equi2pers/numpy_run_baselines.py`](tests/equi2pers/numpy_run_baselines.py) and you can benchmark the runtime performance using different parameters against `scipy` and `cv2`.
 
 ## Develop:
 
@@ -185,14 +188,17 @@ Running tests:
 pytest tests
 ```
 
+Note that I have added codes to benchmark every step of the process so that it is possible to optimize the code.
+If you find there are optimal ways of the implementation or bugs, all pull requests and issues are welcome.
+
 Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
 
 ### TODO:
 
 - [ ] Documentations for each transform
 - [x] Add table and statistics for speed improvements
-- [ ] Batch processing for `numpy` (uses too much memory; alternative will be `multiprocessing`)
-- [ ] Mixed precision for `torch`
+- [x] Batch processing for `numpy`
+- [x] Mixed precision for `torch`
 - [ ] `c++` version of grid sampling
 
 ## Acknowledgements:

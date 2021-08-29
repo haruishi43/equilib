@@ -6,10 +6,35 @@ import numpy as np
 
 import torch
 
-from .cube2equi_numpy import run as run_numpy
-from .cube2equi_torch import run as run_torch
+from .numpy import (
+    convert2horizon as convert2horizon_numpy,
+    run as run_numpy,
+)
+from .torch import (
+    convert2horizon as convert2horizon_torch,
+    run as run_torch,
+)
 
 __all__ = ["Cube2Equi", "cube2equi"]
+
+ArrayLike = Union[np.ndarray, torch.Tensor]
+CubeMaps = Union[
+    # single/batch 'horizon' or 'dice'
+    np.ndarray,
+    torch.Tensor,
+    # single 'list'
+    List[np.ndarray],
+    List[torch.Tensor],
+    # batch 'list'
+    List[List[np.ndarray]],
+    List[List[torch.Tensor]],
+    # single 'dict'
+    Dict[str, np.ndarray],
+    Dict[str, np.ndarray],
+    # batch 'dict'
+    List[Dict[str, np.ndarray]],
+    List[Dict[str, np.ndarray]],
+]
 
 
 class Cube2Equi(object):
@@ -17,7 +42,6 @@ class Cube2Equi(object):
     params:
     - w_out, h_out (int): equirectangular image size
     - cube_format (str): input cube format("dice", "horizon", "dict", "list")
-    - sampling_method (str): defaults to "default"
     - mode (str): interpolation mode, defaults to "bilinear"
 
     inputs:
@@ -29,139 +53,114 @@ class Cube2Equi(object):
 
     def __init__(
         self,
-        w_out: int,
-        h_out: int,
+        height: int,
+        width: int,
         cube_format: str,
-        sampling_method: str = "default",
         mode: str = "bilinear",
     ) -> None:
-        assert w_out % 8 == 0 and h_out % 8 == 0
-        self.w_out = w_out
-        self.h_out = h_out
+        self.height = height
+        self.width = width
         self.cube_format = cube_format
-        self.sampling_method = sampling_method
         self.mode = mode
 
     def __call__(
         self,
-        cubemap: Union[
-            np.ndarray,
-            torch.Tensor,
-            Dict[str, Union[np.ndarray, torch.Tensor]],
-            List[Union[np.ndarray, torch.Tensor]],
-        ],
-    ) -> Union[np.ndarray, torch.Tensor]:
+        cubemap: CubeMaps,
+        **kwargs,
+    ) -> ArrayLike:
         return cube2equi(
             cubemap=cubemap,
             cube_format=self.cube_format,
-            w_out=self.w_out,
-            h_out=self.h_out,
-            sampling_method=self.sampling_method,
+            width=self.width,
+            height=self.height,
             mode=self.mode,
+            **kwargs,
         )
 
 
 def cube2equi(
-    cubemap: Union[
-        np.ndarray,
-        torch.Tensor,
-        Dict[str, Union[np.ndarray, torch.Tensor]],
-        List[Union[np.ndarray, torch.Tensor]],
-    ],
+    cubemap: CubeMaps,
     cube_format: str,
-    w_out: int,
-    h_out: int,
-    sampling_method: str = "default",
+    height: int,
+    width: int,
     mode: str = "bilinear",
-) -> Union[np.ndarray, torch.Tensor]:
+    **kwargs,
+) -> ArrayLike:
     """
     params:
-    - cubemap (Union[
-        np.ndarray,
-        torch.Tensor,
-        Dict[str, Union[np.ndarray, torch.Tensor]],
-        List[Union[np.ndarray, torch.Tensor]]])
+    - cubemap
     - cube_format (str): ("dice", "horizon", "dict", "list")
-    - w_out (int):
-    - h_out (int):
-    - sampling_method (str): "default"
+    - height, width (int): output size
     - mode (str): "bilinear"
-    - z_down (bool): False
 
     return:
     - equi (np.ndarray, torch.Tensor)
     """
 
+    assert width % 8 == 0 and height % 8 == 0
+
     # Try and detect which type it is ("numpy" or "torch")
     # FIXME: any cleaner way of detecting?
     _type = None
     if cube_format in ("dice", "horizon"):
-        if isinstance(cubemap, list):
-            if isinstance(cubemap[0], np.ndarray):
-                _type = "numpy"
-            elif isinstance(cubemap[0], torch.Tensor):
-                _type = "torch"
-            else:
-                raise ValueError
-        else:
-            if isinstance(cubemap, np.ndarray):
-                _type = "numpy"
-            elif isinstance(cubemap, torch.Tensor):
-                _type = "torch"
-            else:
-                raise ValueError
+        if isinstance(cubemap, np.ndarray):
+            _type = "numpy"
+        elif torch.is_tensor(cubemap):
+            _type = "torch"
     elif cube_format == "dict":
         if isinstance(cubemap, dict):
             if isinstance(cubemap["F"], np.ndarray):
                 _type = "numpy"
             elif isinstance(cubemap["F"], torch.Tensor):
                 _type = "torch"
-            else:
-                raise ValueError
         elif isinstance(cubemap, list):
+            assert isinstance(cubemap[0], dict)
             if isinstance(cubemap[0]["F"], np.ndarray):
                 _type = "numpy"
             elif isinstance(cubemap[0]["F"], torch.Tensor):
                 _type = "torch"
-            else:
-                raise ValueError
-        else:
-            raise ValueError
     elif cube_format == "list":
+        assert isinstance(cubemap, list)
         if isinstance(cubemap[0], list):
             if isinstance(cubemap[0][0], np.ndarray):
                 _type = "numpy"
             elif isinstance(cubemap[0][0], torch.Tensor):
                 _type = "torch"
-            else:
-                raise ValueError
         else:
             if isinstance(cubemap[0], np.ndarray):
                 _type = "numpy"
             elif isinstance(cubemap[0], torch.Tensor):
                 _type = "torch"
-            else:
-                raise ValueError
-    else:
-        raise ValueError
+    assert _type is not None, "ERR: input type is not numpy or torch"
 
     if _type == "numpy":
-        return run_numpy(
+        horizon = convert2horizon_numpy(
             cubemap=cubemap,
             cube_format=cube_format,
-            w_out=w_out,
-            h_out=h_out,
-            sampling_method=sampling_method,
+        )
+        out = run_numpy(
+            horizon=horizon,
+            height=height,
+            width=width,
             mode=mode,
+            **kwargs,
         )
     elif _type == "torch":
-        return run_torch(
+        horizon = convert2horizon_torch(
             cubemap=cubemap,
             cube_format=cube_format,
-            w_out=w_out,
-            h_out=h_out,
-            sampling_method=sampling_method,
+        )
+        out = run_torch(
+            horizon=horizon,
+            height=height,
+            width=width,
             mode=mode,
+            **kwargs,
         )
     else:
-        raise ValueError
+        raise ValueError("Oops something went wrong here")
+
+    if out.shape[0] == 1:
+        out = out.squeeze(0)
+
+    return out

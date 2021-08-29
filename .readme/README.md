@@ -13,4 +13,4 @@
 
 ## Benchmarks
 
-- [`bencmarks`](benchmarks.md
+- [`benchmarks`](benchmarks.md)

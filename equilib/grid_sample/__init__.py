@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from . import numpy_grid_sample as numpy_func
-from . import torch_grid_sample as torch_func
+from .numpy import grid_sample as numpy_grid_sample
+from .torch import grid_sample as torch_grid_sample
 
 __all__ = [
-    "numpy_func",
-    "torch_func",
+    "numpy_grid_sample",
+    "torch_grid_sample",
 ]

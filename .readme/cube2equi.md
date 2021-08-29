@@ -2,8 +2,8 @@
 
 Cubemap to equirectangular transformation
 
-- `w_out` and `h_out` must be divisible by 8.
-- if `w_out, h_out` is large respect to the input cubemap, it may leave some artifacts
+- Output `height` and `width` must be divisible by 8.
+- if `height` and `width` are large respect to the input cubemap, it may leave some artifacts
 
 ## TODO:
 

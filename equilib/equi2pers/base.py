@@ -6,144 +6,145 @@ import numpy as np
 
 import torch
 
-from .equi2pers_numpy import run as run_numpy
-from .equi2pers_torch import run as run_torch
+from .numpy import run as run_numpy
+from .torch import run as run_torch
 
 __all__ = ["Equi2Pers", "equi2pers"]
+
+ArrayLike = Union[np.ndarray, torch.Tensor]
+Rot = Union[Dict[str, float], List[Dict[str, float]]]
 
 
 class Equi2Pers(object):
     """
     params:
-    - w_pers, h_pers (int): perspective size
+    - height, width (int): perspective size
     - fov_x (float): perspective image fov of x-axis
     - skew (float): skew intrinsic parameter
     - sampling_method (str)
-    - mode (str)
     - z_down (bool)
+    - mode (str)
 
     inputs:
-    - equi (np.ndarray, torch.Tensor, list)
+    - equi (np.ndarray, torch.Tensor)
     - rot (dict, list): Dict[str, float]
 
     returns:
     - pers (np.ndarray, torch.Tensor)
+
     """
 
     def __init__(
         self,
-        w_pers: int,
-        h_pers: int,
+        height: int,
+        width: int,
         fov_x: float,
         skew: float = 0.0,
-        sampling_method: str = "default",
-        mode: str = "bilinear",
         z_down: bool = False,
+        mode: str = "bilinear",
     ) -> None:
-        self.w_pers = w_pers
-        self.h_pers = h_pers
+        self.height = height
+        self.width = width
         self.fov_x = fov_x
         self.skew = skew
-        self.sampling_method = sampling_method
         self.mode = mode
         self.z_down = z_down
+        # FIXME: maybe do useful stuff like precalculating the grid or something
 
     def __call__(
         self,
-        equi: Union[
-            np.ndarray,
-            torch.Tensor,
-            List[Union[np.ndarray, torch.Tensor]],
-        ],
-        rot: Union[
-            Dict[str, float],
-            List[Dict[str, float]],
-        ],
-    ) -> Union[np.ndarray, torch.Tensor]:
+        equi: ArrayLike,
+        rots: Rot,
+        **kwargs,
+    ) -> ArrayLike:
+        # FIXME: should optimize since some parts of the code can be calculated
+        # before hand.
+        # 1. calculate grid
+        # 2. grid sample
         return equi2pers(
             equi=equi,
-            rot=rot,
-            w_pers=self.w_pers,
-            h_pers=self.h_pers,
+            rots=rots,
+            height=self.height,
+            width=self.width,
             fov_x=self.fov_x,
             skew=self.skew,
-            sampling_method=self.sampling_method,
-            mode=self.mode,
             z_down=self.z_down,
+            mode=self.mode,
+            **kwargs,
         )
 
 
 def equi2pers(
-    equi: Union[
-        np.ndarray,
-        torch.Tensor,
-        List[Union[np.ndarray]],
-    ],
-    rot: Union[
-        Dict[str, float],
-        List[Dict[str, float]],
-    ],
-    w_pers: int,
-    h_pers: int,
+    equi: ArrayLike,
+    rots: Rot,
+    height: int,
+    width: int,
     fov_x: float,
     skew: float = 0.0,
-    sampling_method: str = "default",
     mode: str = "bilinear",
     z_down: bool = False,
-) -> Union[np.ndarray, torch.Tensor]:
+    **kwargs,
+) -> ArrayLike:
     """
     params:
-    - equi (np.ndarray, torch.Tensor, list)
-    - rot (dict, list): Dict[str, float]
-    - w_pers, h_pers (int): perspective size
+    - equi
+    - rots
+    - height, width (int): perspective size
     - fov_x (float): perspective image fov of x-axis
-    - skew (float): skew intrinsic parameter
     - z_down (bool)
+    - skew (float): skew intrinsic parameter
 
     returns:
     - pers (np.ndarray, torch.Tensor)
+
     """
 
-    # Try and detect which type it is ("numpy" or "torch")
-    # FIXME: any cleaner way of detecting?
     _type = None
-    if isinstance(equi, list):
-        if isinstance(equi[0], np.ndarray):
-            _type = "numpy"
-        elif isinstance(equi[0], torch.Tensor):
-            _type = "torch"
-        else:
-            raise ValueError
-    elif isinstance(equi, np.ndarray):
+    if isinstance(equi, np.ndarray):
         _type = "numpy"
-    elif isinstance(equi, torch.Tensor):
+    elif torch.is_tensor(equi):
         _type = "torch"
     else:
         raise ValueError
 
+    if len(equi) == 3 and isinstance(rots, dict):
+        # probably the input was a single image
+        equi = equi[None, ...]
+        rots = [rots]
+    elif len(equi) == 3:
+        # probably a grayscale image
+        equi = equi[:, None, ...]
+
+    assert isinstance(rots, list), "ERR: rots is not a list"
     if _type == "numpy":
-        return run_numpy(
+        out = run_numpy(
             equi=equi,
-            rot=rot,
-            w_pers=w_pers,
-            h_pers=h_pers,
+            rots=rots,
+            height=height,
+            width=width,
             fov_x=fov_x,
             skew=skew,
-            sampling_method=sampling_method,
-            mode=mode,
             z_down=z_down,
+            mode=mode,
+            **kwargs,
         )
     elif _type == "torch":
-        return run_torch(
+        out = run_torch(
             equi=equi,
-            rot=rot,
-            w_pers=w_pers,
-            h_pers=h_pers,
+            rots=rots,
+            height=height,
+            width=width,
             fov_x=fov_x,
             skew=skew,
-            sampling_method=sampling_method,
-            mode=mode,
             z_down=z_down,
+            mode=mode,
+            **kwargs,
         )
     else:
         raise ValueError
+
+    # make sure that the output batch dim is removed if it's only a single image
+    if out.shape[0] == 1:
+        out = out.squeeze(0)
+
+    return out
