@@ -158,8 +158,8 @@ def bench_baselines(
         print("MSE", err_mse)
         print("MAE", err_mae)
 
-        assert err_mse < 1e-05
-        assert err_mae < 1e-03
+        assert err_mse < 1e-04
+        assert err_mae < 1e-02
 
         print()
         print(">>> compare against cv2")
@@ -171,8 +171,8 @@ def bench_baselines(
         print("MSE", err_mse)
         print("MAE", err_mae)
 
-        assert err_mse < 1e-05
-        assert err_mae < 1e-03
+        assert err_mse < 1e-04
+        assert err_mae < 1e-02
 
         print()
         print(">>> compare scipy and cv2")
@@ -184,8 +184,8 @@ def bench_baselines(
         print("MSE", err_mse)
         print("MAE", err_mae)
 
-        assert err_mse < 1e-05
-        assert err_mae < 1e-03
+        assert err_mse < 1e-04
+        assert err_mae < 1e-02
 
         if save_outputs:
             # qualitative
@@ -238,8 +238,8 @@ def bench_baselines(
                 print("MSE", err_mse)
                 print("MAE", err_mae)
 
-                assert err_mse < 1e-05
-                assert err_mae < 1e-03
+                assert err_mse < 1e-04
+                assert err_mae < 1e-02
 
                 print()
                 print(">>> compare against cv2")
@@ -251,8 +251,8 @@ def bench_baselines(
                 print("MSE", err_mse)
                 print("MAE", err_mae)
 
-                assert err_mse < 1e-05
-                assert err_mae < 1e-03
+                assert err_mse < 1e-04
+                assert err_mae < 1e-02
 
                 print()
                 print(">>> compare scipy and cv2")
@@ -315,8 +315,8 @@ def bench_baselines(
                 print("MSE", err_mse)
                 print("MAE", err_mae)
 
-                assert err_mse < 1e-05
-                assert err_mae < 1e-03
+                assert err_mse < 1e-04
+                assert err_mae < 1e-02
 
                 print()
                 print(">>> compare against cv2")
@@ -328,8 +328,8 @@ def bench_baselines(
                 print("MSE", err_mse)
                 print("MAE", err_mae)
 
-                assert err_mse < 1e-05
-                assert err_mae < 1e-03
+                assert err_mse < 1e-04
+                assert err_mae < 1e-02
 
                 print()
                 print(">>> compare scipy and cv2")
@@ -371,11 +371,11 @@ def bench_baselines(
 @pytest.mark.parametrize("bs", [1, 4])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
-@pytest.mark.parametrize("w_face", [256])
+@pytest.mark.parametrize("w_face", [32])
 @pytest.mark.parametrize("cube_format", ["dice", "dict", "list"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("rotation", ["pitch"])
-def test_equi2pers_against_baselines(
+def test_equi2cube_against_baselines(
     bs: int,
     z_down: bool,
     mode: str,

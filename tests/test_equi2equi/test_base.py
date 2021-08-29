@@ -127,8 +127,8 @@ def torch_single(
     assert out.dtype == dtype
 
 
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
@@ -148,8 +148,8 @@ def test_numpy_single(
     )
 
 
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])

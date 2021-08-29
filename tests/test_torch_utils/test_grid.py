@@ -50,6 +50,9 @@ def test_grid_cpu(
                 )
 
 
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="cuda device is not available"
+)
 @pytest.mark.parametrize("height", [4])
 @pytest.mark.parametrize("width", [8])
 @pytest.mark.parametrize("batch", [None, 2])

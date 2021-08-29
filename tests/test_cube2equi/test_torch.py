@@ -329,7 +329,7 @@ def bench_gpu(
 @pytest.mark.parametrize("width", [512])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
-def test_equi2pers_cpu(
+def test_cube2equi_cpu(
     bs: int,
     height: int,
     width: int,
@@ -349,12 +349,12 @@ def test_equi2pers_cpu(
     not torch.cuda.is_available(), reason="cuda device is not available"
 )
 @pytest.mark.parametrize("bs", [1, 4])
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32])
 @pytest.mark.parametrize("torch_dtype", [torch.float16, torch.float32])
-def test_equi2pers_against_baselines(
+def test_cube2equi_gpu(
     bs: int,
     height: int,
     width: int,

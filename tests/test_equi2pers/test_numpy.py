@@ -162,8 +162,8 @@ def bench_baselines(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-05
-    assert err_mae < 1e-03
+    assert err_mse < 1e-04
+    assert err_mae < 1e-02
 
     print()
     print(">>> compare against cv2")
@@ -175,8 +175,8 @@ def bench_baselines(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-05
-    assert err_mae < 1e-03
+    assert err_mse < 1e-04
+    assert err_mae < 1e-02
 
     print()
     print(">>> compare scipy and cv2")
@@ -188,8 +188,8 @@ def bench_baselines(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-05
-    assert err_mae < 1e-03
+    assert err_mse < 1e-04
+    assert err_mae < 1e-02
 
     if save_outputs:
         # qualitative
@@ -206,8 +206,8 @@ def bench_baselines(
     reason="scipy.map_coordinate is None; not installed",
 )
 @pytest.mark.parametrize("bs", [1, 4])
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("fov_x", [90.0])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])

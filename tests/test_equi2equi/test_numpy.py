@@ -156,8 +156,8 @@ def bench_baselines(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-04
-    assert err_mae < 1e-02
+    assert err_mse < 1e-03
+    assert err_mae < 1e-01
 
     print()
     print(">>> compare against cv2")
@@ -169,8 +169,8 @@ def bench_baselines(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-04
-    assert err_mae < 1e-02
+    assert err_mse < 1e-03
+    assert err_mae < 1e-01
 
     print()
     print(">>> compare scipy and cv2")
@@ -182,8 +182,8 @@ def bench_baselines(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-04
-    assert err_mae < 1e-02
+    assert err_mse < 1e-03
+    assert err_mae < 1e-01
 
     if save_outputs:
         # qualitative
@@ -204,9 +204,9 @@ def bench_baselines(
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("rotation", ["pitch"])
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
-def test_equi2pers_against_baselines(
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
+def test_equi2equi_against_baselines(
     bs: int,
     z_down: bool,
     mode: str,

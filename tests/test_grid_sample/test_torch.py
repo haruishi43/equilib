@@ -47,7 +47,6 @@ pure_bicubic = wrapped_partial(grid_sample, mode="bicubic", backend="pure")
 """
 
 
-# @pytest.mark.skip(reason="SKIP THIS!!!")
 @pytest.mark.parametrize("b", [2])
 @pytest.mark.parametrize("c", [3])
 @pytest.mark.parametrize("h", [128])
@@ -167,7 +166,9 @@ def test_faster_vs_pure_cpu(
     assert err_mae < atol
 
 
-# @pytest.mark.skip(reason="SKIP THIS!!!")
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="cuda device is not available"
+)
 @pytest.mark.parametrize("b", [2])
 @pytest.mark.parametrize("c", [3])
 @pytest.mark.parametrize("h", [128])
@@ -296,7 +297,6 @@ def test_faster_vs_pure_gpu(
     assert err_mae < atol
 
 
-# @pytest.mark.skip(reason="SKIP THIS!!!")
 @pytest.mark.parametrize("b", [2])
 @pytest.mark.parametrize("c", [3])
 @pytest.mark.parametrize("h", [128])
@@ -413,7 +413,9 @@ def test_native_vs_pure_cpu(
     assert err_mae < atol
 
 
-# @pytest.mark.skip(reason="SKIP THIS!!!")
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="cuda device is not available"
+)
 @pytest.mark.parametrize("b", [2])
 @pytest.mark.parametrize("c", [3])
 @pytest.mark.parametrize("h", [128])
@@ -533,7 +535,6 @@ def test_native_vs_pure_gpu(
     assert err_mae < atol
 
 
-# @pytest.mark.skip(reason="SKIP THIS!!!")
 @pytest.mark.skipif(cv2 is None, reason="cv2 is None; not installed")
 @pytest.mark.parametrize("b", [2])
 @pytest.mark.parametrize("c", [3])
@@ -655,7 +656,9 @@ def test_native_vs_cv2_cpu(
     assert err_mae < atol
 
 
-# @pytest.mark.skip(reason="SKIP THIS!!!")
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="cuda device is not available"
+)
 @pytest.mark.skipif(cv2 is None, reason="cv2 is None; not installed")
 @pytest.mark.parametrize("b", [2])
 @pytest.mark.parametrize("c", [3])
@@ -779,7 +782,6 @@ def test_native_vs_cv2_gpu(
     assert err_mae < atol
 
 
-# @pytest.mark.skip(reason="SKIP THIS!!!")
 @pytest.mark.skipif(
     map_coordinates is None,
     reason="scipy.map_coordinate is None; not installed",
@@ -904,7 +906,9 @@ def test_native_vs_scipy_cpu(
     assert err_mae < atol
 
 
-# @pytest.mark.skip(reason="SKIP THIS!!!")
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="cuda device is not available"
+)
 @pytest.mark.skipif(
     map_coordinates is None,
     reason="scipy.map_coordinate is None; not installed",

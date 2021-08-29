@@ -157,7 +157,7 @@ def torch_single(
             assert cube.dtype == dtype
 
 
-@pytest.mark.parametrize("w_face", [256])
+@pytest.mark.parametrize("w_face", [32])
 @pytest.mark.parametrize("cube_format", ["dice", "dict", "list"])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
@@ -178,7 +178,7 @@ def test_numpy_single(
     )
 
 
-@pytest.mark.parametrize("w_face", [256])
+@pytest.mark.parametrize("w_face", [32])
 @pytest.mark.parametrize("cube_format", ["dice", "dict", "list"])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])

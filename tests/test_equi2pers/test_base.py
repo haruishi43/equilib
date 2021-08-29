@@ -133,8 +133,8 @@ def torch_single(
     assert out.dtype == dtype
 
 
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("fov_x", [90.0])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
@@ -157,8 +157,8 @@ def test_numpy_single(
     )
 
 
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("fov_x", [90.0])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])

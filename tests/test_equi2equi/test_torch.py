@@ -180,8 +180,8 @@ def bench_cpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-04
-    assert err_mae < 1e-02
+    assert err_mse < 1e-03
+    assert err_mae < 1e-01
 
     print()
     print(">>> compare native and pure")
@@ -193,8 +193,8 @@ def bench_cpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-04
-    assert err_mae < 1e-02
+    assert err_mse < 1e-03
+    assert err_mae < 1e-01
 
     print()
     print(">>> compare pure and numpy")
@@ -206,8 +206,8 @@ def bench_cpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-04
-    assert err_mae < 1e-02
+    assert err_mse < 1e-03
+    assert err_mae < 1e-01
 
     if save_outputs:
         # qualitative
@@ -331,8 +331,8 @@ def bench_gpu(
     if torch_dtype == torch.float16:
         ...
     else:
-        assert err_mse < 1e-04
-        assert err_mae < 1e-02
+        assert err_mse < 1e-03
+        assert err_mae < 1e-01
 
     print()
     print(">>> compare native and pure")
@@ -347,8 +347,8 @@ def bench_gpu(
     if torch_dtype == torch.float16:
         ...
     else:
-        assert err_mse < 1e-04
-        assert err_mae < 1e-02
+        assert err_mse < 1e-03
+        assert err_mae < 1e-01
 
     print()
     print(">>> compare pure and numpy")
@@ -363,8 +363,8 @@ def bench_gpu(
     if torch_dtype == torch.float16:
         ...
     else:
-        assert err_mse < 1e-04
-        assert err_mae < 1e-02
+        assert err_mse < 1e-03
+        assert err_mae < 1e-01
 
     numpy_out = numpy_out.to("cpu")
     native_out = native_out.to("cpu")
@@ -385,13 +385,13 @@ def bench_gpu(
 
 
 @pytest.mark.parametrize("bs", [1, 4])
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("rotation", ["pitch"])
-def test_equi2pers_cpu(
+def test_equi2equi_cpu(
     bs: int,
     z_down: bool,
     mode: str,
@@ -415,14 +415,14 @@ def test_equi2pers_cpu(
     not torch.cuda.is_available(), reason="cuda device is not available"
 )
 @pytest.mark.parametrize("bs", [1, 4])
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32])
 @pytest.mark.parametrize("torch_dtype", [torch.float16, torch.float32])
 @pytest.mark.parametrize("rotation", ["pitch"])
-def test_equi2pers_against_baselines(
+def test_equi2equi_gpu(
     bs: int,
     z_down: bool,
     mode: str,

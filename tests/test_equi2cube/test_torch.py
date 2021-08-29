@@ -695,7 +695,7 @@ def bench_gpu(
 @pytest.mark.parametrize("bs", [1, 4])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
-@pytest.mark.parametrize("w_face", [256])
+@pytest.mark.parametrize("w_face", [32])
 @pytest.mark.parametrize("cube_format", ["dice", "dict", "list"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("rotation", ["pitch"])
@@ -725,12 +725,12 @@ def test_equi2pers_cpu(
 @pytest.mark.parametrize("bs", [1, 4])
 @pytest.mark.parametrize("z_down", [False])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
-@pytest.mark.parametrize("w_face", [256])
+@pytest.mark.parametrize("w_face", [32])
 @pytest.mark.parametrize("cube_format", ["dice", "dict", "list"])
 @pytest.mark.parametrize("dtype", [np.float32])
 @pytest.mark.parametrize("torch_dtype", [torch.float16, torch.float32])
 @pytest.mark.parametrize("rotation", ["pitch"])
-def test_equi2pers_against_baselines(
+def test_equi2cube_gpu(
     bs: int,
     z_down: bool,
     mode: str,

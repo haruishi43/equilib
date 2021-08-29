@@ -171,11 +171,11 @@ def bench_baselines(
     reason="scipy.map_coordinate is None; not installed",
 )
 @pytest.mark.parametrize("bs", [1, 4])
-@pytest.mark.parametrize("height", [256])
-@pytest.mark.parametrize("width", [512])
+@pytest.mark.parametrize("height", [32])
+@pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
-def test_equi2pers_against_baselines(
+def test_cube2equi_against_baselines(
     bs: int,
     height: int,
     width: int,
