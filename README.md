@@ -22,6 +22,17 @@
 - Added functionality like creating rotation matrices, batched processing, and automatic type detection.
 - Highly modular
 
+If you found this module helpful to your project, please site this repository:
+```
+@software{pyequilib2021github,
+  author = {Haruya Ishikawa},
+  title = {PyEquilib: Processing Equirectangular Images with Python},
+  url = {http://github.com/haruishi43/equilib},
+  version = {0.5.0},
+  year = {2021},
+}
+```
+
 ## Installation:
 
 Prerequisites:
