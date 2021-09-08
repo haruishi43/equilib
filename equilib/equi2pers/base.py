@@ -107,11 +107,11 @@ def equi2pers(
     else:
         raise ValueError
 
-    if len(equi) == 3 and isinstance(rots, dict):
+    if len(equi.shape) == 3 and isinstance(rots, dict):
         # probably the input was a single image
         equi = equi[None, ...]
         rots = [rots]
-    elif len(equi) == 3:
+    elif len(equi.shape) == 3:
         # probably a grayscale image
         equi = equi[:, None, ...]
 

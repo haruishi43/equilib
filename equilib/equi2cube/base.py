@@ -107,12 +107,12 @@ def equi2cube(
         raise ValueError
 
     is_single = False
-    if len(equi) == 3 and isinstance(rots, dict):
+    if len(equi.shape) == 3 and isinstance(rots, dict):
         # probably the input was a single image
         equi = equi[None, ...]
         rots = [rots]
         is_single = True
-    elif len(equi) == 3:
+    elif len(equi.shape) == 3:
         # probably a grayscale image
         equi = equi[:, None, ...]
 

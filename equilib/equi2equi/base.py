@@ -88,11 +88,11 @@ def equi2equi(
     else:
         raise ValueError
 
-    if len(src) == 3 and isinstance(rots, dict):
+    if len(src.shape) == 3 and isinstance(rots, dict):
         # probably the input was a single image
         src = src[None, ...]
         rots = [rots]
-    elif len(src) == 3:
+    elif len(src.shape) == 3:
         # probably a grayscale image
         src = src[:, None, ...]
 
