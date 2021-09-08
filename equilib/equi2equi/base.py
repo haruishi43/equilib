@@ -88,10 +88,12 @@ def equi2equi(
     else:
         raise ValueError
 
+    is_single = False
     if len(src.shape) == 3 and isinstance(rots, dict):
         # probably the input was a single image
         src = src[None, ...]
         rots = [rots]
+        is_single = True
     elif len(src.shape) == 3:
         # probably a grayscale image
         src = src[:, None, ...]
@@ -121,7 +123,7 @@ def equi2equi(
         raise ValueError
 
     # make sure that the output batch dim is removed if it's only a single image
-    if out.shape[0] == 1:
+    if is_single:
         out = out.squeeze(0)
 
     return out

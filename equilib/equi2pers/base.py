@@ -107,10 +107,12 @@ def equi2pers(
     else:
         raise ValueError
 
+    is_single = False
     if len(equi.shape) == 3 and isinstance(rots, dict):
         # probably the input was a single image
         equi = equi[None, ...]
         rots = [rots]
+        is_single = True
     elif len(equi.shape) == 3:
         # probably a grayscale image
         equi = equi[:, None, ...]
@@ -144,7 +146,7 @@ def equi2pers(
         raise ValueError
 
     # make sure that the output batch dim is removed if it's only a single image
-    if out.shape[0] == 1:
+    if is_single:
         out = out.squeeze(0)
 
     return out
