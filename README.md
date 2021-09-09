@@ -211,6 +211,8 @@ Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
 - [x] Batch processing for `numpy`
 - [x] Mixed precision for `torch`
 - [ ] `c++` version of grid sampling
+- [ ] More accurate intrinsic matrix formulation using vertial FOV for `equi2pers`
+- [ ] Multiprocessing support (slow when running on `torch.distributed`)
 
 ## Acknowledgements:
 
