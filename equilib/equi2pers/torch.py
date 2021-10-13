@@ -358,16 +358,29 @@ def get_bounding_fov(
     )
 
     bboxs = []
+
+    # top row
+    for out_x in range(width):
+        bboxs.append(grid[:, :, 0, out_x])
+
+    # right column
     for out_y in range(height):
-        for out_x in range(width):
-            if out_y == 0 or out_y == height - 1:
-                bboxs.append(grid[:, :, out_y, out_x])
-            elif out_x == 0 or out_x == width - 1:
-                bboxs.append(grid[:, :, out_y, out_x])
+        if out_y > 0:  # exclude first
+            bboxs.append(grid[:, :, out_y, width - 1])
+
+    # bottom row
+    for out_x in range(width - 2, 0, -1):
+        bboxs.append(grid[:, :, height - 1, out_x])
+
+    # left column
+    for out_y in range(height - 1, 0, -1):
+        bboxs.append(grid[:, :, out_y, 0])
+
+    assert len(bboxs) == width * 2 + (height - 2) * 2
 
     bboxs = torch.stack(bboxs, dim=1)
 
     bboxs = bboxs.numpy()
-    bboxs = np.rint(bboxs)
+    bboxs = np.rint(bboxs).astype(np.int64)
 
     return bboxs
