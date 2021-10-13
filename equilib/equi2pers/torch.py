@@ -3,6 +3,7 @@
 from functools import lru_cache
 from typing import Dict, List, Tuple
 
+import numpy as np
 import torch
 
 from equilib.grid_sample import torch_grid_sample
@@ -268,3 +269,105 @@ def run(
     )
 
     return out
+
+
+def get_bounding_fov(
+    equi: torch.Tensor,
+    rots: List[Dict[str, float]],
+    height: int,
+    width: int,
+    fov_x: float,
+    skew: float,
+    z_down: bool,
+) -> torch.Tensor:
+    assert (
+        len(equi.shape) == 4
+    ), f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
+    assert len(equi) == len(
+        rots
+    ), f"ERR: length of equi and rot differs: {len(equi)} vs {len(rots)}"
+
+    equi_dtype = equi.dtype
+    assert equi_dtype in (
+        torch.uint8,
+        torch.float16,
+        torch.float32,
+        torch.float64,
+    ), (
+        f"ERR: input equirectangular image has dtype of {equi_dtype}which is\n"
+        f"incompatible: try {(torch.uint8, torch.float16, torch.float32, torch.float64)}"
+    )
+
+    # NOTE: we don't want to use uint8 as output array's dtype yet since
+    # floating point calculations (matmul, etc) are faster
+    # NOTE: we are also assuming that uint8 is in range of 0-255 (obviously)
+    # and float is in range of 0.0-1.0; later we will refine it
+    # NOTE: for the sake of consistency, we will try to use the same dtype as equi
+    if equi.device.type == "cuda":
+        dtype = torch.float32 if equi_dtype == torch.uint8 else equi_dtype
+        assert dtype in (torch.float16, torch.float32, torch.float64), (
+            f"ERR: argument `dtype` is {dtype} which is incompatible:\n"
+            f"try {(torch.float16, torch.float32, torch.float64)}"
+        )
+    else:
+        # NOTE: for cpu, it can't use half-precision
+        dtype = torch.float32 if equi_dtype == torch.uint8 else equi_dtype
+        assert dtype in (torch.float32, torch.float64), (
+            f"ERR: argument `dtype` is {dtype} which is incompatible:\n"
+            f"try {(torch.float32, torch.float64)}"
+        )
+
+    bs, c, h_equi, w_equi = equi.shape
+
+    # FIXME: for now, calculate the grid in cpu
+    # I need to benchmark performance of it when grid is created on cuda
+    tmp_device = torch.device("cpu")
+    if equi.device.type == "cuda" and dtype == torch.float16:
+        tmp_dtype = torch.float32
+    else:
+        tmp_dtype = dtype
+
+    # create grid and transform matrix
+    m, G = prep_matrices(
+        height=height,
+        width=width,
+        batch=bs,
+        fov_x=fov_x,
+        skew=skew,
+        dtype=tmp_dtype,
+        device=tmp_device,
+    )
+
+    # create batched rotation matrices
+    R = create_rotation_matrices(
+        rots=rots,
+        z_down=z_down,
+        dtype=tmp_dtype,
+        device=tmp_device,
+    )
+
+    # rotate and transform the grid
+    M = matmul(m, G, R)
+
+    # create a pixel map grid
+    grid = convert_grid(
+        M=M,
+        h_equi=h_equi,
+        w_equi=w_equi,
+        method="robust",
+    )
+
+    bboxs = []
+    for out_y in range(height):
+        for out_x in range(width):
+            if out_y == 0 or out_y == height - 1:
+                bboxs.append(grid[:, :, out_y, out_x])
+            elif out_x == 0 or out_x == width - 1:
+                bboxs.append(grid[:, :, out_y, out_x])
+
+    bboxs = torch.stack(bboxs, dim=1)
+
+    bboxs = bboxs.numpy()
+    bboxs = np.rint(bboxs)
+
+    return bboxs

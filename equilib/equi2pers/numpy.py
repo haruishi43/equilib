@@ -262,3 +262,96 @@ def run(
     )
 
     return out
+
+
+def get_bounding_fov(
+    equi: np.ndarray,
+    rots: List[Dict[str, float]],
+    height: int,
+    width: int,
+    fov_x: float,
+    skew: float,
+    z_down: bool,
+) -> np.ndarray:
+    # NOTE: Assume that the inputs `equi` and `rots` are already batched up
+    assert (
+        len(equi.shape) == 4
+    ), f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
+    assert len(equi) == len(
+        rots
+    ), f"ERR: batch size of equi and rot differs: {len(equi)} vs {len(rots)}"
+
+    equi_dtype = equi.dtype
+    assert equi_dtype in (np.uint8, np.float32, np.float64), (
+        f"ERR: input equirectangular image has dtype of {equi_dtype}\n"
+        f"which is incompatible: try {(np.uint8, np.float32, np.float64)}"
+    )
+
+    # NOTE: we don't want to use uint8 as output array's dtype yet since
+    # floating point calculations (matmul, etc) are faster
+    # NOTE: we are also assuming that uint8 is in range of 0-255 (obviously)
+    # and float is in range of 0.0-1.0; later we will refine it
+    # NOTE: for the sake of consistency, we will try to use the same dtype as equi
+    dtype = (
+        np.dtype(np.float32) if equi_dtype == np.dtype(np.uint8) else equi_dtype
+    )
+    assert dtype in (np.float32, np.float64), (
+        f"ERR: argument `dtype` is {dtype} which is incompatible:\n"
+        f"try {(np.float32, np.float64)}"
+    )
+
+    bs, c, h_equi, w_equi = equi.shape
+
+    # create grid and transfrom matrix
+    m, G = prep_matrices(
+        height=height,
+        width=width,
+        batch=bs,
+        fov_x=fov_x,
+        skew=skew,
+        dtype=dtype,
+    )
+
+    # create batched rotation matrices
+    R = create_rotation_matrices(
+        rots=rots,
+        z_down=z_down,
+        dtype=dtype,
+    )
+
+    # rotate and transform the grid
+    M = matmul(m, G, R)
+
+    # create a pixel map grid
+    grid = convert_grid(
+        M=M,
+        h_equi=h_equi,
+        w_equi=w_equi,
+        method="robust",
+    )
+
+    bboxs = []
+
+    # top row
+    for out_x in range(width):
+        bboxs.append(grid[:, :, 0, out_x])
+
+    # right column
+    for out_y in range(height):
+        if out_y > 0:  # exclude first
+            bboxs.append(grid[:, :, out_y, width - 1])
+
+    # bottom row
+    for out_x in range(width - 2, 0, -1):
+        bboxs.append(grid[:, :, height - 1, out_x])
+
+    # left column
+    for out_y in range(height - 1, 0, -1):
+        bboxs.append(grid[:, :, out_y, 0])
+
+    assert len(bboxs) == width * 2 + (height - 2) * 2
+
+    bboxs = np.stack(bboxs, axis=1)
+    bboxs = np.rint(bboxs).astype(np.int64)
+
+    return bboxs

@@ -6,8 +6,14 @@ import numpy as np
 
 import torch
 
-from .numpy import run as run_numpy
-from .torch import run as run_torch
+from .numpy import (
+    get_bounding_fov as get_bfov_numpy,
+    run as run_numpy,
+)
+from .torch import (
+    get_bounding_fov as get_bfov_torch,
+    run as run_torch,
+)
 
 __all__ = ["Equi2Pers", "equi2pers"]
 
@@ -71,6 +77,21 @@ class Equi2Pers(object):
             z_down=self.z_down,
             mode=self.mode,
             **kwargs,
+        )
+
+    def get_bounding_fov(
+        self,
+        equi: ArrayLike,
+        rots: Rot,
+    ) -> ArrayLike:
+        return get_bounding_fov(
+            equi=equi,
+            rots=rots,
+            height=self.height,
+            width=self.width,
+            fov_x=self.fov_x,
+            skew=self.skew,
+            z_down=self.z_down,
         )
 
 
@@ -141,6 +162,64 @@ def equi2pers(
             z_down=z_down,
             mode=mode,
             **kwargs,
+        )
+    else:
+        raise ValueError
+
+    # make sure that the output batch dim is removed if it's only a single image
+    if is_single:
+        out = out.squeeze(0)
+
+    return out
+
+
+def get_bounding_fov(
+    equi: ArrayLike,
+    rots: Rot,
+    height: int,
+    width: int,
+    fov_x: float,
+    skew: float = 0.0,
+    z_down: bool = False,
+) -> np.ndarray:
+    _type = None
+    if isinstance(equi, np.ndarray):
+        _type = "numpy"
+    elif torch.is_tensor(equi):
+        _type = "torch"
+    else:
+        raise ValueError
+
+    is_single = False
+    if len(equi.shape) == 3 and isinstance(rots, dict):
+        # probably the input was a single image
+        equi = equi[None, ...]
+        rots = [rots]
+        is_single = True
+    elif len(equi.shape) == 3:
+        # probably a grayscale image
+        equi = equi[:, None, ...]
+
+    assert isinstance(rots, list), "ERR: rots is not a list"
+    if _type == "numpy":
+        out = get_bfov_numpy(
+            equi=equi,
+            rots=rots,
+            height=height,
+            width=width,
+            fov_x=fov_x,
+            skew=skew,
+            z_down=z_down,
+        )
+    elif _type == "torch":
+        out = get_bfov_torch(
+            equi=equi,
+            rots=rots,
+            height=height,
+            width=width,
+            fov_x=fov_x,
+            skew=skew,
+            z_down=z_down,
         )
     else:
         raise ValueError
