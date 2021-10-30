@@ -7,6 +7,13 @@ import numpy as np
 import torch
 
 
+def sin(digit):
+    return torch.sin(torch.tensor([digit])).item()
+
+def cos(digit):
+    return torch.cos(torch.tensor([digit])).item()
+
+
 def create_global2camera_rotation_matrix(
     dtype: torch.dtype = torch.float32,
     device: torch.device = torch.device("cpu"),
@@ -55,8 +62,8 @@ def create_rotation_matrix(
     R_x = torch.tensor(
         [
             [1.0, 0.0, 0.0],
-            [0.0, np.cos(roll), -np.sin(roll)],
-            [0.0, np.sin(roll), np.cos(roll)],
+            [0.0, cos(roll), -sin(roll)],
+            [0.0, sin(roll), cos(roll)],
         ],
         dtype=dtype,
     )
@@ -65,9 +72,9 @@ def create_rotation_matrix(
         pitch = -pitch
     R_y = torch.tensor(
         [
-            [np.cos(pitch), 0.0, np.sin(pitch)],
+            [cos(pitch), 0.0, sin(pitch)],
             [0.0, 1.0, 0.0],
-            [-np.sin(pitch), 0.0, np.cos(pitch)],
+            [-sin(pitch), 0.0, cos(pitch)],
         ],
         dtype=dtype,
     )
@@ -76,8 +83,8 @@ def create_rotation_matrix(
         yaw = -yaw
     R_z = torch.tensor(
         [
-            [np.cos(yaw), -np.sin(yaw), 0.0],
-            [np.sin(yaw), np.cos(yaw), 0.0],
+            [cos(yaw), -sin(yaw), 0.0],
+            [sin(yaw), cos(yaw), 0.0],
             [0.0, 0.0, 1.0],
         ],
         dtype=dtype,
@@ -115,23 +122,23 @@ def create_rotation_matrix_at_once(
     return torch.tensor(
         [
             [
-                np.cos(yaw) * np.cos(pitch),
-                np.cos(yaw) * np.sin(pitch) * np.sin(roll)
-                - np.sin(yaw) * np.cos(roll),
-                np.cos(yaw) * np.sin(pitch) * np.cos(roll)
-                + np.sin(yaw) * np.sin(roll),
+                cos(yaw) * cos(pitch),
+                cos(yaw) * sin(pitch) * sin(roll)
+                - sin(yaw) * cos(roll),
+                cos(yaw) * sin(pitch) * cos(roll)
+                + sin(yaw) * sin(roll),
             ],
             [
-                np.sin(yaw) * np.cos(pitch),
-                np.sin(yaw) * np.sin(yaw) * np.sin(pitch) * np.sin(roll)
-                + np.cos(yaw) * np.cos(roll),
-                np.sin(yaw) * np.sin(pitch) * np.cos(roll)
-                - np.cos(yaw) * np.sin(roll),
+                sin(yaw) * cos(pitch),
+                sin(yaw) * sin(yaw) * sin(pitch) * sin(roll)
+                + cos(yaw) * cos(roll),
+                sin(yaw) * sin(pitch) * cos(roll)
+                - cos(yaw) * sin(roll),
             ],
             [
-                -np.sin(pitch),
-                np.cos(pitch) * np.sin(roll),
-                np.cos(pitch) * np.cos(roll),
+                -sin(pitch),
+                cos(pitch) * sin(roll),
+                cos(pitch) * cos(roll),
             ],
         ],
         dtype=dtype,
@@ -181,8 +188,8 @@ def create_rotation_matrix_dep(
     R_x = torch.tensor(
         [
             [1.0, 0.0, 0.0],
-            [0.0, np.cos(x), -np.sin(x)],
-            [0.0, np.sin(x), np.cos(x)],
+            [0.0, cos(x), -sin(x)],
+            [0.0, sin(x), cos(x)],
         ],
         dtype=dtype,
     )
@@ -191,9 +198,9 @@ def create_rotation_matrix_dep(
         y = -y
     R_y = torch.tensor(
         [
-            [np.cos(y), 0.0, -np.sin(y)],
+            [cos(y), 0.0, -sin(y)],
             [0.0, 1.0, 0.0],
-            [np.sin(y), 0.0, np.cos(y)],
+            [sin(y), 0.0, cos(y)],
         ],
         dtype=dtype,
     )
@@ -202,8 +209,8 @@ def create_rotation_matrix_dep(
         z = -z
     R_z = torch.tensor(
         [
-            [np.cos(z), np.sin(z), 0.0],
-            [-np.sin(z), np.cos(z), 0.0],
+            [cos(z), sin(z), 0.0],
+            [-sin(z), cos(z), 0.0],
             [0.0, 0.0, 1.0],
         ],
         dtype=dtype,

@@ -1,9 +1,6 @@
 
 from functools import lru_cache
 from typing import Dict, List, Union, Tuple
-from numpy import float32
-
-import torch
 
 import torch
 
@@ -144,7 +141,7 @@ def run(
 
     params:
     - equi (np.ndarray): 4 dims (b, c, h, w)
-    - rot (List[dict]): dict of ('yaw', 'pitch', 'roll')
+    - sub_level (List[int]): list of subdivision levels
     - w_face (int): icosahedron face width
     - fov_x (float): fov of horizontal axis in degrees
     - mode (str): sampling mode for grid_sample

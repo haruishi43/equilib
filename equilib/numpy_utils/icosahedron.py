@@ -4,12 +4,21 @@ import numpy as np
 def calculate_tangent_rots(
     subdivision_level: List[int]
     ) -> List[Dict[str, float]]:
+    """ Calculate rotation parameters for transformation
+
+        params:
+            subdivision_level (int): set number of faces, which equals to: 
+                    num_of_faces = 20*(4^b), where b=subdivision_level
+        returns:
+            rots (List[[dict]]): list of dicts with rots parameters.
+
+    """
     rots = [[] for _ in subdivision_level]
     radius = 10
     for i, sub_lvl in enumerate(subdivision_level):
         faces = init_20_faces(radius)
         for _ in range(0, sub_lvl):
-            faces = subdivide_faces(faces, radius)
+            faces = subdivide_faces(faces)
         angles = calculate_angles(faces)
         for ang in angles:
             rots[i].append(
@@ -24,16 +33,36 @@ def calculate_tangent_rots(
 def calculate_tangent_angles(
     subdivision_level: List[int]
     ) -> List[np.ndarray]:
+    """ Calculate angles to icosahedron faces
+
+        params:
+            subdivision_level (int): set number of faces, which equals to: 
+                    num_of_faces = 20*(4^b), where b=subdivision_level
+        returns:
+            angles (List[[np.ndarray]]): list of angles.
+
+    """
     angles = [[] for _ in subdivision_level]
     radius = 10
     for i, sub_lvl in enumerate(subdivision_level):
         faces = init_20_faces(radius)
         for _ in range(0, sub_lvl):
-            faces = subdivide_faces(faces, radius)
+            faces = subdivide_faces(faces)
         angles[i] = calculate_angles(faces)
     return angles
 
 def calculate_angles(faces:np.ndarray) -> np.ndarray:
+    """ Calculate angles from (0,0,0) point to centroid of input faces
+
+        params:
+            faces: array of triplets with coordinates of icosahedron faces. Each face
+            represented as array of shape [n,3,3], where n - number of faces.
+
+        returns:
+            angles: array of longtitude and latitude angles to input faces. Returns 
+            array of shape [n,2]
+    
+    """
     centroids = calculate_centroids(faces)
     angles = np.zeros((centroids.shape[0], 2))
     for i, c in enumerate(centroids):
@@ -43,9 +72,16 @@ def calculate_angles(faces:np.ndarray) -> np.ndarray:
     angles[:, 1] *= np.sign(centroids[:, 2])
     return angles * -1
 
-def subdivide_faces(faces: np.ndarray, radius:int=10):
-    """
-        TODO: fix crashes after second subdividing
+def subdivide_faces(faces: np.ndarray):
+    """ Subdivide faces of icosahedron on next level.
+
+        params:
+            faces: array of triplets with coordinates of icosahedron faces. Each face
+            represented as array of shape [n,3,3], where n - number of faces.
+
+        returns:
+            new_faces: array of subdivided faces. Returns array of shape [n*4,3,3]
+    
     """
     new_faces = np.zeros((faces.shape[0]*4,3,3))
     for i, face in enumerate(faces):
@@ -63,6 +99,16 @@ def subdivide_faces(faces: np.ndarray, radius:int=10):
     return new_faces
 
 def init_icosahedron_vertices(radius:int=10) -> np.ndarray:
+    """ Calculate icosahedron vertices at zero subdivision_level. 
+        Used for icosahedron initialization
+
+        params:
+            radius: radius of icosahedron sphere. Can be removed with constant in all methods.
+
+        returns:
+            vertices: points of initialized icosahedron, array of shape [20,3]
+
+    """
     PI, r = np.pi, radius
     H_ANGLE, V_ANGLE = PI / 180 * 72, np.arctan(1.0 / 2)
     vertices = np.zeros((12,3))                         
@@ -87,6 +133,16 @@ def init_icosahedron_vertices(radius:int=10) -> np.ndarray:
     return vertices
 
 def init_20_faces(radius:int=10):
+    """ Calculate icosahedron faces at zero subdivision level. 
+        Used for icosahedron initialization
+
+        params:
+            radius: radius of icosahedron sphere. Can be removed with constant in all methods.
+
+        returns:
+            faces: coordinates of icosahedron faces, array of shape [20,3,3]
+
+    """
     vertices = init_icosahedron_vertices(radius)
     faces = np.zeros((20,3,3))
     upper_pent = vertices[1:6]
@@ -108,24 +164,46 @@ def init_20_faces(radius:int=10):
 
 
 def calculate_centroids(faces:np.ndarray):
+    """ Calculate centroids of faces
+
+        params:
+            faces: array of faces
+        
+        returns:
+            centroids: array of centroid cordinates for input faces. Output array
+            with shape of [n,3], where n - number of input faces
+    """
     centroids = np.zeros((faces.shape[0],3))
     for i, face in enumerate(faces):
         centroids[i] = face.sum(axis=0)/3
     return centroids
     
 def __computeHalfVertex(v1, v2, radius:int = 10):
+    """ Compute half of icosahedron vertices
+
+        params:
+            v1,v2 (np.ndarray): two vertices points
+            radius: radius of icosahedron sphere. Can be removed with constant in all methods.
+
+        returns:
+            new_v (np.ndarray): coordinates of half verice scaled on scale factor 
+    """
     new_v = v1+v2
     scale = radius / np.sqrt(np.sum(new_v**2))
     return new_v * scale
     
 
 def calculate_lat(vec1: np.ndarray, vec2: np.ndarray):
+    """ Calculate latitude between two vectors
+    """
     unit_vector_1 = vec1 / np.linalg.norm(vec1)
     unit_vector_2 = vec2 / np.linalg.norm(vec2)
     dot_product = np.dot(unit_vector_1, unit_vector_2)
     return np.arccos(dot_product)
 
 def calculate_lon(vec1: np.ndarray, vec2: np.ndarray):
+    """ Calculate longtitude between two vectors
+    """
     dot = np.dot(vec1, vec2)
     det = np.linalg.det(np.vstack([vec1, vec2]))
     return np.arctan2(det, dot)

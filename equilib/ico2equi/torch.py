@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import Any, Callable, Dict, List, Optional, Union
+import collections
 
 import numpy as np
 import torch
@@ -17,6 +18,12 @@ from equilib.torch_utils import (
 
 __all__ = ["convert2batches", "run"]
 
+def dict2list(batch: List[Dict[int, torch.Tensor]]):
+    output = []
+    for d in batch:
+        od = collections.OrderedDict(sorted(d.items()))
+        output.extend(list(od.values()))
+    return output
 
 def ceil_max(a: torch.Tensor):
     return torch.sign(a)*torch.ceil(torch.abs(a))
@@ -153,15 +160,16 @@ def run(
     mode: str = 'list',
     backend: str = 'native'
 ) -> torch.Tensor:
-    """Run Cube2Equi
+    """Run Ico2Equi
 
     params:
-    - icomaps (np.ndarray)
+    - icomaps (List[torch.Tensor])
     - height, widht (int): output equirectangular image's size
+    - fov_x (float): fov of horizontal axis in degrees
     - mode (str)
 
-    return:
-    - equi (np.ndarray)
+    returns:
+    - equi (torch.Tensor)
 
     NOTE: we assume that the input `horizon` is a 4 dim array
 
@@ -212,20 +220,26 @@ def run(
 
     # initialize output equi
     out_batch = torch.empty((bs, c, height, width), dtype=icomaps_dtype, device=device)
+    # calculate subdision level of input bathces
     subdivision_levels = [int(np.log(icomap.shape[0]/20)/np.log(4)) for icomap in icomaps]
+    # calculate angles for target subdivion levels
     angles = calculate_tangent_angles(subdivision_levels, device=device)
     # torch routine
     zero = tensor(0, dtype=dtype, device=device)
     one = tensor(1, dtype=dtype, device=device)
+
     for bn, (imgs, angle) in enumerate(zip(icomaps, angles)):
         angle *= -1*180/torch.clone(pi).to(dtype=dtype, device=device) 
         out = torch.empty((c, height, width), dtype=dtype, device=device)
+        # merge_image is sum of reconstructed images
+        # merge_mask is sum of latitude-longtitude masks
         merge_image = torch.zeros((c,height,width), dtype=dtype, device=device)
         merge_mask = torch.zeros((c,height,width), dtype=dtype, device=device)
         for img,[T,P] in zip(imgs, angle):
             img, mask = get_equirec(img,fov_x,T,P,height, width, device=device)
             merge_image += img
             merge_mask += mask
+        # result image equals to dividing sum of images on sum of masks
         merge_mask = torch.where(merge_mask==zero,one,merge_mask)
         out = np.divide(merge_image,merge_mask)
 

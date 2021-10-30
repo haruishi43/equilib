@@ -20,7 +20,7 @@ SubLvl = Union[int, List[int]]
 IcoMaps = Union[
     # single
     np.ndarray,
-    # torch.Tensor,
+    torch.Tensor,
     # single 'list'
     List[np.ndarray],
     List[torch.Tensor],
@@ -28,11 +28,11 @@ IcoMaps = Union[
     List[List[np.ndarray]],
     List[List[torch.Tensor]],
     # single 'dict'
-    Dict[str, np.ndarray],
-    Dict[str, np.ndarray],
+    Dict[int, np.ndarray],
+    Dict[int, np.ndarray],
     # batch 'dict'
-    List[Dict[str, np.ndarray]],
-    List[Dict[str, np.ndarray]],
+    List[Dict[int, np.ndarray]],
+    List[Dict[int, np.ndarray]],
 ]
 
 class Equi2Ico(object):
@@ -143,7 +143,7 @@ def equi2ico(
     else:
         raise ValueError
 
-    # make sure that the output batch dim is removed if it's only a single cubemap
+    # make sure that the output batch dim is removed if it's only a single icomap
     if is_single:
         out = out[0]
 

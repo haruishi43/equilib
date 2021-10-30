@@ -3,23 +3,24 @@
 from typing import Dict, List, Union
 
 import numpy as np
-
 import torch
 
 from .numpy import (
-    run as run_numpy
+    run as run_numpy,
+    dict2list as dict2list_numpy
 )
 from .torch import (
     run as run_torch,
+    dict2list as dict2list_torch
 )
 
 __all__ = ["Ico2Equi", "ico2equi"]
 
 ArrayLike = Union[np.ndarray, torch.Tensor]
 IcoMaps = Union[
-    # single/batch 'horizon' or 'dice'
+    # single
     np.ndarray,
-    # torch.Tensor,
+    torch.Tensor,
     # single 'list'
     List[np.ndarray],
     List[torch.Tensor],
@@ -27,11 +28,11 @@ IcoMaps = Union[
     List[List[np.ndarray]],
     List[List[torch.Tensor]],
     # single 'dict'
-    Dict[str, np.ndarray],
-    Dict[str, np.ndarray],
+    Dict[int, np.ndarray],
+    Dict[int, np.ndarray],
     # batch 'dict'
-    List[Dict[str, np.ndarray]],
-    List[Dict[str, np.ndarray]],
+    List[Dict[int, np.ndarray]],
+    List[Dict[int, np.ndarray]],
 ]
 
 
@@ -39,6 +40,7 @@ class Ico2Equi(object):
     """
     params:
     - height, width (int): equirectangular image size
+    - fov_x (float): fov of horizontal axis in degrees
     - ico_format (str): input cube format("dict", "list")
     - mode (str): interpolation mode, defaults to "bilinear"
 
@@ -93,6 +95,7 @@ def ico2equi(
     - icomaps
     - ico_format (str): ("dict", "list")
     - height, width (int): output size
+    - fov_x (float): fov of horizontal axis in degrees
     - mode (str): "bilinear"
 
     return:
@@ -106,15 +109,15 @@ def ico2equi(
     _type = None
     if ico_format == "dict":
         if isinstance(icomap, dict):
-            if isinstance(icomap["0"], np.ndarray):
+            if isinstance(icomap[0], np.ndarray):
                 _type = "numpy"
-            elif isinstance(icomap["0"], torch.Tensor):
+            elif isinstance(icomap[0], torch.Tensor):
                 _type = "torch"
         elif isinstance(icomap, list):
             assert isinstance(icomap[0], dict)
-            if isinstance(icomap[0]["0"], np.ndarray):
+            if isinstance(icomap[0][0], np.ndarray):
                 _type = "numpy"
-            elif isinstance(icomap[0]["0"], torch.Tensor):
+            elif isinstance(icomap[0][0], torch.Tensor):
                 _type = "torch"
     elif ico_format == "list":
         assert isinstance(icomap, list)
@@ -132,6 +135,8 @@ def ico2equi(
     if _type == "numpy":
         #TODO: add in future
         #icomaps_batch = convert2batches(icomap, ico_format)
+        if ico_format == "dict":
+            icomap = dict2list_numpy(icomap)
         out = run_numpy(
             icomaps=icomap,
             height=height,
@@ -141,6 +146,8 @@ def ico2equi(
             **kwargs,
         )
     elif _type == "torch":
+        if ico_format == "dict":
+            icomap = dict2list_torch(icomap)
         out = run_torch(
             icomaps=icomap,
             height=height,

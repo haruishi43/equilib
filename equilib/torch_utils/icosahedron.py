@@ -8,6 +8,15 @@ def calculate_tangent_rots(
     subdivision_level: List[int],
     device: torch.device = torch.device("cpu")
     ) -> List[Dict[str, float]]:
+    """ Calculate rotation parameters for transformation
+
+        params:
+            subdivision_level (int): set number of faces, which equals to: 
+                    num_of_faces = 20*(4^b), where b=subdivision_level
+        returns:
+            rots (List[[dict]]): list of dicts with rots parameters.
+
+    """
     rots = [[] for _ in subdivision_level]
     radius = 10
     for i, sub_lvl in enumerate(subdivision_level):
@@ -29,6 +38,15 @@ def calculate_tangent_angles(
     subdivision_level: List[int],
     device: torch.device = torch.device("cpu")
     ) -> List[torch.Tensor]:
+    """ Calculate angles to icosahedron faces
+
+        params:
+            subdivision_level (int): set number of faces, which equals to: 
+                    num_of_faces = 20*(4^b), where b=subdivision_level
+        returns:
+            angles (List[[np.ndarray]]): list of angles.
+
+    """
     angles = [[] for _ in subdivision_level]
     radius = 10
     for i, sub_lvl in enumerate(subdivision_level):
@@ -42,6 +60,17 @@ def calculate_angles(
     faces: torch.Tensor,
     device: torch.device=torch.device("cpu")
     ) -> torch.Tensor:
+    """ Calculate angles from (0,0,0) point to centroid of input faces
+
+        params:
+            faces: array of triplets with coordinates of icosahedron faces. Each face
+            represented as array of shape [n,3,3], where n - number of faces.
+
+        returns:
+            angles: array of longtitude and latitude angles to input faces. Returns 
+            array of shape [n,2]
+    
+    """
     centroids = calculate_centroids(faces, device)
     angles = torch.zeros(centroids.shape[0], 2, device=device)
     for i, c in enumerate(centroids):
@@ -56,8 +85,15 @@ def subdivide_faces(
     radius: int=10, 
     device: torch.device = torch.device("cpu")
     ):
-    """
-        TODO: fix crashes after second subdividing
+    """ Subdivide faces of icosahedron on next level.
+
+        params:
+            faces: array of triplets with coordinates of icosahedron faces. Each face
+            represented as array of shape [n,3,3], where n - number of faces.
+
+        returns:
+            new_faces: array of subdivided faces. Returns array of shape [n*4,3,3]
+    
     """
     new_faces = torch.zeros(faces.shape[0]*4,3,3, device=device)
     for i, face in enumerate(faces):
@@ -78,6 +114,16 @@ def init_icosahedron_vertices(
     radius: int = 10,
     device: torch.device = torch.device("cpu")
     ) -> torch.Tensor:
+    """ Calculate icosahedron vertices at zero subdivision_level. 
+        Used for icosahedron initialization
+
+        params:
+            radius: radius of icosahedron sphere. Can be removed with constant in all methods.
+
+        returns:
+            vertices: points of initialized icosahedron, array of shape [20,3]
+
+    """
     PI, r = pi.to(device), radius
     H_ANGLE = torch.clone(PI) / 180 * 72
     V_ANGLE = torch.arctan(tensor(1.0 / 2, device=device))
@@ -106,6 +152,16 @@ def init_20_faces(
     radius: int = 10,
     device: torch.device = torch.device("cpu")
     ):
+    """ Calculate icosahedron faces at zero subdivision level. 
+        Used for icosahedron initialization
+
+        params:
+            radius: radius of icosahedron sphere. Can be removed with constant in all methods.
+
+        returns:
+            faces: coordinates of icosahedron faces, array of shape [20,3,3]
+
+    """
     vertices = init_icosahedron_vertices(radius, device)
     faces = torch.zeros(20,3,3, device=device)
     upper_pent = vertices[1:6]
@@ -130,12 +186,30 @@ def calculate_centroids(
     faces: torch.Tensor,
     device: torch.device = torch.device("cpu")
     ):
+    """ Calculate centroids of faces
+
+        params:
+            faces: array of faces
+        
+        returns:
+            centroids: array of centroid cordinates for input faces. Output array
+            with shape of [n,3], where n - number of input faces
+    """
     centroids = torch.zeros((faces.shape[0],3), device=device)
     for i, face in enumerate(faces):
         centroids[i] = face.sum(axis=0)/3
     return centroids
     
 def __computeHalfVertex(v1, v2, radius:int = 10):
+    """ Compute half of icosahedron vertices
+
+        params:
+            v1,v2 (np.ndarray): two vertices points
+            radius: radius of icosahedron sphere. Can be removed with constant in all methods.
+
+        returns:
+            new_v (np.ndarray): coordinates of half verice scaled on scale factor 
+    """
     new_v = v1+v2
     scale = radius / torch.sqrt(torch.sum(new_v**2))
     return new_v * scale
@@ -146,6 +220,8 @@ def calculate_lat(
     vec2: torch.Tensor, 
     device: torch.device = torch.device("cpu")
     ):
+    """ Calculate latitude between two vectors
+    """
     unit_vector_1 = (vec1 / torch.linalg.norm(vec1)).to(device)
     unit_vector_2 = (vec2 / torch.linalg.norm(vec2)).to(device)
     dot_product = torch.dot(unit_vector_1, unit_vector_2)
@@ -155,6 +231,8 @@ def calculate_lon(
     vec1: torch.Tensor, 
     vec2: torch.Tensor
     ):
+    """ Calculate longtitude between two vectors
+    """
     dot = torch.dot(vec1, vec2)
     det = torch.linalg.det(torch.vstack([vec1, vec2]))
     return torch.atan2(det, dot)

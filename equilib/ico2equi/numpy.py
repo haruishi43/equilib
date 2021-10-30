@@ -2,19 +2,39 @@
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
+import collections
+
 import numpy as np
 
 from equilib.numpy_utils import calculate_tangent_angles
+
 from equilib.grid_sample import numpy_grid_sample
 
-__all__ = ["convert2batches", "run"]
+__all__ = ["run"]
+
+
+def dict2list(batch: List[Dict[int, np.array]]):
+    output = []
+    for d in batch:
+        od = collections.OrderedDict(sorted(d.items()))
+        output.extend(list(od.values()))
+    return output
 
 
 def ceil_max(a: np.array):
+    """ Method for rounding digits
+
+        For a > 0 returns higher, e.g. a = 1.1 output = 2
+        For a < 0 returns lower, e.g. a = -0.1 output = 1
+    """
     return np.sign(a)*np.ceil(np.abs(a))
 
 def rodrigues(rot_vector: np.ndarray):
+    """ Rodrigues transformation 
+        https://docs.opencv.org/4.5.3/d9/d0c/group__calib3d.html#ga61585db663d9da06b68e70cfbf6a1eac
+    """
     if rot_vector.shape == (3,):
+        # do if input is a vector
         theta = np.linalg.norm(rot_vector)
         i = np.eye(3)
         if theta < 1e-9:
@@ -28,6 +48,7 @@ def rodrigues(rot_vector: np.ndarray):
         ])
         return (np.cos(theta)*i + (1-np.cos(theta))*rr + np.sin(theta)*rmap).astype(np.float32)
     else:
+        # do if vector is a matrix
         R = rot_vector
         r = np.array([R[2,1]-R[1,2], R[0,2]-R[2,0], R[1,0]-R[0,1]])
         s = np.sqrt(np.sum(r**2)/4)
@@ -65,6 +86,7 @@ def get_equirec(
     phi: int,
     height: int,
     width: int,
+    mode:str,
 ):
     _img = img
     _height, _width = _img.shape[1:]
@@ -119,7 +141,7 @@ def get_equirec(
     grid = np.stack((lat_map, lon_map), axis=0)
     grid = np.concatenate([grid[np.newaxis, ...]] * 1)
     imgt = np.concatenate([_img[np.newaxis, ...]] * 1)
-    out = numpy_grid_sample(imgt, grid, out, "bilinear")
+    out = numpy_grid_sample(imgt, grid, out, mode=mode)
     out = out.squeeze()
     
     mask = mask * inverse_mask
@@ -137,14 +159,15 @@ def run(
     fov_x: float,
     mode: str
 ) -> np.ndarray:
-    """Run Cube2Equi
+    """Run Ico2Equi
 
     params:
     - icomaps (np.ndarray)
     - height, widht (int): output equirectangular image's size
+    - fov_x (float): fov of horizontal axis in degrees
     - mode (str)
 
-    return:
+    returns:
     - equi (np.ndarray)
 
     NOTE: we assume that the input `horizon` is a 4 dim array
@@ -180,18 +203,23 @@ def run(
 
     # initialize output equi
     out_batch = np.empty((bs, c, height, width), dtype=icomaps_dtype)
+    # calculate subdision level of input bathces
     subdivision_levels = [int(np.log(icomap.shape[0]/20)/np.log(4)) for icomap in icomaps]
+    # calculate angles for target subdivion levels
     angles = calculate_tangent_angles(subdivision_levels)
 
     for bn, (imgs, angle) in enumerate(zip(icomaps, angles)):
         angle *= -1*180/np.pi
         out = np.empty((c, height, width), dtype=dtype)
+        # merge_image is sum of reconstructed images
+        # merge_mask is sum of latitude-longtitude masks
         merge_image = np.zeros((c,height,width))
         merge_mask = np.zeros((c,height,width))
         for img,[T,P] in zip(imgs, angle):
-            img, mask = get_equirec(img,fov_x,T,P,height, width)
+            img, mask = get_equirec(img,fov_x,T,P,height, width, mode=mode)
             merge_image += img
             merge_mask += mask
+        # result image equals to dividing sum of images on sum of masks
         merge_mask = np.where(merge_mask==0,1,merge_mask)
         out = np.divide(merge_image,merge_mask)
 
