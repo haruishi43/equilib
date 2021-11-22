@@ -101,7 +101,7 @@ setup(
     author_email=find_email(),
     license="AGPL-3.0",
     url=find_url(),
-    install_requires=get_requirements(),
+    install_requires=['numpy'],
     keywords=["Equirectangular", "Computer Vision"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
