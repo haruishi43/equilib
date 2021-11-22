@@ -18,21 +18,9 @@ import torch
 from equilib.cube2equi.numpy import run as run_numpy
 from equilib.cube2equi.torch import run as run
 
-from tests.helpers.benchmarking import (
-    check_close,
-    how_many_closes,
-    mae,
-    mse,
-)
-from tests.helpers.image_io import (
-    load2numpy,
-    load2torch,
-    save,
-)
-from tests.helpers.timer import (
-    func_timer,
-    wrapped_partial,
-)
+from tests.helpers.benchmarking import check_close, how_many_closes, mae, mse
+from tests.helpers.image_io import load2numpy, load2torch, save
+from tests.helpers.timer import func_timer, wrapped_partial
 
 run_native = wrapped_partial(run, backend="native")
 run_pure = wrapped_partial(run, backend="pure")
@@ -112,26 +100,17 @@ def bench_cpu(
 
     print("numpy")
     numpy_out = func_timer(run_numpy)(
-        horizon=numpy_imgs,
-        height=height,
-        width=width,
-        mode=mode,
+        horizon=numpy_imgs, height=height, width=width, mode=mode
     )
 
     print("native")
     native_out = func_timer(run_native)(
-        horizon=torch_imgs.clone(),
-        height=height,
-        width=width,
-        mode=mode,
+        horizon=torch_imgs.clone(), height=height, width=width, mode=mode
     )
 
     print("pure")
     pure_out = func_timer(run_pure)(
-        horizon=torch_imgs.clone(),
-        height=height,
-        width=width,
-        mode=mode,
+        horizon=torch_imgs.clone(), height=height, width=width, mode=mode
     )
 
     numpy_out = torch.from_numpy(numpy_out)
@@ -237,10 +216,7 @@ def bench_gpu(
 
     print("numpy")
     numpy_out = func_timer(run_numpy)(
-        horizon=numpy_imgs,
-        height=height,
-        width=width,
-        mode=mode,
+        horizon=numpy_imgs, height=height, width=width, mode=mode
     )
 
     print("native")
@@ -330,19 +306,9 @@ def bench_gpu(
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 def test_cube2equi_cpu(
-    bs: int,
-    height: int,
-    width: int,
-    mode: str,
-    dtype: np.dtype,
+    bs: int, height: int, width: int, mode: str, dtype: np.dtype
 ) -> None:
-    bench_cpu(
-        bs=bs,
-        height=height,
-        width=width,
-        mode=mode,
-        dtype=dtype,
-    )
+    bench_cpu(bs=bs, height=height, width=width, mode=mode, dtype=dtype)
 
 
 @pytest.mark.skipif(

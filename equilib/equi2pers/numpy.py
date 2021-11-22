@@ -24,15 +24,9 @@ def create_cam2global_matrix(
 ) -> np.ndarray:
 
     K = create_intrinsic_matrix(
-        height=height,
-        width=width,
-        fov_x=fov_x,
-        skew=skew,
-        dtype=dtype,
+        height=height, width=width, fov_x=fov_x, skew=skew, dtype=dtype
     )
-    g2c_rot = create_global2camera_rotation_matrix(
-        dtype=dtype,
-    )
+    g2c_rot = create_global2camera_rotation_matrix(dtype=dtype)
 
     # FIXME: change to faster inverse
     K_inv = np.linalg.inv(K)
@@ -49,29 +43,17 @@ def prep_matrices(
     dtype: np.dtype = np.dtype(np.float32),
 ) -> Tuple[np.ndarray, np.ndarray]:
 
-    m = create_grid(
-        height=height,
-        width=width,
-        batch=batch,
-        dtype=dtype,
-    )
+    m = create_grid(height=height, width=width, batch=batch, dtype=dtype)
     m = m[..., np.newaxis]
     G = create_cam2global_matrix(
-        height=height,
-        width=width,
-        fov_x=fov_x,
-        skew=skew,
-        dtype=dtype,
+        height=height, width=width, fov_x=fov_x, skew=skew, dtype=dtype
     )
 
     return m, G
 
 
 def matmul(
-    m: np.ndarray,
-    G: np.ndarray,
-    R: np.ndarray,
-    method: str = "faster",
+    m: np.ndarray, G: np.ndarray, R: np.ndarray, method: str = "faster"
 ) -> np.ndarray:
 
     if method == "robust":
@@ -99,10 +81,7 @@ def matmul(
 
 
 def convert_grid(
-    M: np.ndarray,
-    h_equi: int,
-    w_equi: int,
-    method: str = "robust",
+    M: np.ndarray, h_equi: int, w_equi: int, method: str = "robust"
 ) -> np.ndarray:
 
     # convert to rotation
@@ -221,31 +200,19 @@ def run(
     )
 
     # create batched rotation matrices
-    R = create_rotation_matrices(
-        rots=rots,
-        z_down=z_down,
-        dtype=dtype,
-    )
+    R = create_rotation_matrices(rots=rots, z_down=z_down, dtype=dtype)
 
     # rotate and transform the grid
     M = matmul(m, G, R)
 
     # create a pixel map grid
-    grid = convert_grid(
-        M=M,
-        h_equi=h_equi,
-        w_equi=w_equi,
-        method="robust",
-    )
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     # grid sample
     if override_func is not None:
         # NOTE: override func is used for test purposes
         out = override_func(  # type: ignore
-            img=equi,
-            grid=grid,
-            out=out,
-            mode=mode,
+            img=equi, grid=grid, out=out, mode=mode
         )
     else:
         out = numpy_grid_sample(
@@ -313,22 +280,13 @@ def get_bounding_fov(
     )
 
     # create batched rotation matrices
-    R = create_rotation_matrices(
-        rots=rots,
-        z_down=z_down,
-        dtype=dtype,
-    )
+    R = create_rotation_matrices(rots=rots, z_down=z_down, dtype=dtype)
 
     # rotate and transform the grid
     M = matmul(m, G, R)
 
     # create a pixel map grid
-    grid = convert_grid(
-        M=M,
-        h_equi=h_equi,
-        w_equi=w_equi,
-        method="robust",
-    )
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     bboxs = []
 

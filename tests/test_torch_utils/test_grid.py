@@ -11,18 +11,9 @@ from equilib.torch_utils.grid import create_grid
 @pytest.mark.parametrize("height", [48, 64])
 @pytest.mark.parametrize("width", [64])
 @pytest.mark.parametrize("batch", [None, 4])
-@pytest.mark.parametrize(
-    "dtype",
-    [
-        torch.float32,
-        torch.float64,
-    ],
-)
+@pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 def test_grid_cpu(
-    height: int,
-    width: int,
-    batch: Optional[int],
-    dtype: torch.dtype,
+    height: int, width: int, batch: Optional[int], dtype: torch.dtype
 ):
     device = torch.device("cpu")
 
@@ -56,19 +47,9 @@ def test_grid_cpu(
 @pytest.mark.parametrize("height", [4])
 @pytest.mark.parametrize("width", [8])
 @pytest.mark.parametrize("batch", [None, 2])
-@pytest.mark.parametrize(
-    "dtype",
-    [
-        torch.float16,
-        torch.float32,
-        torch.float64,
-    ],
-)
+@pytest.mark.parametrize("dtype", [torch.float16, torch.float32, torch.float64])
 def test_grid_gpu(
-    height: int,
-    width: int,
-    batch: Optional[int],
-    dtype: torch.dtype,
+    height: int, width: int, batch: Optional[int], dtype: torch.dtype
 ):
     device = torch.device("cuda")
 

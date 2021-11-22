@@ -15,11 +15,7 @@ def interp2d(q00, q10, q01, q11, dy, dx):
     return interp(f0, f1, dy, 1)
 
 
-def bilinear(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
-) -> np.ndarray:
+def bilinear(img: np.ndarray, grid: np.ndarray, out: np.ndarray) -> np.ndarray:
     """Bilinear Interpolation
 
     NOTE: asserts are removed

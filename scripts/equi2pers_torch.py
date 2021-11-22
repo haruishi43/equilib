@@ -27,8 +27,7 @@ DATA_PATH = "./data"
 
 
 def preprocess(
-    img: Union[np.ndarray, Image.Image],
-    is_cv2: bool = False,
+    img: Union[np.ndarray, Image.Image], is_cv2: bool = False
 ) -> torch.Tensor:
     """Preprocesses image"""
     if isinstance(img, np.ndarray) and is_cv2:
@@ -37,11 +36,7 @@ def preprocess(
         # Sometimes images are RGBA
         img = img.convert("RGB")
 
-    to_tensor = transforms.Compose(
-        [
-            transforms.ToTensor(),
-        ]
-    )
+    to_tensor = transforms.Compose([transforms.ToTensor()])
     img = to_tensor(img)
     assert len(img.shape) == 3, "input must be dim=3"
     assert img.shape[0] == 3, "input must be HWC"
@@ -49,8 +44,7 @@ def preprocess(
 
 
 def postprocess(
-    img: torch.Tensor,
-    to_cv2: bool = False,
+    img: torch.Tensor, to_cv2: bool = False
 ) -> Union[np.ndarray, Image.Image]:
     if to_cv2:
         img = np.asarray(img.to("cpu").numpy() * 255, dtype=np.uint8)
@@ -58,21 +52,14 @@ def postprocess(
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
     else:
-        to_PIL = transforms.Compose(
-            [
-                transforms.ToPILImage(),
-            ]
-        )
+        to_PIL = transforms.Compose([transforms.ToPILImage()])
         img = img.to("cpu")
         img = to_PIL(img)
         return img
 
 
 def test_video(
-    path: str,
-    h_pers: int = 480,
-    w_pers: int = 640,
-    fov_x: float = 90.0,
+    path: str, h_pers: int = 480, w_pers: int = 640, fov_x: float = 90.0
 ) -> None:
     """Test video"""
     # Rotation:
@@ -84,10 +71,7 @@ def test_video(
 
     # Initialize equi2pers
     equi2pers = Equi2Pers(
-        height=h_pers,
-        width=w_pers,
-        fov_x=fov_x,
-        mode="bilinear",
+        height=h_pers, width=w_pers, fov_x=fov_x, mode="bilinear"
     )
     device = torch.device("cuda")
 
@@ -97,21 +81,14 @@ def test_video(
     while cap.isOpened():
         ret, frame = cap.read()
 
-        rot = {
-            "roll": roll,
-            "pitch": pitch,
-            "yaw": yaw,
-        }
+        rot = {"roll": roll, "pitch": pitch, "yaw": yaw}
 
         if not ret:
             break
 
         s = time.time()
         equi_img = preprocess(frame, is_cv2=True).to(device)
-        pers_img = equi2pers(
-            equi=equi_img,
-            rots=rot,
-        )
+        pers_img = equi2pers(equi=equi_img, rots=rot)
         pers_img = postprocess(pers_img, to_cv2=True)
         e = time.time()
         times.append(e - s)
@@ -142,10 +119,7 @@ def test_video(
 
 
 def test_image(
-    path: str,
-    h_pers: int = 480,
-    w_pers: int = 640,
-    fov_x: float = 90.0,
+    path: str, h_pers: int = 480, w_pers: int = 640, fov_x: float = 90.0
 ) -> None:
     """Test single image"""
     # Rotation:
@@ -157,10 +131,7 @@ def test_image(
 
     # Initialize equi2pers
     equi2pers = Equi2Pers(
-        height=h_pers,
-        width=w_pers,
-        fov_x=fov_x,
-        mode="bilinear",
+        height=h_pers, width=w_pers, fov_x=fov_x, mode="bilinear"
     )
     device = torch.device("cuda")
 
@@ -168,10 +139,7 @@ def test_image(
     equi_img = Image.open(path)
     equi_img = preprocess(equi_img).to(device)
 
-    pers_img = equi2pers(
-        equi_img,
-        rots=rot,
-    )
+    pers_img = equi2pers(equi_img, rots=rot)
     pers_img = postprocess(pers_img)
 
     pers_path = osp.join(RESULT_PATH, "output_equi2pers_torch_image.jpg")

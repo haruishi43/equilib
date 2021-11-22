@@ -22,37 +22,17 @@ from tests.helpers.timer import func_timer
 # TODO: more test cases
 GT = [
     {
-        "rot": {
-            "roll": 0.0,
-            "pitch": 0.0,
-            "yaw": 0.0,
-        },
+        "rot": {"roll": 0.0, "pitch": 0.0, "yaw": 0.0},
         "in_coord": [1.0, 0.0, 1.0],
-        "out_coord": [
-            1.0,
-            0.0,
-            1.0,
-        ],
+        "out_coord": [1.0, 0.0, 1.0],
     },
     {
-        "rot": {
-            "roll": 0.0,
-            "pitch": np.pi / 4,
-            "yaw": np.pi / 4,
-        },
+        "rot": {"roll": 0.0, "pitch": np.pi / 4, "yaw": np.pi / 4},
         "in_coord": [1.0, 0.0, 0.0],
-        "out_coord": [
-            0.5,
-            0.5,
-            -0.707106781186547524400844362105,
-        ],
+        "out_coord": [0.5, 0.5, -0.707106781186547524400844362105],
     },
     {
-        "rot": {
-            "roll": 0.0,
-            "pitch": np.pi / 3,
-            "yaw": -np.pi / 3,
-        },
+        "rot": {"roll": 0.0, "pitch": np.pi / 3, "yaw": -np.pi / 3},
         "in_coord": [3.0, 2.0, 1.0],
         "out_coord": [
             2.91506350946109661690930792688,
@@ -63,38 +43,18 @@ GT = [
 ]
 
 
-@pytest.mark.parametrize(
-    "dtype",
-    [
-        torch.float32,
-        torch.float64,
-    ],
-)
+@pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 def test_rotation_matrix_cpu(dtype):
     device = torch.device("cpu")
     for gt in GT:
-        in_coord = torch.tensor(
-            gt["in_coord"],
-            dtype=dtype,
-            device=device,
-        )
-        gt_coord = torch.tensor(
-            gt["out_coord"],
-            dtype=dtype,
-            device=device,
-        )
+        in_coord = torch.tensor(gt["in_coord"], dtype=dtype, device=device)
+        gt_coord = torch.tensor(gt["out_coord"], dtype=dtype, device=device)
 
         R = create_rotation_matrix(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-            device=device,
+            **gt["rot"], z_down=True, dtype=dtype, device=device
         )
         R_ = create_rotation_matrix_at_once(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-            device=device,
+            **gt["rot"], z_down=True, dtype=dtype, device=device
         )
 
         coord = R @ in_coord
@@ -107,39 +67,18 @@ def test_rotation_matrix_cpu(dtype):
 @pytest.mark.skipif(
     not torch.cuda.is_available(), reason="cuda device is not available"
 )
-@pytest.mark.parametrize(
-    "dtype",
-    [
-        torch.float16,
-        torch.float32,
-        torch.float64,
-    ],
-)
+@pytest.mark.parametrize("dtype", [torch.float16, torch.float32, torch.float64])
 def test_rotation_matrix_gpu(dtype):
     device = torch.device("cuda")
     for gt in GT:
-        in_coord = torch.tensor(
-            gt["in_coord"],
-            dtype=dtype,
-            device=device,
-        )
-        gt_coord = torch.tensor(
-            gt["out_coord"],
-            dtype=dtype,
-            device=device,
-        )
+        in_coord = torch.tensor(gt["in_coord"], dtype=dtype, device=device)
+        gt_coord = torch.tensor(gt["out_coord"], dtype=dtype, device=device)
 
         R = create_rotation_matrix(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-            device=device,
+            **gt["rot"], z_down=True, dtype=dtype, device=device
         )
         R_ = create_rotation_matrix_at_once(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-            device=device,
+            **gt["rot"], z_down=True, dtype=dtype, device=device
         )
 
         coord = R @ in_coord
@@ -169,28 +108,14 @@ def test_rotation_matrix_down(device):
         rot["pitch"] = -rot["pitch"]
         rot["yaw"] = -rot["yaw"]
 
-        in_coord = torch.tensor(
-            gt["in_coord"],
-            dtype=dtype,
-            device=device,
-        )
-        gt_coord = torch.tensor(
-            gt["out_coord"],
-            dtype=dtype,
-            device=device,
-        )
+        in_coord = torch.tensor(gt["in_coord"], dtype=dtype, device=device)
+        gt_coord = torch.tensor(gt["out_coord"], dtype=dtype, device=device)
 
         R = create_rotation_matrix(
-            **rot,
-            z_down=False,
-            dtype=dtype,
-            device=device,
+            **rot, z_down=False, dtype=dtype, device=device
         )
         R_ = create_rotation_matrix_at_once(
-            **rot,
-            z_down=False,
-            dtype=dtype,
-            device=device,
+            **rot, z_down=False, dtype=dtype, device=device
         )
 
         coord = R @ in_coord
@@ -200,32 +125,19 @@ def test_rotation_matrix_down(device):
         assert torch.allclose(coord_, gt_coord)
 
 
-@pytest.mark.parametrize(
-    "dtype",
-    [
-        torch.float32,
-        torch.float64,
-    ],
-)
+@pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 def test_rotation_matrices_cpu(dtype):
     device = torch.device("cpu")
 
     rots = [gt["rot"] for gt in GT]
     R = create_rotation_matrices(
-        rots=rots,
-        z_down=True,
-        dtype=dtype,
-        device=device,
+        rots=rots, z_down=True, dtype=dtype, device=device
     )
     in_coords = torch.tensor(
-        [gt["in_coord"] for gt in GT],
-        dtype=dtype,
-        device=device,
+        [gt["in_coord"] for gt in GT], dtype=dtype, device=device
     ).unsqueeze(-1)
     gt_coords = torch.tensor(
-        [gt["out_coord"] for gt in GT],
-        dtype=dtype,
-        device=device,
+        [gt["out_coord"] for gt in GT], dtype=dtype, device=device
     ).unsqueeze(-1)
 
     coords = R @ in_coords
@@ -236,33 +148,19 @@ def test_rotation_matrices_cpu(dtype):
 @pytest.mark.skipif(
     not torch.cuda.is_available(), reason="cuda device is not available"
 )
-@pytest.mark.parametrize(
-    "dtype",
-    [
-        torch.float16,
-        torch.float32,
-        torch.float64,
-    ],
-)
+@pytest.mark.parametrize("dtype", [torch.float16, torch.float32, torch.float64])
 def test_rotation_matrices_gpu(dtype):
     device = torch.device("cuda")
 
     rots = [gt["rot"] for gt in GT]
     R = create_rotation_matrices(
-        rots=rots,
-        z_down=True,
-        dtype=dtype,
-        device=device,
+        rots=rots, z_down=True, dtype=dtype, device=device
     )
     in_coords = torch.tensor(
-        [gt["in_coord"] for gt in GT],
-        dtype=dtype,
-        device=device,
+        [gt["in_coord"] for gt in GT], dtype=dtype, device=device
     ).unsqueeze(-1)
     gt_coords = torch.tensor(
-        [gt["out_coord"] for gt in GT],
-        dtype=dtype,
-        device=device,
+        [gt["out_coord"] for gt in GT], dtype=dtype, device=device
     ).unsqueeze(-1)
 
     coords = R @ in_coords
@@ -273,10 +171,7 @@ def test_rotation_matrices_gpu(dtype):
         assert torch.allclose(coords, gt_coords)
 
 
-def bench_rotation_matrix(
-    dtype,
-    device,
-):
+def bench_rotation_matrix(dtype, device):
     import gc
 
     # wrapping functions
@@ -285,20 +180,12 @@ def bench_rotation_matrix(
 
     # FIXME: can't get the variables released somehow
     for gt in GT:
-        a = rot_mat(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-            device=device,
-        )
+        a = rot_mat(**gt["rot"], z_down=True, dtype=dtype, device=device)
         del a
         gc.collect()
         torch.cuda.empty_cache()
         b = rot_mat_at_once(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-            device=device,
+            **gt["rot"], z_down=True, dtype=dtype, device=device
         )
         del b
         gc.collect()

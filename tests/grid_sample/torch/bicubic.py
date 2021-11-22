@@ -10,29 +10,17 @@ from tests.grid_sample.numpy.bicubic import (
     faster_bicubic as faster_bicubic_numpy,
 )
 from tests.grid_sample.torch.native import native_bicubic
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
+from tests.helpers.benchmarking import check_close, mae, mse
 from tests.helpers.timer import func_timer
 
 
-def naive_bicubic(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-) -> torch.Tensor:
+def naive_bicubic(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
     ...
 
 
 def faster_bicubic(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-    out: torch.Tensor,
+    img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
 
     b_in, c_in, h_in, w_in = img.shape
@@ -86,22 +74,10 @@ def faster_bicubic(
     k4 = kernel(d4, a).type(dtype)
 
     mat_l = torch.stack(
-        [
-            k1[:, 1, ...],
-            k2[:, 1, ...],
-            k3[:, 1, ...],
-            k4[:, 1, ...],
-        ],
-        dim=-1,
+        [k1[:, 1, ...], k2[:, 1, ...], k3[:, 1, ...], k4[:, 1, ...]], dim=-1
     ).to(device)
     mat_r = torch.stack(
-        [
-            k1[:, 0, ...],
-            k2[:, 0, ...],
-            k3[:, 0, ...],
-            k4[:, 0, ...],
-        ],
-        dim=-1,
+        [k1[:, 0, ...], k2[:, 0, ...], k3[:, 0, ...], k4[:, 0, ...]], dim=-1
     ).to(device)
 
     mat_m = torch.empty(
@@ -156,13 +132,7 @@ def faster_bicubic(
         )
 
         mat_m[b, ...] = torch.stack(
-            [
-                mat_m_x1,
-                mat_m_x2,
-                mat_m_x3,
-                mat_m_x4,
-            ],
-            dim=-2,
+            [mat_m_x1, mat_m_x2, mat_m_x3, mat_m_x4], dim=-2
         )
 
     mat_l = mat_l.unsqueeze(1).unsqueeze(-2)

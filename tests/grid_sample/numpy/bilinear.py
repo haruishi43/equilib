@@ -10,24 +10,13 @@ from tests.grid_sample.numpy.baselines import (
     baseline_scipy_linear,
     baseline_cv2_linear,
 )
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
-from tests.helpers.timer import (
-    func_timer,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
+from tests.helpers.benchmarking import check_close, mae, mse
+from tests.helpers.timer import func_timer
 
 
 def naive_bilinear(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray
 ) -> np.ndarray:
     """Simple bilinear interpolation
 
@@ -74,9 +63,7 @@ def naive_bilinear(
 
 
 def faster_bilinear(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray
 ) -> np.ndarray:
     """Faster way of achieving bilinear without numba"""
 

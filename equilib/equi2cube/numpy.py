@@ -6,10 +6,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 import numpy as np
 
 from equilib.grid_sample import numpy_grid_sample
-from equilib.numpy_utils import (
-    create_xyz_grid,
-    create_rotation_matrices,
-)
+from equilib.numpy_utils import create_xyz_grid, create_rotation_matrices
 
 
 def cube_hsplits(cube_h: np.ndarray) -> List[np.ndarray]:
@@ -51,8 +48,7 @@ def cube_h2dice(cube_h: np.ndarray) -> np.ndarray:
 
     w = cube_h.shape[-2]
     cube_dice = np.zeros(
-        (bs, cube_h.shape[-3], w * 3, w * 4),
-        dtype=cube_h.dtype,
+        (bs, cube_h.shape[-3], w * 3, w * 4), dtype=cube_h.dtype
     )
     # Order: F R B L U D
     sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
@@ -65,11 +61,7 @@ def cube_h2dice(cube_h: np.ndarray) -> np.ndarray:
     return cube_dice
 
 
-def matmul(
-    m: np.ndarray,
-    R: np.ndarray,
-    method: str = "faster",
-) -> np.ndarray:
+def matmul(m: np.ndarray, R: np.ndarray, method: str = "faster") -> np.ndarray:
 
     if method == "robust":
         # When target image size is smaller, it might be faster with `matmul`
@@ -95,10 +87,7 @@ def matmul(
 
 
 def convert_grid(
-    xyz: np.ndarray,
-    h_equi: int,
-    w_equi: int,
-    method: str = "robust",
+    xyz: np.ndarray, h_equi: int, w_equi: int, method: str = "robust"
 ) -> np.ndarray:
 
     # convert to rotation
@@ -195,11 +184,7 @@ def run(
     out = np.empty((bs, c, w_face, w_face * 6), dtype=dtype)
 
     # create grid
-    xyz = create_xyz_grid(
-        w_face=w_face,
-        batch=bs,
-        dtype=dtype,
-    )
+    xyz = create_xyz_grid(w_face=w_face, batch=bs, dtype=dtype)
     xyz = xyz[..., np.newaxis]
 
     # FIXME: not sure why, but z-axis is facing the opposite
@@ -207,38 +192,21 @@ def run(
     # this is a temporary fix for now
     z_down = not z_down
     # create batched rotation matrices
-    R = create_rotation_matrices(
-        rots=rots,
-        z_down=z_down,
-        dtype=dtype,
-    )
+    R = create_rotation_matrices(rots=rots, z_down=z_down, dtype=dtype)
 
     # rotate grid
     xyz = matmul(xyz, R, method="faster")
 
     # create a pixel map grid
-    grid = convert_grid(
-        xyz=xyz,
-        h_equi=h_equi,
-        w_equi=w_equi,
-        method="robust",
-    )
+    grid = convert_grid(xyz=xyz, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     # grid sample
     if override_func is not None:
         out = override_func(  # type: ignore
-            img=equi,
-            grid=grid,
-            out=out,
-            mode=mode,
+            img=equi, grid=grid, out=out, mode=mode
         )
     else:
-        out = numpy_grid_sample(
-            img=equi,
-            grid=grid,
-            out=out,
-            mode=mode,
-        )
+        out = numpy_grid_sample(img=equi, grid=grid, out=out, mode=mode)
 
     out = (
         out.astype(equi_dtype)

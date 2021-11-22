@@ -6,9 +6,7 @@ __all__ = ["nearest"]
 
 
 def nearest(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-    out: torch.Tensor,
+    img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
     """Nearest Neighbor Interpolation
 

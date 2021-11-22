@@ -24,17 +24,9 @@ import torch
 
 from torchvision import transforms
 
-to_tensor = transforms.Compose(
-    [
-        transforms.ToTensor(),
-    ],
-)
+to_tensor = transforms.Compose([transforms.ToTensor()])
 
-to_PIL = transforms.Compose(
-    [
-        transforms.ToPILImage(),
-    ]
-)
+to_PIL = transforms.Compose([transforms.ToPILImage()])
 
 
 def _open_as_PIL(img_path: str) -> Image.Image:
@@ -58,9 +50,7 @@ def _open_as_cv2(img_path: str) -> np.ndarray:
 
 
 def load2numpy(
-    img_path: str,
-    dtype: np.dtype,
-    is_cv2: bool = False,
+    img_path: str, dtype: np.dtype, is_cv2: bool = False
 ) -> np.ndarray:
 
     assert os.path.exists(img_path), f"{img_path} doesn't exist"
@@ -87,9 +77,7 @@ def load2numpy(
 
 
 def load2torch(
-    img_path: str,
-    dtype: torch.dtype,
-    is_cv2: bool = False,
+    img_path: str, dtype: torch.dtype, is_cv2: bool = False
 ) -> torch.Tensor:
 
     assert os.path.exists(img_path), f"{img_path} doesn't exist"
@@ -161,10 +149,7 @@ def _torch2PIL(img: torch.Tensor) -> Image.Image:
     return img
 
 
-def save(
-    img: Union[np.ndarray, torch.Tensor],
-    path: str,
-) -> None:
+def save(img: Union[np.ndarray, torch.Tensor], path: str) -> None:
     assert len(img.shape) == 3, f"{img.shape} is not a valid input format"
     if isinstance(img, np.ndarray):
         img = _numpy2PIL(img)
@@ -184,33 +169,21 @@ def _test_numpy():
     dtype = np.float32
 
     # load rgb jpg
-    rgb_jpg = load2numpy(
-        img_path=rgb_jpg_path,
-        dtype=dtype,
-        is_cv2=False,
-    )
+    rgb_jpg = load2numpy(img_path=rgb_jpg_path, dtype=dtype, is_cv2=False)
 
     assert len(rgb_jpg.shape) == 3
     assert rgb_jpg.shape[0] == 3
     assert rgb_jpg.dtype == dtype
 
     # load rgb png (rgba)
-    rgb_png = load2numpy(
-        img_path=rgb_png_path,
-        dtype=dtype,
-        is_cv2=False,
-    )
+    rgb_png = load2numpy(img_path=rgb_png_path, dtype=dtype, is_cv2=False)
 
     assert len(rgb_png.shape) == 3
     assert rgb_png.shape[0] == 3
     assert rgb_png.dtype == dtype
 
     # load grayscale jpg
-    gray_jpg = load2numpy(
-        img_path=gray_jpg_path,
-        dtype=dtype,
-        is_cv2=False,
-    )
+    gray_jpg = load2numpy(img_path=gray_jpg_path, dtype=dtype, is_cv2=False)
 
     assert len(gray_jpg.shape) == 3
     assert gray_jpg.shape[0] == 1
@@ -227,33 +200,21 @@ def _test_torch():
     dtype = torch.float32
 
     # load rgb jpg
-    rgb_jpg = load2torch(
-        img_path=rgb_jpg_path,
-        dtype=dtype,
-        is_cv2=False,
-    )
+    rgb_jpg = load2torch(img_path=rgb_jpg_path, dtype=dtype, is_cv2=False)
 
     assert len(rgb_jpg.shape) == 3
     assert rgb_jpg.shape[0] == 3
     assert rgb_jpg.dtype == dtype
 
     # load rgb png (rgba)
-    rgb_png = load2torch(
-        img_path=rgb_png_path,
-        dtype=dtype,
-        is_cv2=False,
-    )
+    rgb_png = load2torch(img_path=rgb_png_path, dtype=dtype, is_cv2=False)
 
     assert len(rgb_png.shape) == 3
     assert rgb_png.shape[0] == 3
     assert rgb_png.dtype == dtype
 
     # load grayscale jpg
-    gray_jpg = load2torch(
-        img_path=gray_jpg_path,
-        dtype=dtype,
-        is_cv2=False,
-    )
+    gray_jpg = load2torch(img_path=gray_jpg_path, dtype=dtype, is_cv2=False)
 
     assert len(gray_jpg.shape) == 3
     assert gray_jpg.shape[0] == 1

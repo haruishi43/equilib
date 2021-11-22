@@ -20,12 +20,7 @@ from tests.grid_sample.numpy.baselines import (
     grid_sample_scipy,
     map_coordinates,
 )
-from tests.helpers.benchmarking import (
-    check_close,
-    how_many_closes,
-    mae,
-    mse,
-)
+from tests.helpers.benchmarking import check_close, how_many_closes, mae, mse
 from tests.helpers.image_io import load2numpy, save
 from tests.helpers.timer import func_timer, wrapped_partial
 from tests.helpers.rot_path import (
@@ -210,10 +205,7 @@ def bench_baselines(
         assert isinstance(out, list)
         for b in range(bs):
             assert isinstance(out[b], list)
-            for (
-                i,
-                face,
-            ) in enumerate(["F", "R", "B", "L", "U", "D"]):
+            for (i, face) in enumerate(["F", "R", "B", "L", "U", "D"]):
                 print()
                 print(f">>> Testing batch: {b}, face: {face}")
                 _out = out[b][i]

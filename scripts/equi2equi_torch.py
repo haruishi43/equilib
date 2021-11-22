@@ -27,8 +27,7 @@ DATA_PATH = "./data"
 
 
 def preprocess(
-    img: Union[np.ndarray, Image.Image],
-    is_cv2: bool = False,
+    img: Union[np.ndarray, Image.Image], is_cv2: bool = False
 ) -> torch.Tensor:
     """Preprocesses image"""
     if isinstance(img, np.ndarray) and is_cv2:
@@ -37,11 +36,7 @@ def preprocess(
         # Sometimes images are RGBA
         img = img.convert("RGB")
 
-    to_tensor = transforms.Compose(
-        [
-            transforms.ToTensor(),
-        ]
-    )
+    to_tensor = transforms.Compose([transforms.ToTensor()])
     img = to_tensor(img)
     assert len(img.shape) == 3, "input must be dim=3"
     assert img.shape[0] == 3, "input must be HWC"
@@ -49,8 +44,7 @@ def preprocess(
 
 
 def postprocess(
-    img: torch.Tensor,
-    to_cv2: bool = False,
+    img: torch.Tensor, to_cv2: bool = False
 ) -> Union[np.ndarray, Image.Image]:
     if to_cv2:
         img = np.asarray(img.to("cpu").numpy() * 255, dtype=np.uint8)
@@ -58,11 +52,7 @@ def postprocess(
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
     else:
-        to_PIL = transforms.Compose(
-            [
-                transforms.ToPILImage(),
-            ]
-        )
+        to_PIL = transforms.Compose([transforms.ToPILImage()])
         img = img.to("cpu")
         img = to_PIL(img)
         return img
@@ -78,11 +68,7 @@ def test_video(path: str) -> None:
     yaw = 0
 
     # Initialize equi2equi
-    equi2equi = Equi2Equi(
-        height=320,
-        width=640,
-        mode="bilinear",
-    )
+    equi2equi = Equi2Equi(height=320, width=640, mode="bilinear")
     device = torch.device("cuda")
 
     times = []
@@ -91,21 +77,14 @@ def test_video(path: str) -> None:
     while cap.isOpened():
         ret, frame = cap.read()
 
-        rot = {
-            "roll": roll,
-            "pitch": pitch,
-            "yaw": yaw,
-        }
+        rot = {"roll": roll, "pitch": pitch, "yaw": yaw}
 
         if not ret:
             break
 
         s = time.time()
         src_img = preprocess(frame, is_cv2=True).to(device)
-        out_img = equi2equi(
-            src=src_img,
-            rots=rot,
-        )
+        out_img = equi2equi(src=src_img, rots=rot)
         out_img = postprocess(out_img, to_cv2=True)
         e = time.time()
         times.append(e - s)
@@ -145,21 +124,14 @@ def test_image(path: str) -> None:
     }
 
     # Initialize equi2equi
-    equi2equi = Equi2Equi(
-        height=320,
-        width=640,
-        mode="bilinear",
-    )
+    equi2equi = Equi2Equi(height=320, width=640, mode="bilinear")
     device = torch.device("cuda")
 
     # Open Image
     src_img = Image.open(path)
     src_img = preprocess(src_img).to(device)
 
-    out_img = equi2equi(
-        src=src_img,
-        rots=rot,
-    )
+    out_img = equi2equi(src=src_img, rots=rot)
     out_img = postprocess(out_img)
 
     out_path = osp.join(RESULT_PATH, "output_equi2equi_torch_image.jpg")

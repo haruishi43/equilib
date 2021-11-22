@@ -23,8 +23,7 @@ DATA_PATH = "./data"
 
 
 def preprocess(
-    img: Union[np.ndarray, Image.Image],
-    is_cv2: bool = False,
+    img: Union[np.ndarray, Image.Image], is_cv2: bool = False
 ) -> np.ndarray:
     """Preprocesses image"""
     if isinstance(img, np.ndarray) and is_cv2:
@@ -40,10 +39,7 @@ def preprocess(
 
 
 def test_video(
-    path: str,
-    h_pers: int = 480,
-    w_pers: int = 640,
-    fov_x: float = 90.0,
+    path: str, h_pers: int = 480, w_pers: int = 640, fov_x: float = 90.0
 ) -> None:
     """Test video"""
     # Rotation:
@@ -55,10 +51,7 @@ def test_video(
 
     # Initialize equi2pers
     equi2pers = Equi2Pers(
-        height=h_pers,
-        width=w_pers,
-        fov_x=fov_x,
-        mode="bilinear",
+        height=h_pers, width=w_pers, fov_x=fov_x, mode="bilinear"
     )
 
     times = []
@@ -67,21 +60,14 @@ def test_video(
     while cap.isOpened():
         ret, frame = cap.read()
 
-        rot = {
-            "roll": roll,
-            "pitch": pitch,
-            "yaw": yaw,
-        }
+        rot = {"roll": roll, "pitch": pitch, "yaw": yaw}
 
         if not ret:
             break
 
         s = time.time()
         equi_img = preprocess(frame, is_cv2=True)
-        pers_img = equi2pers(
-            equi=equi_img,
-            rots=rot,
-        )
+        pers_img = equi2pers(equi=equi_img, rots=rot)
         pers_img = np.transpose(pers_img, (1, 2, 0))
         pers_img = cv2.cvtColor(pers_img, cv2.COLOR_RGB2BGR)
         e = time.time()
@@ -113,10 +99,7 @@ def test_video(
 
 
 def test_image(
-    path: str,
-    h_pers: int = 480,
-    w_pers: int = 640,
-    fov_x: float = 90.0,
+    path: str, h_pers: int = 480, w_pers: int = 640, fov_x: float = 90.0
 ) -> None:
     """Test single image"""
     # Rotation:
@@ -128,20 +111,14 @@ def test_image(
 
     # Initialize equi2pers
     equi2pers = Equi2Pers(
-        height=h_pers,
-        width=w_pers,
-        fov_x=fov_x,
-        mode="bilinear",
+        height=h_pers, width=w_pers, fov_x=fov_x, mode="bilinear"
     )
 
     # Open Image
     equi_img = Image.open(path)
     equi_img = preprocess(equi_img)
 
-    pers_img = equi2pers(
-        equi_img,
-        rots=rot,
-    )
+    pers_img = equi2pers(equi_img, rots=rot)
 
     pers_img = np.transpose(pers_img, (1, 2, 0))
     pers_img = Image.fromarray(pers_img)

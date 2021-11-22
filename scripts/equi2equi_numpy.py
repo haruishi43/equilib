@@ -23,8 +23,7 @@ DATA_PATH = "./data"
 
 
 def preprocess(
-    img: Union[np.ndarray, Image.Image],
-    is_cv2: bool = False,
+    img: Union[np.ndarray, Image.Image], is_cv2: bool = False
 ) -> np.ndarray:
     """Preprocesses image"""
     if isinstance(img, np.ndarray) and is_cv2:
@@ -49,11 +48,7 @@ def test_video(path: str) -> None:
     yaw = 0
 
     # Initialize equi2equi
-    equi2equi = Equi2Equi(
-        height=320,
-        width=640,
-        mode="bilinear",
-    )
+    equi2equi = Equi2Equi(height=320, width=640, mode="bilinear")
 
     times = []
     cap = cv2.VideoCapture(path)
@@ -61,21 +56,14 @@ def test_video(path: str) -> None:
     while cap.isOpened():
         ret, frame = cap.read()
 
-        rot = {
-            "roll": roll,
-            "pitch": pitch,
-            "yaw": yaw,
-        }
+        rot = {"roll": roll, "pitch": pitch, "yaw": yaw}
 
         if not ret:
             break
 
         s = time.time()
         src_img = preprocess(frame, is_cv2=True)
-        out_img = equi2equi(
-            src=src_img,
-            rots=rot,
-        )
+        out_img = equi2equi(src=src_img, rots=rot)
         out_img = np.transpose(out_img, (1, 2, 0))
         out_img = cv2.cvtColor(out_img, cv2.COLOR_RGB2BGR)
         e = time.time()
@@ -109,27 +97,16 @@ def test_video(path: str) -> None:
 def test_image(path: str) -> None:
     """Test single image"""
     # Rotation:
-    rot = {
-        "roll": 0,  #
-        "pitch": 0,  # vertical
-        "yaw": np.pi / 4,  # horizontal
-    }
+    rot = {"roll": 0, "pitch": 0, "yaw": np.pi / 4}  # vertical, horizontal
 
     # Initialize equi2equi
-    equi2equi = Equi2Equi(
-        height=320,
-        width=640,
-        mode="bilinear",
-    )
+    equi2equi = Equi2Equi(height=320, width=640, mode="bilinear")
 
     # Open Image
     src_img = Image.open(path)
     src_img = preprocess(src_img)
 
-    out_img = equi2equi(
-        src=src_img,
-        rots=rot,
-    )
+    out_img = equi2equi(src=src_img, rots=rot)
 
     out_img = np.transpose(out_img, (1, 2, 0))
     out_img = Image.fromarray(out_img)

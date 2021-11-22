@@ -18,21 +18,9 @@ import torch
 from equilib.equi2cube.numpy import run as run_numpy
 from equilib.equi2cube.torch import run as run
 
-from tests.helpers.benchmarking import (
-    check_close,
-    how_many_closes,
-    mae,
-    mse,
-)
-from tests.helpers.image_io import (
-    load2numpy,
-    load2torch,
-    save,
-)
-from tests.helpers.timer import (
-    func_timer,
-    wrapped_partial,
-)
+from tests.helpers.benchmarking import check_close, how_many_closes, mae, mse
+from tests.helpers.image_io import load2numpy, load2torch, save
+from tests.helpers.timer import func_timer, wrapped_partial
 from tests.helpers.rot_path import (
     create_rots,
     create_rots_pitch,
@@ -229,10 +217,7 @@ def bench_cpu(
         assert isinstance(native_out, list)
         for b in range(bs):
             assert isinstance(native_out[b], list)
-            for (
-                i,
-                face,
-            ) in enumerate(["F", "R", "B", "L", "U", "D"]):
+            for (i, face) in enumerate(["F", "R", "B", "L", "U", "D"]):
                 print()
                 print(f">>> Testing batch: {b}, face: {face}")
                 _numpy_out = torch.from_numpy(numpy_out[b][i])
@@ -531,10 +516,7 @@ def bench_gpu(
         assert isinstance(native_out, list)
         for b in range(bs):
             assert isinstance(native_out[b], list)
-            for (
-                i,
-                face,
-            ) in enumerate(["F", "R", "B", "L", "U", "D"]):
+            for (i, face) in enumerate(["F", "R", "B", "L", "U", "D"]):
                 print()
                 print(f">>> Testing batch: {b}, face: {face}")
                 _numpy_out = (

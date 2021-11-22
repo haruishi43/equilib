@@ -10,10 +10,7 @@ from typing import Tuple
 
 import numpy as np
 
-from tests.helpers.sample_data import (
-    grayscale_gradient,
-    rgb_gradient,
-)
+from tests.helpers.sample_data import grayscale_gradient, rgb_gradient
 
 np.random.seed(0)
 print("DEBUG: random is set to 0")
@@ -38,13 +35,7 @@ def create_single_data(
     dtype_grid: np.dtype = np.dtype(np.float32),
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
-    img = create_single_img(
-        c=c,
-        h=h,
-        w=w,
-        rand=rand_img,
-        dtype=dtype_img,
-    )
+    img = create_single_img(c=c, h=h, w=w, rand=rand_img, dtype=dtype_img)
 
     grid = create_single_grid(
         h=h,
@@ -75,14 +66,7 @@ def create_batch_data(
     dtype_grid: np.dtype = np.dtype(np.float32),
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
-    img = create_batch_img(
-        b=b,
-        c=c,
-        h=h,
-        w=w,
-        rand=rand_img,
-        dtype=dtype_img,
-    )
+    img = create_batch_img(b=b, c=c, h=h, w=w, rand=rand_img, dtype=dtype_img)
 
     grid = create_batch_grid(
         b=b,

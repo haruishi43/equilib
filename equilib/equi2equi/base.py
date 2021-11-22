@@ -43,18 +43,9 @@ class Equi2Equi(object):
         self.mode = mode
         self.z_down = z_down
 
-    def __call__(
-        self,
-        src: ArrayLike,
-        rots: Rot,
-        **kwargs,
-    ) -> ArrayLike:
+    def __call__(self, src: ArrayLike, rots: Rot, **kwargs) -> ArrayLike:
         return equi2equi(
-            src=src,
-            rots=rots,
-            mode=self.mode,
-            z_down=self.z_down,
-            **kwargs,
+            src=src, rots=rots, mode=self.mode, z_down=self.z_down, **kwargs
         )
 
 

@@ -5,18 +5,11 @@ from functools import partial
 import torch
 import torch.nn.functional as F
 
-__all__ = [
-    "native",
-    "native_bicubic",
-    "native_bilinear",
-    "native_nearest",
-]
+__all__ = ["native", "native_bicubic", "native_bilinear", "native_nearest"]
 
 
 def native(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-    mode: str = "bilinear",
+    img: torch.Tensor, grid: torch.Tensor, mode: str = "bilinear"
 ) -> torch.Tensor:
     """Torch Grid Sample (default)
 

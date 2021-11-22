@@ -6,14 +6,8 @@ import numpy as np
 
 import torch
 
-from .numpy import (
-    get_bounding_fov as get_bfov_numpy,
-    run as run_numpy,
-)
-from .torch import (
-    get_bounding_fov as get_bfov_torch,
-    run as run_torch,
-)
+from .numpy import get_bounding_fov as get_bfov_numpy, run as run_numpy
+from .torch import get_bounding_fov as get_bfov_torch, run as run_torch
 
 __all__ = ["Equi2Pers", "equi2pers"]
 
@@ -57,12 +51,7 @@ class Equi2Pers(object):
         self.z_down = z_down
         # FIXME: maybe do useful stuff like precalculating the grid or something
 
-    def __call__(
-        self,
-        equi: ArrayLike,
-        rots: Rot,
-        **kwargs,
-    ) -> ArrayLike:
+    def __call__(self, equi: ArrayLike, rots: Rot, **kwargs) -> ArrayLike:
         # FIXME: should optimize since some parts of the code can be calculated
         # before hand.
         # 1. calculate grid
@@ -79,11 +68,7 @@ class Equi2Pers(object):
             **kwargs,
         )
 
-    def get_bounding_fov(
-        self,
-        equi: ArrayLike,
-        rots: Rot,
-    ) -> ArrayLike:
+    def get_bounding_fov(self, equi: ArrayLike, rots: Rot) -> ArrayLike:
         return get_bounding_fov(
             equi=equi,
             rots=rots,

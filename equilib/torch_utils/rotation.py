@@ -13,19 +13,11 @@ def create_global2camera_rotation_matrix(
 ) -> torch.Tensor:
     """Rotation from global (world) to camera coordinates"""
     R_XY = torch.tensor(
-        [  # X <-> Y
-            [0.0, 1.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0],
-        ],
+        [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]],  # X <-> Y
         dtype=dtype,
     )
     R_YZ = torch.tensor(
-        [  # Y <-> Z
-            [1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0],
-            [0.0, 1.0, 0.0],
-        ],
+        [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]],  # Y <-> Z
         dtype=dtype,
     )
     R = R_XY @ R_YZ
@@ -156,10 +148,7 @@ def create_rotation_matrices(
         # FIXME: maybe default to `create_rotation_matrix_at_once`?
         # NOTE: at_once is faster with cpu, while slower on GPU
         R[i, ...] = create_rotation_matrix(
-            **rot,
-            z_down=z_down,
-            dtype=dtype,
-            device=device,
+            **rot, z_down=z_down, dtype=dtype, device=device
         )
 
     return R

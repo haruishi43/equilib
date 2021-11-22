@@ -17,10 +17,7 @@ from itertools import combinations
 import numpy as np
 
 from tests.equi2pers.numpy_prep import example
-from tests.equi2pers.numpy_matmul import (
-    DATA,
-    baseline_v2,
-)
+from tests.equi2pers.numpy_matmul import DATA, baseline_v2
 from tests.helpers.benchmarking import check_close, mae, mse
 from tests.helpers.timer import func_timer
 

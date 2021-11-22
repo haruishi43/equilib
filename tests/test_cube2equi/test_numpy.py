@@ -15,20 +15,9 @@ from tests.grid_sample.numpy.baselines import (
     grid_sample_scipy,
     map_coordinates,
 )
-from tests.helpers.benchmarking import (
-    check_close,
-    how_many_closes,
-    mae,
-    mse,
-)
-from tests.helpers.image_io import (
-    load2numpy,
-    save,
-)
-from tests.helpers.timer import (
-    func_timer,
-    wrapped_partial,
-)
+from tests.helpers.benchmarking import check_close, how_many_closes, mae, mse
+from tests.helpers.image_io import load2numpy, save
+from tests.helpers.timer import func_timer, wrapped_partial
 
 run_cv2 = wrapped_partial(run, override_func=grid_sample_cv2)
 run_scipy = wrapped_partial(run, override_func=grid_sample_scipy)
@@ -93,25 +82,14 @@ def bench_baselines(
 
     print("scipy:")
     out_scipy = func_timer(run_scipy)(
-        horizon=imgs,
-        height=height,
-        width=width,
-        mode=mode,
+        horizon=imgs, height=height, width=width, mode=mode
     )
     print("cv2:")
     out_cv2 = func_timer(run_cv2)(
-        horizon=imgs,
-        height=height,
-        width=width,
-        mode=mode,
+        horizon=imgs, height=height, width=width, mode=mode
     )
     print("numpy:")
-    out = func_timer(run)(
-        horizon=imgs,
-        height=height,
-        width=width,
-        mode=mode,
-    )
+    out = func_timer(run)(horizon=imgs, height=height, width=width, mode=mode)
 
     assert out_scipy.shape == out_cv2.shape == out.shape
     assert out_scipy.dtype == out_cv2.dtype == out.dtype == dtype
@@ -176,16 +154,6 @@ def bench_baselines(
 @pytest.mark.parametrize("mode", ["nearest", "bilinear", "bicubic"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 def test_cube2equi_against_baselines(
-    bs: int,
-    height: int,
-    width: int,
-    mode: str,
-    dtype: np.dtype,
+    bs: int, height: int, width: int, mode: str, dtype: np.dtype
 ) -> None:
-    bench_baselines(
-        bs=bs,
-        height=height,
-        width=width,
-        mode=mode,
-        dtype=dtype,
-    )
+    bench_baselines(bs=bs, height=height, width=width, mode=mode, dtype=dtype)

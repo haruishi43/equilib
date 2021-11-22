@@ -5,21 +5,12 @@ import warnings
 
 import torch
 
-from .native import (
-    native_bicubic,
-    native_bilinear,
-    native_nearest,
-)
+from .native import native_bicubic, native_bilinear, native_nearest
 from .nearest import nearest
 from .bilinear import bilinear
 from .bicubic import bicubic
 
-DTYPES = (
-    torch.uint8,
-    torch.float16,
-    torch.float32,
-    torch.float64,
-)
+DTYPES = (torch.uint8, torch.float16, torch.float32, torch.float64)
 
 
 def grid_sample(

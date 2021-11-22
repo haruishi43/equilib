@@ -10,33 +10,19 @@ from tests.grid_sample.numpy.nearest import (
     faster_nearest as faster_nearest_numpy,
 )
 from tests.grid_sample.torch.native import native_nearest
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
+from tests.helpers.benchmarking import check_close, mae, mse
 from tests.helpers.timer import func_timer
 
 
-def old_naive_nearest(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-) -> torch.Tensor:
+def old_naive_nearest(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
 
     b_in, c_in, h_in, w_in = img.shape
     b_out, _, h_out, w_out = grid.shape
     dtype = img.dtype
     device = get_device(img)
 
-    out = torch.empty(
-        (b_in, c_in, h_out, w_out),
-        dtype=dtype,
-        device=device,
-    )
+    out = torch.empty((b_in, c_in, h_out, w_out), dtype=dtype, device=device)
 
     for b in range(b_out):
         for y_out in range(h_out):
@@ -51,9 +37,7 @@ def old_naive_nearest(
 
 
 def naive_nearest(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-    out: torch.Tensor,
+    img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
 
     b_in, c_in, h_in, w_in = img.shape
@@ -71,10 +55,7 @@ def naive_nearest(
     return out
 
 
-def old_faster_nearest(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-) -> torch.Tensor:
+def old_faster_nearest(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
     """
 
     NOTE:
@@ -94,11 +75,7 @@ def old_faster_nearest(
             "input `grid` should be on the cpu, but got a cuda tensor"
         )
 
-    out = torch.zeros(
-        (b_in, c_in, h_out, w_out),
-        dtype=dtype,
-        device=device,
-    )
+    out = torch.zeros((b_in, c_in, h_out, w_out), dtype=dtype, device=device)
 
     round_grid = torch.round(grid).type(torch.int64)
     round_grid[:, 0, ...] %= h_in
@@ -113,9 +90,7 @@ def old_faster_nearest(
 
 
 def faster_nearest(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-    out: torch.Tensor,
+    img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
     """ """
 

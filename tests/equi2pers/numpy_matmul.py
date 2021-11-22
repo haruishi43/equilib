@@ -289,29 +289,17 @@ def bench_time():
         # make data
         m, G, R = example(**data)
 
-        args = {
-            "R": R,
-            "G": G,
-            "m": m,
-        }
+        args = {"R": R, "G": G, "m": m}
 
         for func in test_functions:
-            time_func_loop(
-                func=func,
-                func_args=args,
-                num=num,
-            )
+            time_func_loop(func=func, func_args=args, num=num)
 
 
 def compare_accuracy():
 
     data = DATA[3]
     m, G, R = example(**data)
-    args = {
-        "R": R,
-        "G": G,
-        "m": m,
-    }
+    args = {"R": R, "G": G, "m": m}
 
     GT = naive_v1(**args)
     einsum = einsum_v3(**args)

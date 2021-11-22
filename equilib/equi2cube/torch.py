@@ -75,10 +75,7 @@ def cube_h2dice(cube_h: torch.Tensor) -> torch.Tensor:
     return cube_dice
 
 
-def matmul(
-    m: torch.Tensor,
-    R: torch.Tensor,
-) -> torch.Tensor:
+def matmul(m: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
 
     M = torch.matmul(R[:, None, None, ...], m)
     M = M.squeeze(-1)
@@ -87,10 +84,7 @@ def matmul(
 
 
 def convert_grid(
-    xyz: torch.Tensor,
-    h_equi: int,
-    w_equi: int,
-    method: str = "robust",
+    xyz: torch.Tensor, h_equi: int, w_equi: int, method: str = "robust"
 ) -> torch.Tensor:
 
     # convert to rotation
@@ -222,22 +216,14 @@ def run(
     z_down = not z_down
     # create batched rotation matrices
     R = create_rotation_matrices(
-        rots=rots,
-        z_down=z_down,
-        dtype=tmp_dtype,
-        device=tmp_device,
+        rots=rots, z_down=z_down, dtype=tmp_dtype, device=tmp_device
     )
 
     # rotate grid
     xyz = matmul(xyz, R)
 
     # create a pixel map grid
-    grid = convert_grid(
-        xyz=xyz,
-        h_equi=h_equi,
-        w_equi=w_equi,
-        method="robust",
-    )
+    grid = convert_grid(xyz=xyz, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     # FIXME: putting `grid` to device since `pure`'s bilinear interpolation requires it
     # FIXME: better way of forcing `grid` to be the same dtype?
@@ -248,11 +234,7 @@ def run(
 
     # grid sample
     out = torch_grid_sample(
-        img=equi,
-        grid=grid,
-        out=out,
-        mode=mode,
-        backend=backend,
+        img=equi, grid=grid, out=out, mode=mode, backend=backend
     )
 
     out = (

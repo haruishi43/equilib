@@ -245,28 +245,16 @@ def run(
 
     # create sampling grid
     grid = create_equi_grid(
-        h_out=height,
-        w_out=width,
-        w_face=w_face,
-        batch=bs,
-        dtype=dtype,
+        h_out=height, w_out=width, w_face=w_face, batch=bs, dtype=dtype
     )
 
     # grid sample
     if override_func is not None:
         out = override_func(  # type: ignore
-            img=horizon,
-            grid=grid,
-            out=out,
-            mode=mode,
+            img=horizon, grid=grid, out=out, mode=mode
         )
     else:
-        out = numpy_grid_sample(
-            img=horizon,
-            grid=grid,
-            out=out,
-            mode=mode,
-        )
+        out = numpy_grid_sample(img=horizon, grid=grid, out=out, mode=mode)
 
     out = (
         out.astype(horizon_dtype)

@@ -35,10 +35,7 @@ def create_cam2global_matrix(
         dtype=dtype,
         device=device,
     )
-    g2c_rot = create_global2camera_rotation_matrix(
-        dtype=dtype,
-        device=device,
-    )
+    g2c_rot = create_global2camera_rotation_matrix(dtype=dtype, device=device)
 
     return g2c_rot @ K.inverse()
 
@@ -54,11 +51,7 @@ def prep_matrices(
 ) -> Tuple[torch.Tensor, torch.Tensor]:
 
     m = create_grid(
-        height=height,
-        width=width,
-        batch=batch,
-        dtype=dtype,
-        device=device,
+        height=height, width=width, batch=batch, dtype=dtype, device=device
     )
     m = m.unsqueeze(-1)
     G = create_cam2global_matrix(
@@ -73,11 +66,7 @@ def prep_matrices(
     return m, G
 
 
-def matmul(
-    m: torch.Tensor,
-    G: torch.Tensor,
-    R: torch.Tensor,
-) -> torch.Tensor:
+def matmul(m: torch.Tensor, G: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
 
     M = torch.matmul(torch.matmul(R, G)[:, None, None, ...], m)
     M = M.squeeze(-1)
@@ -86,10 +75,7 @@ def matmul(
 
 
 def convert_grid(
-    M: torch.Tensor,
-    h_equi: int,
-    w_equi: int,
-    method: str = "robust",
+    M: torch.Tensor, h_equi: int, w_equi: int, method: str = "robust"
 ) -> torch.Tensor:
 
     # convert to rotation
@@ -225,22 +211,14 @@ def run(
 
     # create batched rotation matrices
     R = create_rotation_matrices(
-        rots=rots,
-        z_down=z_down,
-        dtype=tmp_dtype,
-        device=tmp_device,
+        rots=rots, z_down=z_down, dtype=tmp_dtype, device=tmp_device
     )
 
     # rotate and transform the grid
     M = matmul(m, G, R)
 
     # create a pixel map grid
-    grid = convert_grid(
-        M=M,
-        h_equi=h_equi,
-        w_equi=w_equi,
-        method="robust",
-    )
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     # if backend == "native":
     #     grid = grid.to(img_device)
@@ -340,22 +318,14 @@ def get_bounding_fov(
 
     # create batched rotation matrices
     R = create_rotation_matrices(
-        rots=rots,
-        z_down=z_down,
-        dtype=tmp_dtype,
-        device=tmp_device,
+        rots=rots, z_down=z_down, dtype=tmp_dtype, device=tmp_device
     )
 
     # rotate and transform the grid
     M = matmul(m, G, R)
 
     # create a pixel map grid
-    grid = convert_grid(
-        M=M,
-        h_equi=h_equi,
-        w_equi=w_equi,
-        method="robust",
-    )
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     bboxs = []
 

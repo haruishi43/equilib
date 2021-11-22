@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
-from .grid import (
-    create_grid,
-    create_normalized_grid,
-    create_xyz_grid,
-)
+from .grid import create_grid, create_normalized_grid, create_xyz_grid
 from .intrinsic import create_intrinsic_matrix
 from .rotation import (
     create_global2camera_rotation_matrix,

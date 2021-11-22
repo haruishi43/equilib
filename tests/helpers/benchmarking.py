@@ -8,10 +8,7 @@ import numpy as np
 
 import torch
 
-from .timer import (
-    func_timer,
-    printable_time,
-)
+from .timer import func_timer, printable_time
 
 # aliases
 ArrayLike = Union[np.ndarray, torch.Tensor]
@@ -84,10 +81,7 @@ def check_close(
 
 
 def how_many_closes(
-    a1: ArrayLike,
-    a2: ArrayLike,
-    rtol: float = 1e-05,
-    atol: float = 1e-08,
+    a1: ArrayLike, a2: ArrayLike, rtol: float = 1e-05, atol: float = 1e-08
 ) -> float:
     """Returns ratio of 'closes' (counted by `isclose`)"""
     assert _check_arrays(a1, a2)
@@ -103,11 +97,7 @@ def how_many_closes(
         raise ValueError
 
 
-def check_similar(
-    a1: ArrayLike,
-    a2: ArrayLike,
-    tol: float = 1e-08,
-) -> bool:
+def check_similar(a1: ArrayLike, a2: ArrayLike, tol: float = 1e-08) -> bool:
     """When a1 and a2 are close to zero"""
     assert _check_arrays(a1, a2)
     d = a1 - a2

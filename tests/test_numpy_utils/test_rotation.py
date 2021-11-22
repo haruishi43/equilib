@@ -19,37 +19,17 @@ from tests.helpers.timer import func_timer
 # TODO: more test cases
 GT = [
     {
-        "rot": {
-            "roll": 0.0,
-            "pitch": 0.0,
-            "yaw": 0.0,
-        },
+        "rot": {"roll": 0.0, "pitch": 0.0, "yaw": 0.0},
         "in_coord": [1.0, 0.0, 1.0],
-        "out_coord": [
-            1.0,
-            0.0,
-            1.0,
-        ],
+        "out_coord": [1.0, 0.0, 1.0],
     },
     {
-        "rot": {
-            "roll": 0.0,
-            "pitch": np.pi / 4,
-            "yaw": np.pi / 4,
-        },
+        "rot": {"roll": 0.0, "pitch": np.pi / 4, "yaw": np.pi / 4},
         "in_coord": [1.0, 0.0, 0.0],
-        "out_coord": [
-            0.5,
-            0.5,
-            -0.707106781186547524400844362105,
-        ],
+        "out_coord": [0.5, 0.5, -0.707106781186547524400844362105],
     },
     {
-        "rot": {
-            "roll": 0.0,
-            "pitch": np.pi / 3,
-            "yaw": -np.pi / 3,
-        },
+        "rot": {"roll": 0.0, "pitch": np.pi / 3, "yaw": -np.pi / 3},
         "in_coord": [3.0, 2.0, 1.0],
         "out_coord": [
             2.91506350946109661690930792688,
@@ -60,24 +40,15 @@ GT = [
 ]
 
 
-@pytest.mark.parametrize(
-    "dtype",
-    [np.dtype(np.float32), np.dtype(np.float64)],
-)
+@pytest.mark.parametrize("dtype", [np.dtype(np.float32), np.dtype(np.float64)])
 def test_rotation_matrix(dtype):
     for gt in GT:
         in_coord = np.array(gt["in_coord"], dtype=dtype)
         gt_coord = np.array(gt["out_coord"], dtype=dtype)
 
-        R = create_rotation_matrix(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-        )
+        R = create_rotation_matrix(**gt["rot"], z_down=True, dtype=dtype)
         R_ = create_rotation_matrix_at_once(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
+            **gt["rot"], z_down=True, dtype=dtype
         )
 
         coord = R @ in_coord
@@ -99,16 +70,8 @@ def test_rotation_matrix_down():
         in_coord = np.array(gt["in_coord"], dtype=dtype)
         gt_coord = np.array(gt["out_coord"], dtype=dtype)
 
-        R = create_rotation_matrix(
-            **rot,
-            z_down=False,
-            dtype=dtype,
-        )
-        R_ = create_rotation_matrix_at_once(
-            **rot,
-            z_down=False,
-            dtype=dtype,
-        )
+        R = create_rotation_matrix(**rot, z_down=False, dtype=dtype)
+        R_ = create_rotation_matrix_at_once(**rot, z_down=False, dtype=dtype)
 
         coord = R @ in_coord
         coord_ = R_ @ in_coord
@@ -117,17 +80,10 @@ def test_rotation_matrix_down():
         assert np.allclose(coord_, gt_coord)
 
 
-@pytest.mark.parametrize(
-    "dtype",
-    [np.dtype(np.float32), np.dtype(np.float64)],
-)
+@pytest.mark.parametrize("dtype", [np.dtype(np.float32), np.dtype(np.float64)])
 def test_rotation_matrices(dtype):
     rots = [gt["rot"] for gt in GT]
-    R = create_rotation_matrices(
-        rots=rots,
-        z_down=True,
-        dtype=dtype,
-    )
+    R = create_rotation_matrices(rots=rots, z_down=True, dtype=dtype)
     in_coords = np.array([gt["in_coord"] for gt in GT], dtype=dtype)[
         ..., np.newaxis
     ]
@@ -146,16 +102,8 @@ def bench_rotation_matrix():
     dtype = np.dtype(np.float64)
 
     for gt in GT:
-        _ = rot_mat(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-        )
-        _ = rot_mat_at_once(
-            **gt["rot"],
-            z_down=True,
-            dtype=dtype,
-        )
+        _ = rot_mat(**gt["rot"], z_down=True, dtype=dtype)
+        _ = rot_mat_at_once(**gt["rot"], z_down=True, dtype=dtype)
 
 
 if __name__ == "__main__":

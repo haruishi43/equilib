@@ -6,9 +6,7 @@ __all__ = ["bicubic"]
 
 
 def kernel(
-    s: np.ndarray,
-    a: float = -0.75,
-    dtype: np.dtype = np.dtype(np.float32),
+    s: np.ndarray, a: float = -0.75, dtype: np.dtype = np.dtype(np.float32)
 ) -> np.ndarray:
     out = np.zeros_like(s, dtype)
     s = np.abs(s)
@@ -24,11 +22,7 @@ def kernel(
     return out
 
 
-def bicubic(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
-) -> np.ndarray:
+def bicubic(img: np.ndarray, grid: np.ndarray, out: np.ndarray) -> np.ndarray:
     """Bicubic Interpolation"""
 
     b_in, c_in, h_in, w_in = img.shape
@@ -66,22 +60,10 @@ def bicubic(
     k4 = kernel(d4, a, dtype)
 
     mat_l = np.stack(
-        [
-            k1[:, 1, ...],
-            k2[:, 1, ...],
-            k3[:, 1, ...],
-            k4[:, 1, ...],
-        ],
-        axis=-1,
+        [k1[:, 1, ...], k2[:, 1, ...], k3[:, 1, ...], k4[:, 1, ...]], axis=-1
     )
     mat_r = np.stack(
-        [
-            k1[:, 0, ...],
-            k2[:, 0, ...],
-            k3[:, 0, ...],
-            k4[:, 0, ...],
-        ],
-        axis=-1,
+        [k1[:, 0, ...], k2[:, 0, ...], k3[:, 0, ...], k4[:, 0, ...]], axis=-1
     )
 
     # FIXME: this part is slow
@@ -135,13 +117,7 @@ def bicubic(
         )
 
         mat_m[b, ...] = np.stack(
-            [
-                mat_m_x1,
-                mat_m_x2,
-                mat_m_x3,
-                mat_m_x4,
-            ],
-            axis=-2,
+            [mat_m_x1, mat_m_x2, mat_m_x3, mat_m_x4], axis=-2
         )
 
     mat_l = mat_l[:, np.newaxis, ..., np.newaxis, :]

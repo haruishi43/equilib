@@ -51,11 +51,7 @@ def prepare_transform_matrix(
     """
 
     K = create_intrinsic_matrix(
-        height=height,
-        width=width,
-        fov_x=fov_x,
-        skew=skew,
-        dtype=dtype,
+        height=height, width=width, fov_x=fov_x, skew=skew, dtype=dtype
     )
 
     g2c_mat = create_global2camera_rotation_matrix(dtype=dtype)
@@ -76,27 +72,14 @@ def example(
     skew: float = 0.0,
 ):
     """An example of the `prep` function"""
-    m = create_grid(
-        height=height,
-        width=width,
-        batch=batch,
-        dtype=dtype,
-    )
+    m = create_grid(height=height, width=width, batch=batch, dtype=dtype)
     m = m[..., np.newaxis]
 
     G = prepare_transform_matrix(
-        height=height,
-        width=width,
-        fov_x=fov_x,
-        skew=skew,
-        dtype=dtype,
+        height=height, width=width, fov_x=fov_x, skew=skew, dtype=dtype
     )
 
-    R = create_rotation_matrices(
-        rots=rots,
-        z_down=True,
-        dtype=dtype,
-    )
+    R = create_rotation_matrices(rots=rots, z_down=True, dtype=dtype)
 
     return m, G, R
 
@@ -105,11 +88,7 @@ def check_cache():
     data = [
         {
             "rots": [
-                {
-                    "roll": 0.0,
-                    "pitch": np.pi / 2 + 0.1,
-                    "yaw": np.pi + 0.1,
-                }
+                {"roll": 0.0, "pitch": np.pi / 2 + 0.1, "yaw": np.pi + 0.1}
             ]
             * 32,
             "height": 256,
@@ -119,11 +98,7 @@ def check_cache():
         },
         {
             "rots": [
-                {
-                    "roll": 0.0,
-                    "pitch": np.pi / 2 + 0.1,
-                    "yaw": np.pi + 0.1,
-                }
+                {"roll": 0.0, "pitch": np.pi / 2 + 0.1, "yaw": np.pi + 0.1}
             ]
             * 32,
             "height": 256,
@@ -133,11 +108,7 @@ def check_cache():
         },
         {
             "rots": [
-                {
-                    "roll": 0.0,
-                    "pitch": np.pi / 2 + 0.1,
-                    "yaw": np.pi + 0.1,
-                }
+                {"roll": 0.0, "pitch": np.pi / 2 + 0.1, "yaw": np.pi + 0.1}
             ]
             * 64,
             "height": 256,
@@ -147,11 +118,7 @@ def check_cache():
         },
         {
             "rots": [
-                {
-                    "roll": 0.0,
-                    "pitch": np.pi / 2 + 0.1,
-                    "yaw": np.pi + 0.1,
-                }
+                {"roll": 0.0, "pitch": np.pi / 2 + 0.1, "yaw": np.pi + 0.1}
             ]
             * 32,
             "height": 128,

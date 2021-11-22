@@ -12,24 +12,13 @@ from tests.grid_sample.numpy.baselines import (
     baseline_scipy_nearest,
     baseline_cv2_nearest,
 )
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
-from tests.helpers.timer import (
-    func_timer,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
+from tests.helpers.benchmarking import check_close, mae, mse
+from tests.helpers.timer import func_timer
 
 
 def naive_nearest(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray
 ) -> np.ndarray:
     """Simple nearest neighbor interpolation
 
@@ -52,9 +41,7 @@ def naive_nearest(
 
 
 def faster_nearest(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray
 ) -> np.ndarray:
     """Simple nearest neighbor interpolation
 
@@ -87,9 +74,7 @@ def run(img, grid, out, b, h, w):
 
 
 def numba_nearest(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray
 ) -> np.ndarray:
     """numba nearest neighbor interpolation
 

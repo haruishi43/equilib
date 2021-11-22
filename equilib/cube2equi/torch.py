@@ -27,9 +27,7 @@ def dice2horizon(dices: torch.Tensor) -> torch.Tensor:
     # create a (b, c, h, w) horizon array
     device = get_device(dices)
     horizons = torch.empty(
-        (*dices.shape[0:2], w, w * 6),
-        dtype=dices.dtype,
-        device=device,
+        (*dices.shape[0:2], w, w * 6), dtype=dices.dtype, device=device
     )
 
     # Order: F R B L U D
@@ -47,9 +45,7 @@ def dict2horizon(dicts: List[Dict[str, torch.Tensor]]) -> torch.Tensor:
     dtype = dicts[0][face_key[0]].dtype
     device = get_device(dicts[0][face_key[0]])
     horizons = torch.empty(
-        (len(dicts), c, w, w * 6),
-        dtype=dtype,
-        device=device,
+        (len(dicts), c, w, w * 6), dtype=dtype, device=device
     )
     for b, cube in enumerate(dicts):
         horizons[b, ...] = single_list2horizon([cube[k] for k in face_key])
@@ -62,9 +58,7 @@ def list2horizon(lists: List[List[torch.Tensor]]) -> torch.Tensor:
     dtype = lists[0][0].dtype
     device = get_device(lists[0][0])
     horizons = torch.empty(
-        (len(lists), c, w, w * 6),
-        dtype=dtype,
-        device=device,
+        (len(lists), c, w, w * 6), dtype=dtype, device=device
     )
     for b, cube in enumerate(lists):
         horizons[b, ...] = single_list2horizon(cube)
@@ -308,9 +302,7 @@ def run(
         out = None
     else:
         out = torch.empty(
-            (bs, c, height, width),
-            dtype=dtype,
-            device=horizon_device,
+            (bs, c, height, width), dtype=dtype, device=horizon_device
         )
 
     # FIXME: for now, calculate the grid in cpu
@@ -340,11 +332,7 @@ def run(
 
     # grid sample
     out = torch_grid_sample(
-        img=horizon,
-        grid=grid,
-        out=out,
-        mode=mode,
-        backend=backend,
+        img=horizon, grid=grid, out=out, mode=mode, backend=backend
     )
 
     out = (

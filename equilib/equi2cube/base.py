@@ -60,11 +60,7 @@ class Equi2Cube(object):
         self.z_down = z_down
         self.mode = mode
 
-    def __call__(
-        self,
-        equi: ArrayLike,
-        rots: Rot,
-    ) -> CubeMaps:
+    def __call__(self, equi: ArrayLike, rots: Rot) -> CubeMaps:
         return equi2cube(
             equi=equi,
             rots=rots,

@@ -19,24 +19,13 @@ from tests.grid_sample.numpy.baselines import (
     baseline_scipy_cubic,
     baseline_cv2_cubic,
 )
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
-from tests.helpers.timer import (
-    func_timer,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
+from tests.helpers.benchmarking import check_close, mae, mse
+from tests.helpers.timer import func_timer
 
 
 def naive_bicubic(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray
 ) -> np.ndarray:
     """Bicubic single image
 
@@ -137,7 +126,7 @@ def naive_bicubic(
                             img[b, :, y3, x4],
                             img[b, :, y4, x4],
                         ],
-                    ],
+                    ]
                 )
                 mat_m = mat_m.transpose((2, 0, 1))
 
@@ -147,9 +136,7 @@ def naive_bicubic(
 
 
 def faster_bicubic(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray
 ) -> np.ndarray:
     """Faster way of achieving bicubic without numba
 
@@ -205,22 +192,10 @@ def faster_bicubic(
     k4 = kernel(d4, a, dtype)
 
     mat_l = np.stack(
-        [
-            k1[:, 1, ...],
-            k2[:, 1, ...],
-            k3[:, 1, ...],
-            k4[:, 1, ...],
-        ],
-        axis=-1,
+        [k1[:, 1, ...], k2[:, 1, ...], k3[:, 1, ...], k4[:, 1, ...]], axis=-1
     )
     mat_r = np.stack(
-        [
-            k1[:, 0, ...],
-            k2[:, 0, ...],
-            k3[:, 0, ...],
-            k4[:, 0, ...],
-        ],
-        axis=-1,
+        [k1[:, 0, ...], k2[:, 0, ...], k3[:, 0, ...], k4[:, 0, ...]], axis=-1
     )
 
     # FIXME: this part is slow
@@ -274,13 +249,7 @@ def faster_bicubic(
         )
 
         mat_m[b, ...] = np.stack(
-            [
-                mat_m_x1,
-                mat_m_x2,
-                mat_m_x3,
-                mat_m_x4,
-            ],
-            axis=-2,
+            [mat_m_x1, mat_m_x2, mat_m_x3, mat_m_x4], axis=-2
         )
 
     mat_l = mat_l[:, np.newaxis, ..., np.newaxis, :]

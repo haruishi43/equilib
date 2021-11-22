@@ -8,29 +8,17 @@ from tests.grid_sample.numpy.bilinear import (
     faster_bilinear as faster_bilinear_numpy,
 )
 from tests.grid_sample.torch.native import native_bilinear
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
+from tests.helpers.benchmarking import check_close, mae, mse
 from tests.helpers.timer import func_timer
 
 
-def naive_bilinear(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-) -> torch.Tensor:
+def naive_bilinear(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
     ...
 
 
 def faster_bilinear(
-    img: torch.Tensor,
-    grid: torch.Tensor,
-    out: torch.Tensor,
+    img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
 
     b_in, _, h_in, w_in = img.shape

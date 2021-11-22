@@ -5,17 +5,10 @@ from typing import Any, Callable, Dict, List, Optional
 import numpy as np
 
 from equilib.grid_sample import numpy_grid_sample
-from equilib.numpy_utils import (
-    create_normalized_grid,
-    create_rotation_matrices,
-)
+from equilib.numpy_utils import create_normalized_grid, create_rotation_matrices
 
 
-def matmul(
-    m: np.ndarray,
-    R: np.ndarray,
-    method: str = "faster",
-) -> np.ndarray:
+def matmul(m: np.ndarray, R: np.ndarray, method: str = "faster") -> np.ndarray:
 
     if method == "robust":
         # When target image size is smaller, it might be faster with `matmul`
@@ -41,10 +34,7 @@ def matmul(
 
 
 def convert_grid(
-    M: np.ndarray,
-    h_equi: int,
-    w_equi: int,
-    method: str = "robust",
+    M: np.ndarray, h_equi: int, w_equi: int, method: str = "robust"
 ) -> np.ndarray:
 
     # convert to rotation
@@ -158,46 +148,26 @@ def run(
 
     # create grid and transfrom matrix
     m = create_normalized_grid(
-        height=height,
-        width=width,
-        batch=bs,
-        dtype=dtype,
+        height=height, width=width, batch=bs, dtype=dtype
     )
     m = m[..., np.newaxis]
 
     # create batched rotation matrices
-    R = create_rotation_matrices(
-        rots=rots,
-        z_down=z_down,
-        dtype=dtype,
-    )
+    R = create_rotation_matrices(rots=rots, z_down=z_down, dtype=dtype)
 
     # rotate the grid
     M = matmul(m, R, method="faster")
 
     # create a pixel map grid
-    grid = convert_grid(
-        M=M,
-        h_equi=h_equi,
-        w_equi=w_equi,
-        method="robust",
-    )
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     # grid sample
     if override_func is not None:
         out = override_func(  # type: ignore
-            img=src,
-            grid=grid,
-            out=out,
-            mode=mode,
+            img=src, grid=grid, out=out, mode=mode
         )
     else:
-        out = numpy_grid_sample(
-            img=src,
-            grid=grid,
-            out=out,
-            mode=mode,
-        )
+        out = numpy_grid_sample(img=src, grid=grid, out=out, mode=mode)
 
     out = (
         out.astype(src_dtype)

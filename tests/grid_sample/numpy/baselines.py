@@ -38,27 +38,13 @@ except ImportError:
     print("scipy is not installed")
     map_coordinates = None
 
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
-from tests.helpers.timer import (
-    func_timer,
-    time_func_loop,
-    wrapped_partial,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
+from tests.helpers.benchmarking import check_close, mae, mse
+from tests.helpers.timer import func_timer, time_func_loop, wrapped_partial
 
 
 def baseline_scipy(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
-    order: int = 1,
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray, order: int = 1
 ) -> np.ndarray:
     """Slower than cv2, but *accurate*"""
 
@@ -87,11 +73,7 @@ def baseline_scipy(
     return out
 
 
-def old_scipy(
-    img: np.ndarray,
-    grid: np.ndarray,
-    order: int = 1,
-) -> np.ndarray:
+def old_scipy(img: np.ndarray, grid: np.ndarray, order: int = 1) -> np.ndarray:
     """Old version of grid_sample code
 
     `out` is created in the function, so there might be allocation
@@ -131,10 +113,7 @@ baseline_scipy_cubic = wrapped_partial(baseline_scipy, order=3)
 
 
 def grid_sample_scipy(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
-    mode: str = "bilinear",
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray, mode: str = "bilinear"
 ) -> np.ndarray:
 
     if mode == "nearest":
@@ -150,10 +129,7 @@ def grid_sample_scipy(
 
 
 def baseline_cv2(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
-    mode: str = "linear",
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray, mode: str = "linear"
 ) -> np.ndarray:
     """Fastest at the cost of low precision"""
 
@@ -204,10 +180,7 @@ baseline_cv2_cubic = wrapped_partial(baseline_cv2, mode="cubic")
 
 
 def grid_sample_cv2(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
-    mode: str = "bilinear",
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray, mode: str = "bilinear"
 ) -> np.ndarray:
 
     if mode == "nearest":

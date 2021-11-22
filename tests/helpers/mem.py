@@ -60,30 +60,15 @@ def get_torch_size(tensor: torch.Tensor, pretty: bool = True) -> str:
 
 
 if __name__ == "__main__":
-    arr32 = np.zeros(
-        (512, 256, 3),
-        dtype=np.dtype(np.float32),
-    )
-    arr64 = np.zeros(
-        (512, 256, 3),
-        dtype=np.dtype(np.float),
-    )
+    arr32 = np.zeros((512, 256, 3), dtype=np.dtype(np.float32))
+    arr64 = np.zeros((512, 256, 3), dtype=np.dtype(np.float))
 
     print("arr32", get_np_size(arr32))
     print("arr64", get_np_size(arr64))
 
-    tensor16 = torch.zeros(
-        (512, 256, 3),
-        dtype=torch.float16,
-    )
-    tensor32 = torch.zeros(
-        (512, 256, 3),
-        dtype=torch.float32,
-    )
-    tensor64 = torch.zeros(
-        (512, 256, 3),
-        dtype=torch.float64,
-    )
+    tensor16 = torch.zeros((512, 256, 3), dtype=torch.float16)
+    tensor32 = torch.zeros((512, 256, 3), dtype=torch.float32)
+    tensor64 = torch.zeros((512, 256, 3), dtype=torch.float64)
 
     print("tensor16", get_torch_size(tensor16))
     print("tensor32", get_torch_size(tensor32))

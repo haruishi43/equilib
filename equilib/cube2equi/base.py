@@ -6,14 +6,8 @@ import numpy as np
 
 import torch
 
-from .numpy import (
-    convert2horizon as convert2horizon_numpy,
-    run as run_numpy,
-)
-from .torch import (
-    convert2horizon as convert2horizon_torch,
-    run as run_torch,
-)
+from .numpy import convert2horizon as convert2horizon_numpy, run as run_numpy
+from .torch import convert2horizon as convert2horizon_torch, run as run_torch
 
 __all__ = ["Cube2Equi", "cube2equi"]
 
@@ -52,22 +46,14 @@ class Cube2Equi(object):
     """
 
     def __init__(
-        self,
-        height: int,
-        width: int,
-        cube_format: str,
-        mode: str = "bilinear",
+        self, height: int, width: int, cube_format: str, mode: str = "bilinear"
     ) -> None:
         self.height = height
         self.width = width
         self.cube_format = cube_format
         self.mode = mode
 
-    def __call__(
-        self,
-        cubemap: CubeMaps,
-        **kwargs,
-    ) -> ArrayLike:
+    def __call__(self, cubemap: CubeMaps, **kwargs) -> ArrayLike:
         return cube2equi(
             cubemap=cubemap,
             cube_format=self.cube_format,
@@ -135,27 +121,17 @@ def cube2equi(
 
     if _type == "numpy":
         horizon = convert2horizon_numpy(
-            cubemap=cubemap,
-            cube_format=cube_format,
+            cubemap=cubemap, cube_format=cube_format
         )
         out = run_numpy(
-            horizon=horizon,
-            height=height,
-            width=width,
-            mode=mode,
-            **kwargs,
+            horizon=horizon, height=height, width=width, mode=mode, **kwargs
         )
     elif _type == "torch":
         horizon = convert2horizon_torch(
-            cubemap=cubemap,
-            cube_format=cube_format,
+            cubemap=cubemap, cube_format=cube_format
         )
         out = run_torch(
-            horizon=horizon,
-            height=height,
-            width=width,
-            mode=mode,
-            **kwargs,
+            horizon=horizon, height=height, width=width, mode=mode, **kwargs
         )
     else:
         raise ValueError("Oops something went wrong here")

@@ -64,9 +64,7 @@ class RGB:
 
 
 def rgb_gradient(
-    height: int,
-    width: int,
-    dtype: np.dtype = np.dtype(np.uint8),
+    height: int, width: int, dtype: np.dtype = np.dtype(np.uint8)
 ) -> np.ndarray:
     # NOTE: set parameters
     start_rgb = (0, 0, 192)
@@ -87,9 +85,7 @@ def rgb_gradient(
 
 
 def depth_grayscale_gradient(
-    height: int,
-    width: int,
-    dtype: np.dtype = np.dtype(np.float64),
+    height: int, width: int, dtype: np.dtype = np.dtype(np.float64)
 ) -> np.ndarray:
     ...
 
@@ -97,11 +93,7 @@ def depth_grayscale_gradient(
 if __name__ == "__main__":
     from PIL import Image
 
-    hgs = grayscale_gradient(
-        width=128,
-        height=64,
-        dtype=np.uint8,
-    )
+    hgs = grayscale_gradient(width=128, height=64, dtype=np.uint8)
 
     print(hgs.shape)
 

@@ -6,10 +6,7 @@ import torch
 
 from equilib.grid_sample.torch.native import native
 
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
 from tests.grid_sample.numpy.baselines import (
     baseline_cv2_cubic,
     baseline_cv2_linear,
@@ -21,15 +18,8 @@ from tests.grid_sample.numpy.baselines import (
 from tests.grid_sample.numpy.nearest import naive_nearest
 from tests.grid_sample.numpy.bilinear import naive_bilinear
 from tests.grid_sample.numpy.bicubic import naive_bicubic
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
-from tests.helpers.timer import (
-    func_timer,
-    wrapped_partial,
-)
+from tests.helpers.benchmarking import check_close, mae, mse
+from tests.helpers.timer import func_timer, wrapped_partial
 
 # wrapped with custom wrapper so the `__name__` doesn't get lost
 native_nearest = wrapped_partial(native, mode="nearest")

@@ -8,10 +8,7 @@ from .nearest import nearest
 
 
 def grid_sample(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
-    mode: str = "bilinear",
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray, mode: str = "bilinear"
 ) -> np.ndarray:
     """Numpy grid sampling algorithm
 

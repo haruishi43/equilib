@@ -6,11 +6,7 @@ from functools import partial, update_wrapper
 import time
 from typing import Any, Callable, Dict
 
-__all__ = [
-    "func_timer",
-    "printable_time",
-    "wrapped_partial",
-]
+__all__ = ["func_timer", "printable_time", "wrapped_partial"]
 
 
 def wrapped_partial(

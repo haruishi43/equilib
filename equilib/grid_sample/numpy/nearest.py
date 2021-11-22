@@ -5,11 +5,7 @@ import numpy as np
 __all__ = ["nearest"]
 
 
-def nearest(
-    img: np.ndarray,
-    grid: np.ndarray,
-    out: np.ndarray,
-) -> np.ndarray:
+def nearest(img: np.ndarray, grid: np.ndarray, out: np.ndarray) -> np.ndarray:
     """Nearest Neightbor Sampling"""
 
     b, _, h, w = img.shape

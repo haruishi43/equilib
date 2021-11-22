@@ -8,10 +8,7 @@ import pytest
 
 from equilib.grid_sample.torch import grid_sample
 
-from tests.grid_sample.helpers import (
-    create_batch_data,
-    make_copies,
-)
+from tests.grid_sample.helpers import create_batch_data, make_copies
 from tests.grid_sample.torch import (
     faster_bicubic,
     faster_bilinear,
@@ -27,11 +24,7 @@ from tests.grid_sample.numpy.baselines import (
     cv2,
     map_coordinates,
 )
-from tests.helpers.benchmarking import (
-    check_close,
-    mae,
-    mse,
-)
+from tests.helpers.benchmarking import check_close, mae, mse
 from tests.helpers.timer import func_timer, wrapped_partial
 
 native_nearest = wrapped_partial(grid_sample, mode="nearest", backend="native")

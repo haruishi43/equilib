@@ -13,10 +13,7 @@ from equilib.torch_utils import (
 )
 
 
-def matmul(
-    m: torch.Tensor,
-    R: torch.Tensor,
-) -> torch.Tensor:
+def matmul(m: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
 
     M = torch.matmul(R[:, None, None, ...], m)
     M = M.squeeze(-1)
@@ -25,10 +22,7 @@ def matmul(
 
 
 def convert_grid(
-    M: torch.Tensor,
-    h_equi: int,
-    w_equi: int,
-    method: str = "robust",
+    M: torch.Tensor, h_equi: int, w_equi: int, method: str = "robust"
 ) -> torch.Tensor:
 
     # convert to rotation
@@ -165,31 +159,19 @@ def run(
         tmp_dtype = dtype
 
     m = create_normalized_grid(
-        height=height,
-        width=width,
-        batch=bs,
-        dtype=tmp_dtype,
-        device=tmp_device,
+        height=height, width=width, batch=bs, dtype=tmp_dtype, device=tmp_device
     )
     m = m.unsqueeze(-1)
 
     # create batched rotation matrices
     R = create_rotation_matrices(
-        rots=rots,
-        z_down=z_down,
-        dtype=tmp_dtype,
-        device=tmp_device,
+        rots=rots, z_down=z_down, dtype=tmp_dtype, device=tmp_device
     )
 
     # rotate the grid
     M = matmul(m, R)
 
-    grid = convert_grid(
-        M=M,
-        h_equi=h_equi,
-        w_equi=w_equi,
-        method="robust",
-    )
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     # FIXME: putting `grid` to device since `pure`'s bilinear interpolation requires it
     # FIXME: better way of forcing `grid` to be the same dtype?
