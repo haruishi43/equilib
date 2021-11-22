@@ -78,7 +78,7 @@ if sys.argv[1] == "release":
 
     commands = [
         "git pull origin master",
-        "git tag v{:s}".format(find_version()),
+        "git tag {:s}".format(find_version()),
         "git push origin master --tag",
         "python setup.py sdist bdist_wheel",
         "twine upload dist/pyequilib-{:s}.tar.gz".format(find_version()),
