@@ -29,7 +29,7 @@ def vdet(A):
 def finv(A):
     detA = vdet(A)
     I1 = np.einsum("ii...", A)
-    I2 = -0.5 * (np.einsum("ik...,ki...", A, A) - I1 ** 2)
+    I2 = -0.5 * (np.einsum("ik...,ki...", A, A) - I1**2)
     Asq = np.einsum("ik...,kj...->ij...", A, A)
     eye = np.zeros_like(A)
     eye[0, 0] = 1.0

@@ -40,9 +40,9 @@ def naive_bicubic(
     def kernel(s, a):
         s = np.abs(s)
         if 0 <= s <= 1:
-            return (a + 2) * (s ** 3) - (a + 3) * (s ** 2) + 1
+            return (a + 2) * (s**3) - (a + 3) * (s**2) + 1
         elif 1 < s <= 2:
-            return a * (s ** 3) - (5 * a) * (s ** 2) + (8 * a) * abs(s) - 4 * a
+            return a * (s**3) - (5 * a) * (s**2) + (8 * a) * abs(s) - 4 * a
         else:
             return 0
 
