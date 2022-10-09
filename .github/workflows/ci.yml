@@ -33,11 +33,11 @@ jobs:
       shell: bash -l {0}
       run: |
         pip install -e .
-    - name: Flake8
-      shell: bash -l {0}
-      run: |
-        pip install importlib-metadata < 5, hacking==4.1.0
-        flake8 .
+    # - name: Flake8
+    #   shell: bash -l {0}
+    #   run: |
+    #     pip install importlib-metadata < 5, hacking==4.1.0
+    #     flake8 .
     - name: Black
       shell: bash -l {0}
       run: |
