@@ -196,12 +196,13 @@ def bench_gpu(
     print()
     print("bs, grid(height, width):", bs, (height, width))
     print("dtype:", dtype)
+    print("torch_dtype:", torch_dtype)
     print("mode:", mode)
 
-    if dtype == np.float32:
+    if torch_dtype == torch.float32:
         rtol = 1e-03
         atol = 1e-05
-    elif dtype == np.float64:
+    elif torch_dtype == torch.float64:
         rtol = 1e-05
         atol = 1e-08
     else:
@@ -257,7 +258,7 @@ def bench_gpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-03
+    assert err_mse < 1e-02
     assert err_mae < 1e-02
 
     print()
@@ -270,7 +271,7 @@ def bench_gpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-03
+    assert err_mse < 1e-02
     assert err_mae < 1e-02
 
     print()
@@ -283,7 +284,7 @@ def bench_gpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-03
+    assert err_mse < 1e-02
     assert err_mae < 1e-02
 
     if save_outputs:

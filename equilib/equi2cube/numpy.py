@@ -119,7 +119,7 @@ def convert_grid(
 
     # stack the pixel maps into a grid
     grid = np.stack((uj, ui), axis=-3)
-    grid = grid - 0.5 # offset pixel center
+    grid = grid - 0.5  # offset pixel center
     return grid
 
 

@@ -133,8 +133,17 @@ def _equirect_facetype(h: int, w: int) -> np.ndarray:
 
     # Prepare ceil mask
     mask = np.zeros((h, w // 4), np.bool)
-    idx = np.linspace(-np.pi + half_pixel_angular_width, np.pi - half_pixel_angular_width, num=w // 4) / 4
-    idx = h // 2 - np.around(np.arctan(np.cos(idx)) * h / (np.pi - pixel_angular_height))
+    idx = (
+        np.linspace(
+            -np.pi + half_pixel_angular_width,
+            np.pi - half_pixel_angular_width,
+            num=w // 4,
+        )
+        / 4
+    )
+    idx = h // 2 - np.around(
+        np.arctan(np.cos(idx)) * h / (np.pi - pixel_angular_height)
+    )
     idx = idx.astype(int_dtype)
     for i, j in enumerate(idx):
         mask[:j, i] = 1
@@ -155,8 +164,18 @@ def create_equi_grid(
 ) -> np.ndarray:
     half_pixel_angular_width = np.pi / w_out
     half_pixel_angular_height = np.pi / h_out / 2
-    theta = np.linspace(-np.pi + half_pixel_angular_width, np.pi - half_pixel_angular_width, num=w_out, dtype=dtype)
-    phi = np.linspace(np.pi / 2 - half_pixel_angular_height, -np.pi / 2 + half_pixel_angular_height, num=h_out, dtype=dtype)
+    theta = np.linspace(
+        -np.pi + half_pixel_angular_width,
+        np.pi - half_pixel_angular_width,
+        num=w_out,
+        dtype=dtype,
+    )
+    phi = np.linspace(
+        np.pi / 2 - half_pixel_angular_height,
+        -np.pi / 2 + half_pixel_angular_height,
+        num=h_out,
+        dtype=dtype,
+    )
     theta, phi = np.meshgrid(theta, phi)
 
     # Get face id to each pixel: 0F 1R 2B 3L 4U 5D
@@ -194,7 +213,7 @@ def create_equi_grid(
 
     grid = np.stack((coor_y, coor_x), axis=0)
     grid = np.concatenate([grid[np.newaxis, ...]] * batch)
-    grid = grid - 0.5 # Offset pixel center
+    grid = grid - 0.5  # Offset pixel center
     return grid
 
 

@@ -176,10 +176,18 @@ def create_equi_grid(
     half_pixel_angular_width = math.pi / w_out
     half_pixel_angular_height = math.pi / h_out / 2
     theta = torch.linspace(
-        -math.pi + half_pixel_angular_width, math.pi - half_pixel_angular_width, steps=w_out, dtype=dtype, device=device
+        -math.pi + half_pixel_angular_width,
+        math.pi - half_pixel_angular_width,
+        steps=w_out,
+        dtype=dtype,
+        device=device,
     )
     phi = torch.linspace(
-        math.pi / 2 - half_pixel_angular_height, -math.pi / 2 + half_pixel_angular_height, steps=h_out, dtype=dtype, device=device
+        math.pi / 2 - half_pixel_angular_height,
+        -math.pi / 2 + half_pixel_angular_height,
+        steps=h_out,
+        dtype=dtype,
+        device=device,
     )
     phi, theta = torch.meshgrid([phi, theta])
 
@@ -226,7 +234,7 @@ def create_equi_grid(
     coor_y = coor_y.repeat(batch, 1, 1)
 
     grid = torch.stack((coor_y, coor_x), dim=-3).to(device)
-    grid = grid - 0.5 # offset pixel center
+    grid = grid - 0.5  # offset pixel center
     return grid
 
 
