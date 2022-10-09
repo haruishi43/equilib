@@ -128,10 +128,13 @@ def _equirect_facetype(h: int, w: int) -> np.ndarray:
         np.arange(4).repeat(w // 4)[None, :].repeat(h, 0), 3 * w // 8, 1
     )
 
+    half_pixel_angular_width = np.pi / w
+    pixel_angular_height = np.pi / h
+
     # Prepare ceil mask
     mask = np.zeros((h, w // 4), np.bool)
-    idx = np.linspace(-np.pi, np.pi, w // 4) / 4
-    idx = h // 2 - np.around(np.arctan(np.cos(idx)) * h / np.pi)
+    idx = np.linspace(-np.pi + half_pixel_angular_width, np.pi - half_pixel_angular_width, num=w // 4) / 4
+    idx = h // 2 - np.around(np.arctan(np.cos(idx)) * h / (np.pi - pixel_angular_height))
     idx = idx.astype(int_dtype)
     for i, j in enumerate(idx):
         mask[:j, i] = 1
@@ -150,8 +153,10 @@ def create_equi_grid(
     batch: int,
     dtype: np.dtype = np.dtype(np.float32),
 ) -> np.ndarray:
-    theta = np.linspace(-np.pi, np.pi, num=w_out, dtype=dtype)
-    phi = np.linspace(np.pi, -np.pi, num=h_out, dtype=dtype) / 2
+    half_pixel_angular_width = np.pi / w_out
+    half_pixel_angular_height = np.pi / h_out / 2
+    theta = np.linspace(-np.pi + half_pixel_angular_width, np.pi - half_pixel_angular_width, num=w_out, dtype=dtype)
+    phi = np.linspace(np.pi / 2 - half_pixel_angular_height, -np.pi / 2 + half_pixel_angular_height, num=h_out, dtype=dtype)
     theta, phi = np.meshgrid(theta, phi)
 
     # Get face id to each pixel: 0F 1R 2B 3L 4U 5D
@@ -179,8 +184,8 @@ def create_equi_grid(
             coor_y[mask] = -c * np.cos(theta[mask])
 
     # Final renormalize
-    coor_x = np.clip(np.clip(coor_x + 0.5, 0, 1) * w_face, 0, w_face - 1)
-    coor_y = np.clip(np.clip(coor_y + 0.5, 0, 1) * w_face, 0, w_face - 1)
+    coor_x = np.clip(coor_x + 0.5, 0, 1) * w_face
+    coor_y = np.clip(coor_y + 0.5, 0, 1) * w_face
 
     # change x axis of the x coordinate map
     for i in range(6):
@@ -189,6 +194,7 @@ def create_equi_grid(
 
     grid = np.stack((coor_y, coor_x), axis=0)
     grid = np.concatenate([grid[np.newaxis, ...]] * batch)
+    grid = grid - 0.5 # Offset pixel center
     return grid
 
 
