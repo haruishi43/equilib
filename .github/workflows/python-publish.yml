@@ -27,7 +27,7 @@ jobs:
         pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
         pip install -r requirements.txt
     - name: Build package
-    shell: bash -l {0}
+      shell: bash -l {0}
       run: |
         python -m build --sdist --wheel --outdir dist/ .
     - name: Publish package
