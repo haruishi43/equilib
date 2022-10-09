@@ -36,8 +36,7 @@ jobs:
     - name: Flake8
       shell: bash -l {0}
       run: |
-        pip install importlib-metadata < 5
-        pip install hacking==4.1.0
+        pip install importlib-metadata < 5, hacking==4.1.0
         flake8 .
     - name: Black
       shell: bash -l {0}
