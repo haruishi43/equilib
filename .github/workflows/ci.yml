@@ -16,7 +16,7 @@ jobs:
         python-version: [3.6, 3.7, 3.8]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
 
     # - name: Cache cache directory
     #   uses: actions/cache@v1
@@ -41,6 +41,7 @@ jobs:
       run: |
         pip install -e .
     - name: Flake8
+      uses: actions/checkout@v2
       run: |
         pip install importlib-metadata < 5
         pip install hacking
