@@ -214,7 +214,7 @@ def create_equi_grid(
     grid = np.stack((coor_y, coor_x), axis=0)
     grid = np.concatenate([grid[np.newaxis, ...]] * batch)
     grid = grid - 0.5  # Offset pixel center
-    return grid
+    return (grid, tp)
 
 
 def run(
@@ -269,7 +269,7 @@ def run(
     out = np.empty((bs, c, height, width), dtype=dtype)
 
     # create sampling grid
-    grid = create_equi_grid(
+    (grid, tp) = create_equi_grid(
         h_out=height, w_out=width, w_face=w_face, batch=bs, dtype=dtype
     )
 
@@ -279,7 +279,7 @@ def run(
             img=horizon, grid=grid, out=out, mode=mode
         )
     else:
-        out = numpy_grid_sample(img=horizon, grid=grid, out=out, mode=mode)
+        out = numpy_grid_sample(img=horizon, grid=grid, out=out, mode=mode, cube_face_id=tp)
 
     out = (
         out.astype(horizon_dtype)

@@ -8,7 +8,7 @@ from .nearest import nearest
 
 
 def grid_sample(
-    img: np.ndarray, grid: np.ndarray, out: np.ndarray, mode: str = "bilinear"
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray, mode: str = "bilinear", cube_face_id: np.ndarray = np.array(None)
 ) -> np.ndarray:
     """Numpy grid sampling algorithm
 
@@ -31,7 +31,7 @@ def grid_sample(
     if mode == "nearest":
         out = nearest(img, grid, out)
     elif mode == "bilinear":
-        out = bilinear(img, grid, out)
+        out = bilinear(img, grid, out, cube_face_id)
     elif mode == "bicubic":
         out = bicubic(img, grid, out)
     else:
