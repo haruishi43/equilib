@@ -137,6 +137,9 @@ def _equirect_facetype(h: int, w: int) -> torch.Tensor:
 
     int_dtype = torch.int64
 
+    w_ratio = (w - 1) / w
+    h_ratio = (h - 1) / h
+
     tp = torch.roll(
         torch.arange(4)  # 1
         .repeat_interleave(w // 4)  # 2 same as np.repeat
@@ -151,8 +154,10 @@ def _equirect_facetype(h: int, w: int) -> torch.Tensor:
 
     # Prepare ceil mask
     mask = torch.zeros((h, w // 4), dtype=torch.bool)
-    idx = torch.linspace(-math.pi, math.pi, w // 4) / 4
-    idx = h // 2 - torch.round(torch.atan(torch.cos(idx)) * h / math.pi)
+    idx = torch.linspace(-(math.pi * w_ratio), math.pi * w_ratio, w // 4) / 4
+    idx = h // 2 - torch.round(
+        torch.atan(torch.cos(idx)) * h / (math.pi * h_ratio)
+    )
     idx = idx.type(int_dtype)
     for i, j in enumerate(idx):
         mask[:j, i] = 1
@@ -172,17 +177,18 @@ def create_equi_grid(
     dtype: torch.dtype = torch.float32,
     device: torch.device = torch.device("cpu"),
 ) -> torch.Tensor:
-
+    w_ratio = (w_out - 1) / w_out
+    h_ratio = (h_out - 1) / h_out
     theta = torch.linspace(
-        -math.pi,
-        math.pi,
+        -(math.pi * w_ratio),
+        math.pi * w_ratio,
         steps=w_out,
         dtype=dtype,
         device=device,
     )
     phi = torch.linspace(
-        math.pi / 2,
-        -math.pi / 2,
+        (math.pi * h_ratio) / 2,
+        -(math.pi * h_ratio) / 2,
         steps=h_out,
         dtype=dtype,
         device=device,
@@ -232,8 +238,8 @@ def create_equi_grid(
         coor_x[mask] = coor_x[mask] + w_face * i
 
     # repeat batch
-    coor_x = coor_x.repeat(batch, 1, 1)
-    coor_y = coor_y.repeat(batch, 1, 1)
+    coor_x = coor_x.repeat(batch, 1, 1) - 0.5
+    coor_y = coor_y.repeat(batch, 1, 1) - 0.5
 
     grid = torch.stack((coor_y, coor_x), dim=-3).to(device)
     return grid

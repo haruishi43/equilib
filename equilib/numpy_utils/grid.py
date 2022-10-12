@@ -103,8 +103,11 @@ def create_xyz_grid(
     dtype: np.dtype = np.dtype(np.float32),
 ) -> np.ndarray:
     """xyz coordinates of the faces of the cube"""
+
+    ratio = (w_face - 1) / w_face
+
     out = np.zeros((w_face, w_face * 6, 3), dtype=dtype)
-    rng = np.linspace(-0.5, 0.5, num=w_face, dtype=dtype)
+    rng = np.linspace(-0.5 * ratio, 0.5 * ratio, num=w_face, dtype=dtype)
 
     # Front face (x = 0.5)
     out[:, 0 * w_face : 1 * w_face, [1, 2]] = np.stack(

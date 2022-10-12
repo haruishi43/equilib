@@ -123,8 +123,13 @@ def create_xyz_grid(
     device: torch.device = torch.device("cpu"),
 ) -> torch.Tensor:
     """xyz coordinates of the faces of the cube"""
+
+    ratio = (w_face - 1) / w_face
+
     out = torch.zeros((w_face, w_face * 6, 3), dtype=dtype, device=device)
-    rng = torch.linspace(-0.5, 0.5, w_face, dtype=dtype, device=device)
+    rng = torch.linspace(
+        -0.5 * ratio, 0.5 * ratio, w_face, dtype=dtype, device=device
+    )
 
     # NOTE: https://github.com/pytorch/pytorch/issues/15301
     # Torch meshgrid behaves differently than numpy
