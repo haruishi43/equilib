@@ -173,18 +173,16 @@ def create_equi_grid(
     device: torch.device = torch.device("cpu"),
 ) -> torch.Tensor:
 
-    half_pixel_angular_width = math.pi / w_out
-    half_pixel_angular_height = math.pi / h_out / 2
     theta = torch.linspace(
-        -math.pi + half_pixel_angular_width,
-        math.pi - half_pixel_angular_width,
+        -math.pi,
+        math.pi,
         steps=w_out,
         dtype=dtype,
         device=device,
     )
     phi = torch.linspace(
-        math.pi / 2 - half_pixel_angular_height,
-        -math.pi / 2 + half_pixel_angular_height,
+        math.pi / 2,
+        -math.pi / 2,
         steps=h_out,
         dtype=dtype,
         device=device,
@@ -221,8 +219,12 @@ def create_equi_grid(
             coor_y[mask] = -c * torch.cos(theta[mask])
 
     # Final renormalize
-    coor_x = torch.clamp(coor_x + 0.5, 0, 1) * w_face
-    coor_y = torch.clamp(coor_y + 0.5, 0, 1) * w_face
+    coor_x = torch.clamp(
+        torch.clamp(coor_x + 0.5, 0, 1) * w_face, 0, w_face - 1
+    )
+    coor_y = torch.clamp(
+        torch.clamp(coor_y + 0.5, 0, 1) * w_face, 0, w_face - 1
+    )
 
     # change x axis of the x coordinate map
     for i in range(6):
@@ -234,7 +236,6 @@ def create_equi_grid(
     coor_y = coor_y.repeat(batch, 1, 1)
 
     grid = torch.stack((coor_y, coor_x), dim=-3).to(device)
-    grid = grid - 0.5  # offset pixel center
     return grid
 
 

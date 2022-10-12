@@ -108,7 +108,6 @@ def convert_grid(
 
     # stack the pixel maps into a grid
     grid = torch.stack((uj, ui), dim=-3)
-    grid = grid - 0.5  # offset pixel center
     return grid
 
 
