@@ -143,6 +143,7 @@ def bench_baselines(
             save(out_scipy[b], os.path.join(SAVE_ROOT, f"out_scipy_{b}.jpg"))
 
 
+@pytest.mark.skip(reason="shouldn't compare with other sampling methods")
 @pytest.mark.skipif(cv2 is None, reason="cv2 is None; not installed")
 @pytest.mark.skipif(
     map_coordinates is None,

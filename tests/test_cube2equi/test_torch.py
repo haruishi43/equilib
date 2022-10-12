@@ -301,6 +301,7 @@ def bench_gpu(
             save(pure_out[b], os.path.join(SAVE_ROOT, f"out_gpu_pure_{b}.jpg"))
 
 
+@pytest.mark.skip(reason="shouldn't compare with other sampling methods")
 @pytest.mark.parametrize("bs", [1, 4])
 @pytest.mark.parametrize("height", [256])
 @pytest.mark.parametrize("width", [512])
@@ -312,6 +313,7 @@ def test_cube2equi_cpu(
     bench_cpu(bs=bs, height=height, width=width, mode=mode, dtype=dtype)
 
 
+@pytest.mark.skip(reason="shouldn't compare with other sampling methods")
 @pytest.mark.skipif(
     not torch.cuda.is_available(), reason="cuda device is not available"
 )
