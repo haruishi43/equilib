@@ -98,8 +98,8 @@ def convert_grid(
         # convert to pixel
         # I thought it would be faster if it was done all at once,
         # but it was faster separately
-        ui = (theta - np.pi) * w_equi / (2 * np.pi)
-        uj = (np.pi / 2 - phi) * h_equi / np.pi  # NOTE: fixed here
+        ui = (theta / (2 * np.pi) - 0.5) * w_equi - 0.5
+        uj = (0.5 - phi / np.pi) * h_equi - 0.5
         ui %= w_equi
         uj %= h_equi
     elif method == "faster":
@@ -108,8 +108,8 @@ def convert_grid(
         # the range of phi is -pi/2 ~ pi/2
         # this means that if the input `rots` have rotations that are
         # out of range, it will not work with `faster`
-        ui = (theta - np.pi) * w_equi / (2 * np.pi)
-        uj = (np.pi / 2 - phi) * h_equi / np.pi  # NOTE: fixed here
+        ui = (theta / (2 * np.pi) - 0.5) * w_equi - 0.5
+        uj = (0.5 - phi / np.pi) * h_equi - 0.5
         ui = np.where(ui < 0, ui + w_equi, ui)
         ui = np.where(ui >= w_equi, ui - w_equi, ui)
         uj = np.where(uj < 0, uj + h_equi, uj)
@@ -119,7 +119,6 @@ def convert_grid(
 
     # stack the pixel maps into a grid
     grid = np.stack((uj, ui), axis=-3)
-    grid = grid - 0.5  # offset pixel center
     return grid
 
 

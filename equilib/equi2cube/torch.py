@@ -92,13 +92,13 @@ def convert_grid(
     theta = torch.atan2(xyz[..., 1], xyz[..., 0])
 
     if method == "robust":
-        ui = (theta - pi) * w_equi / (2 * pi)
-        uj = (pi / 2 - phi) * h_equi / pi  # FIXME: fixed here
+        ui = (theta / (2 * pi) - 0.5) * w_equi - 0.5
+        uj = (0.5 - phi / pi) * h_equi - 0.5
         ui %= w_equi
         uj %= h_equi
     elif method == "faster":
-        ui = (theta - pi) * w_equi / (2 * pi)
-        uj = (pi / 2 - phi) * h_equi / pi  # FIXME: fixed here
+        ui = (theta / (2 * pi) - 0.5) * w_equi - 0.5
+        uj = (0.5 - phi / pi) * h_equi - 0.5
         ui = torch.where(ui < 0, ui + w_equi, ui)
         ui = torch.where(ui >= w_equi, ui - w_equi, ui)
         uj = torch.where(uj < 0, uj + h_equi, uj)
@@ -108,7 +108,6 @@ def convert_grid(
 
     # stack the pixel maps into a grid
     grid = torch.stack((uj, ui), dim=-3)
-    grid = grid - 0.5  # offset pixel center
     return grid
 
 

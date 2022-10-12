@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import warnings
+
 import numpy as np
 
 from .bicubic import bicubic
@@ -33,6 +35,10 @@ def grid_sample(
     elif mode == "bilinear":
         out = bilinear(img, grid, out)
     elif mode == "bicubic":
+        # FIXME: bicubic algorithm is not perfect yet
+        warnings.warn(
+            "Bicubic interpolation is not perfect (especially when upsampling). Use with care!"
+        )
         out = bicubic(img, grid, out)
     else:
         raise ValueError(f"ERR: {mode} is not supported")

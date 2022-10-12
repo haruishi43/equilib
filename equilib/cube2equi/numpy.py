@@ -4,7 +4,8 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
 
-from equilib.grid_sample import numpy_grid_sample
+# from equilib.grid_sample import numpy_grid_sample
+from equilib.grid_sample.numpy.bilinear import interp2d
 
 __all__ = ["convert2horizon", "run"]
 
@@ -124,26 +125,17 @@ def _equirect_facetype(h: int, w: int) -> np.ndarray:
 
     int_dtype = np.dtype(np.int64)
 
+    w_ratio = (w - 1) / w
+    h_ratio = (h - 1) / h
+
     tp = np.roll(
         np.arange(4).repeat(w // 4)[None, :].repeat(h, 0), 3 * w // 8, 1
     )
 
-    half_pixel_angular_width = np.pi / w
-    pixel_angular_height = np.pi / h
-
     # Prepare ceil mask
     mask = np.zeros((h, w // 4), np.bool)
-    idx = (
-        np.linspace(
-            -np.pi + half_pixel_angular_width,
-            np.pi - half_pixel_angular_width,
-            num=w // 4,
-        )
-        / 4
-    )
-    idx = h // 2 - np.around(
-        np.arctan(np.cos(idx)) * h / (np.pi - pixel_angular_height)
-    )
+    idx = np.linspace(-(np.pi * w_ratio), np.pi * w_ratio, w // 4) / 4
+    idx = h // 2 - np.around(np.arctan(np.cos(idx)) * h / (np.pi * h_ratio))
     idx = idx.astype(int_dtype)
     for i, j in enumerate(idx):
         mask[:j, i] = 1
@@ -162,19 +154,14 @@ def create_equi_grid(
     batch: int,
     dtype: np.dtype = np.dtype(np.float32),
 ) -> np.ndarray:
-    half_pixel_angular_width = np.pi / w_out
-    half_pixel_angular_height = np.pi / h_out / 2
+
+    w_ratio = (w_out - 1) / w_out
+    h_ratio = (h_out - 1) / h_out
     theta = np.linspace(
-        -np.pi + half_pixel_angular_width,
-        np.pi - half_pixel_angular_width,
-        num=w_out,
-        dtype=dtype,
+        -(np.pi * w_ratio), np.pi * w_ratio, num=w_out, dtype=dtype
     )
     phi = np.linspace(
-        np.pi / 2 - half_pixel_angular_height,
-        -np.pi / 2 + half_pixel_angular_height,
-        num=h_out,
-        dtype=dtype,
+        np.pi * h_ratio / 2, -(np.pi * h_ratio) / 2, num=h_out, dtype=dtype
     )
     theta, phi = np.meshgrid(theta, phi)
 
@@ -203,18 +190,67 @@ def create_equi_grid(
             coor_y[mask] = -c * np.cos(theta[mask])
 
     # Final renormalize
-    coor_x = np.clip(coor_x + 0.5, 0, 1) * w_face
-    coor_y = np.clip(coor_y + 0.5, 0, 1) * w_face
+    # coor_x = np.clip(np.clip(coor_x + 0.5, 0, 1) * w_face, 0, w_face - 1)
+    # coor_y = np.clip(np.clip(coor_y + 0.5, 0, 1) * w_face, 0, w_face - 1)
+
+    coor_x = (np.clip(coor_x, -0.5, 0.5) + 0.5) * w_face
+    coor_y = (np.clip(coor_y, -0.5, 0.5) + 0.5) * w_face
 
     # change x axis of the x coordinate map
     for i in range(6):
         mask = tp == i
         coor_x[mask] = coor_x[mask] + w_face * i
 
-    grid = np.stack((coor_y, coor_x), axis=0)
+    grid = np.stack((coor_y, coor_x), axis=0) - 0.5
     grid = np.concatenate([grid[np.newaxis, ...]] * batch)
-    grid = grid - 0.5  # Offset pixel center
-    return grid
+    return grid, tp
+
+
+def numpy_grid_sample(
+    img: np.ndarray, grid: np.ndarray, out: np.ndarray, cube_face_id: np.ndarray
+):
+    b, _, h, w = img.shape
+
+    min_grid = np.floor(grid).astype(np.int64)
+    max_grid = min_grid + 1
+    d_grid = grid - min_grid
+
+    _, _, grid_h, grid_w = grid.shape
+    cube_face_min_grid = min_grid // h
+    cube_face_max_grid = max_grid // h
+
+    min_grid[:, 0, :, :] = np.clip(min_grid[:, 0, :, :], 0, None)
+    max_grid[:, 0, :, :] = np.clip(max_grid[:, 0, :, :], None, h - 1)
+
+    # FIXME: any way to do efficient batch?
+    for i in range(b):
+
+        for y in range(grid_h):
+            for x in range(grid_w):
+                if (
+                    cube_face_max_grid[i, 1, y, x]
+                    != cube_face_min_grid[i, 1, y, x]
+                ):
+                    if cube_face_max_grid[i, 1, y, x] != cube_face_id[y, x]:
+                        max_grid[i, 1, y, x] -= 1
+                    else:
+                        min_grid[i, 1, y, x] += 1
+
+        dy = d_grid[i, 0, ...]
+        dx = d_grid[i, 1, ...]
+        min_ys = min_grid[i, 0, ...]
+        min_xs = min_grid[i, 1, ...]
+        max_ys = max_grid[i, 0, ...]
+        max_xs = max_grid[i, 1, ...]
+
+        p00 = img[i][:, min_ys, min_xs]
+        p10 = img[i][:, max_ys, min_xs]
+        p01 = img[i][:, min_ys, max_xs]
+        p11 = img[i][:, max_ys, max_xs]
+
+        out[i, ...] = interp2d(p00, p10, p01, p11, dy, dx)
+
+    return out
 
 
 def run(
@@ -269,7 +305,7 @@ def run(
     out = np.empty((bs, c, height, width), dtype=dtype)
 
     # create sampling grid
-    grid = create_equi_grid(
+    grid, tp = create_equi_grid(
         h_out=height, w_out=width, w_face=w_face, batch=bs, dtype=dtype
     )
 
@@ -279,7 +315,10 @@ def run(
             img=horizon, grid=grid, out=out, mode=mode
         )
     else:
-        out = numpy_grid_sample(img=horizon, grid=grid, out=out, mode=mode)
+        # out = numpy_grid_sample(img=horizon, grid=grid, out=out, mode=mode)
+        out = numpy_grid_sample(
+            img=horizon, grid=grid, out=out, cube_face_id=tp
+        )
 
     out = (
         out.astype(horizon_dtype)
