@@ -16,8 +16,8 @@
 <img src=".img/equilib.png" alt="equilib" width="720"/>
 
 - A library for processing equirectangular image that runs on Python.
-- Developed using `numpy` and `torch` (`c++` is WIP).
-- Able to use GPU for faster processing.
+- Developed using Python>=3.6 (`c++` is WIP).
+- Compatible with `cuda` tensors for faster processing.
 - No need for other dependencies except for `numpy` and `torch`.
 - Added functionality like creating rotation matrices, batched processing, and automatic type detection.
 - Highly modular
