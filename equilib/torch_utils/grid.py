@@ -40,7 +40,7 @@ def create_grid(
     _ys = torch.linspace(0, height - 1, height, dtype=dtype, device=device)
     # NOTE: https://github.com/pytorch/pytorch/issues/15301
     # Torch meshgrid behaves differently than numpy
-    ys, xs = torch.meshgrid([_ys, _xs])
+    ys, xs = torch.meshgrid([_ys, _xs], indexing="ij")
     zs = torch.ones_like(xs, dtype=dtype, device=device)
     grid = torch.stack((xs, ys, zs), dim=2)
     # grid shape (h, w, 3)
@@ -93,7 +93,7 @@ def create_normalized_grid(
     ys = torch.linspace(0, height - 1, height, dtype=dtype, device=device)
     theta = xs * 2 * pi / width - pi
     phi = ys * pi / height - pi / 2
-    phi, theta = torch.meshgrid([phi, theta])
+    phi, theta = torch.meshgrid([phi, theta], indexing="ij")
     a = torch.stack((theta, phi), dim=-1)
     norm_A = 1
     x = norm_A * torch.cos(a[..., 1]) * torch.cos(a[..., 0])
@@ -136,37 +136,37 @@ def create_xyz_grid(
 
     # Front face (x = 0.5)
     out[:, 0 * w_face : 1 * w_face, [2, 1]] = torch.stack(
-        torch.meshgrid([-rng, rng]), -1
+        torch.meshgrid([-rng, rng], indexing="ij"), -1
     )
     out[:, 0 * w_face : 1 * w_face, 0] = 0.5
 
     # Right face (y = -0.5)
     out[:, 1 * w_face : 2 * w_face, [2, 0]] = torch.stack(
-        torch.meshgrid([-rng, -rng]), -1
+        torch.meshgrid([-rng, -rng], indexing="ij"), -1
     )
     out[:, 1 * w_face : 2 * w_face, 1] = 0.5
 
     # Back face (x = -0.5)
     out[:, 2 * w_face : 3 * w_face, [2, 1]] = torch.stack(
-        torch.meshgrid([-rng, -rng]), -1
+        torch.meshgrid([-rng, -rng], indexing="ij"), -1
     )
     out[:, 2 * w_face : 3 * w_face, 0] = -0.5
 
     # Left face (y = 0.5)
     out[:, 3 * w_face : 4 * w_face, [2, 0]] = torch.stack(
-        torch.meshgrid([-rng, rng]), -1
+        torch.meshgrid([-rng, rng], indexing="ij"), -1
     )
     out[:, 3 * w_face : 4 * w_face, 1] = -0.5
 
     # Up face (z = 0.5)
     out[:, 4 * w_face : 5 * w_face, [0, 1]] = torch.stack(
-        torch.meshgrid([rng, rng]), -1
+        torch.meshgrid([rng, rng], indexing="ij"), -1
     )
     out[:, 4 * w_face : 5 * w_face, 2] = 0.5
 
     # Down face (z = -0.5)
     out[:, 5 * w_face : 6 * w_face, [0, 1]] = torch.stack(
-        torch.meshgrid([-rng, rng]), -1
+        torch.meshgrid([-rng, rng], indexing="ij"), -1
     )
     out[:, 5 * w_face : 6 * w_face, 2] = -0.5
 

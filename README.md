@@ -37,7 +37,7 @@ If you found this module helpful to your project, please site this repository:
 
 Prerequisites:
 - Python (>=3.6)
-- Pytorch
+- Pytorch (tested on 1.12)
 
 ```Bash
 pip install pyequilib
@@ -55,6 +55,8 @@ pip install -e .
 # or
 python setup.py develop
 ```
+
+__NOTE__: might not work for PyTorch>=2.0. If you have any issues, please open an issue.
 
 ## Basic Usage:
 
