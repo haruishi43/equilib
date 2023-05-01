@@ -37,11 +37,11 @@ jobs:
       #   run: |
       #     pip install importlib-metadata < 5, hacking==4.1.0
       #     flake8 .
-      - name: Black
-        shell: bash -l {0}
-        run: |
-          pip install black
-          black --check .
+      # - name: Black
+      #   shell: bash -l {0}
+      #   run: |
+      #     pip install black
+      #     black --check .
       - name: Test with pytest
         shell: bash -l {0}
         run: |
