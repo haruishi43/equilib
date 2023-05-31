@@ -119,6 +119,7 @@ def run(
     z_down: bool,
     mode: str,
     backend: str = "native",
+    pad: float = 0.,
 ) -> Union[torch.Tensor, List[torch.Tensor], List[Dict[str, torch.Tensor]]]:
     """Run Equi2Cube
 
@@ -201,7 +202,7 @@ def run(
 
     # create grid
     xyz = create_xyz_grid(
-        w_face=w_face, batch=bs, dtype=tmp_dtype, device=tmp_device
+        w_face=w_face, pad=pad, batch=bs, dtype=tmp_dtype, device=tmp_device
     )
     xyz = xyz.unsqueeze(-1)
 
