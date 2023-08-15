@@ -131,7 +131,7 @@ def run(
     z_down: bool,
     mode: str,
     override_func: Optional[Callable[[], Any]] = None,
-    clip_output: bool = True
+    clip_output: bool = True,
 ) -> np.ndarray:
     """Run Equi2Pers
 
