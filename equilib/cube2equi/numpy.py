@@ -133,7 +133,7 @@ def _equirect_facetype(h: int, w: int) -> np.ndarray:
     )
 
     # Prepare ceil mask
-    mask = np.zeros((h, w // 4), np.bool)
+    mask = np.zeros((h, w // 4), bool)
     idx = np.linspace(-(np.pi * w_ratio), np.pi * w_ratio, w // 4) / 4
     idx = h // 2 - np.around(np.arctan(np.cos(idx)) * h / (np.pi * h_ratio))
     idx = idx.astype(int_dtype)
