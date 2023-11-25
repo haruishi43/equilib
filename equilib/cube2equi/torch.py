@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import math
+from functools import cache
 
 from typing import Dict, List, Union
 
@@ -169,6 +170,7 @@ def _equirect_facetype(h: int, w: int) -> torch.Tensor:
     return tp.type(int_dtype)
 
 
+@cache
 def create_equi_grid(
     h_out: int,
     w_out: int,

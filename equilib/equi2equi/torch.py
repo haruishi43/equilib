@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-
-from typing import Dict, List, Optional
+from functools import cache
+from typing import Dict, List, Optional, Tuple, Iterable
 
 import torch
 
@@ -52,6 +52,58 @@ def convert_grid(
     grid = torch.stack((uj, ui), dim=-3)
 
     return grid
+
+@cache
+def _get_grid(
+    height: int,
+    width: int,
+    bs: int,
+    tmp_dtype: torch.dtype,
+    tmp_device: torch.device,
+    rolls: Tuple[float],
+    pitchs: Tuple[float],
+    yaws: Tuple[float],
+    z_down: float,
+    h_equi: int,
+    w_equi: int,
+) -> torch.Tensor:
+    m = create_normalized_grid(
+        height=height, width=width, batch=bs, dtype=tmp_dtype, device=tmp_device
+    )
+    m = m.unsqueeze(-1)
+
+    rots = [
+        {'roll': roll, 'pitch': pitch, 'yaw': yaw}
+        for (roll, pitch, yaw) in zip(rolls, pitchs, yaws)
+    ]
+
+    # create batched rotation matrices
+    R = create_rotation_matrices(
+        rots=rots, z_down=z_down, dtype=tmp_dtype, device=tmp_device
+    )
+
+    # rotate the grid
+    M = matmul(m, R)
+
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
+
+    return grid
+
+
+def get_grid(
+    rots: Iterable[Dict[str, float]],
+    **kwargs
+) -> torch.Tensor:
+    rolls = tuple([rot['roll'] for rot in rots])
+    pitchs = tuple([rot['pitch'] for rot in rots])
+    yaws = tuple([rot['yaw'] for rot in rots])
+
+    return _get_grid(
+        rolls=rolls,
+        pitchs=pitchs,
+        yaws=yaws,
+        **kwargs
+    )
 
 
 def run(
@@ -158,20 +210,17 @@ def run(
     else:
         tmp_dtype = dtype
 
-    m = create_normalized_grid(
-        height=height, width=width, batch=bs, dtype=tmp_dtype, device=tmp_device
+    grid = get_grid(
+        height=height,
+        width=width,
+        bs=bs,
+        tmp_dtype=tmp_dtype,
+        tmp_device=tmp_device,
+        rots=rots,
+        z_down=z_down,
+        h_equi=h_equi,
+        w_equi=w_equi
     )
-    m = m.unsqueeze(-1)
-
-    # create batched rotation matrices
-    R = create_rotation_matrices(
-        rots=rots, z_down=z_down, dtype=tmp_dtype, device=tmp_device
-    )
-
-    # rotate the grid
-    M = matmul(m, R)
-
-    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
 
     # FIXME: putting `grid` to device since `pure`'s bilinear interpolation requires it
     # FIXME: better way of forcing `grid` to be the same dtype?

@@ -118,6 +118,7 @@ def create_normalized_grid(
 
 def create_xyz_grid(
     w_face: int,
+    pad: float = 0.,
     batch: Optional[int] = None,
     dtype: torch.dtype = torch.float32,
     device: torch.device = torch.device("cpu"),
@@ -128,7 +129,7 @@ def create_xyz_grid(
 
     out = torch.zeros((w_face, w_face * 6, 3), dtype=dtype, device=device)
     rng = torch.linspace(
-        -0.5 * ratio, 0.5 * ratio, w_face, dtype=dtype, device=device
+        -(0.5 + pad) * ratio, (0.5 + pad) * ratio, w_face, dtype=dtype, device=device
     )
 
     # NOTE: https://github.com/pytorch/pytorch/issues/15301

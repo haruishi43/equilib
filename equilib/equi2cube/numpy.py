@@ -130,6 +130,7 @@ def run(
     z_down: bool,
     mode: str,
     override_func: Optional[Callable[[], Any]] = None,
+    pad: float = 0.,
 ) -> Union[np.ndarray, List[List[np.ndarray]], List[Dict[str, np.ndarray]]]:
     """Call Equi2Cube
 
@@ -179,7 +180,7 @@ def run(
     out = np.empty((bs, c, w_face, w_face * 6), dtype=dtype)
 
     # create grid
-    xyz = create_xyz_grid(w_face=w_face, batch=bs, dtype=dtype)
+    xyz = create_xyz_grid(w_face=w_face, pad=pad, batch=bs, dtype=dtype)
     xyz = xyz[..., np.newaxis]
 
     # FIXME: not sure why, but z-axis is facing the opposite
