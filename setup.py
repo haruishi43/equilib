@@ -99,7 +99,7 @@ setup(
     long_description_content_type="text/markdown",
     author=find_author(),
     author_email=find_email(),
-    license="AGPL-3.0",
+    license="Apache License 2.0",
     url=find_url(),
     install_requires=["numpy"],
     keywords=["Equirectangular", "Computer Vision"],
