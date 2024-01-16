@@ -226,7 +226,7 @@ def run(
     out = (
         out.astype(equi_dtype)
         if equi_dtype == np.dtype(np.uint8) or not clip_output
-        else np.clip(out, 0.0, 1.0)
+        else np.clip(out, np.nanmin(out), np.nanmax(out))
     )
 
     return out
