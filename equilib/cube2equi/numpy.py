@@ -323,7 +323,7 @@ def run(
     out = (
         out.astype(horizon_dtype)
         if horizon_dtype == np.dtype(np.uint8)
-        else np.clip(out, 0.0, 1.0)
+        else np.clip(out, np.nanmin(out), np.nanmax(out))
     )
 
     return out
