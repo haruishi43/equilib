@@ -22,7 +22,6 @@ def naive_bicubic(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
 def faster_bicubic(
     img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
-
     b_in, c_in, h_in, w_in = img.shape
     b_out, _, h_out, w_out = out.shape
     dtype = out.dtype
@@ -143,7 +142,6 @@ def faster_bicubic(
 
 
 def compare_baseline():
-
     dtype_img = dtype_grid = np.dtype(np.float32)
     b = 1
     c = 3

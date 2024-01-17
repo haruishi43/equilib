@@ -52,7 +52,6 @@ def _open_as_cv2(img_path: str) -> np.ndarray:
 def load2numpy(
     img_path: str, dtype: np.dtype, is_cv2: bool = False
 ) -> np.ndarray:
-
     assert os.path.exists(img_path), f"{img_path} doesn't exist"
     if is_cv2:
         # FIXME: currently only supports RGB
@@ -79,7 +78,6 @@ def load2numpy(
 def load2torch(
     img_path: str, dtype: torch.dtype, is_cv2: bool = False
 ) -> torch.Tensor:
-
     assert os.path.exists(img_path), f"{img_path} doesn't exist"
     if is_cv2:
         # FIXME: currently only supports RGB
@@ -133,7 +131,6 @@ def _numpy2PIL(img: np.ndarray) -> Image.Image:
 
 
 def _torch2PIL(img: torch.Tensor) -> Image.Image:
-
     if img.device == "cuda":
         # move to cpu
         img = img.to("cpu")

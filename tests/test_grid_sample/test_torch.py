@@ -66,7 +66,6 @@ def test_faster_vs_pure_cpu(
     rand_grid: bool,
     dtype_tensor: torch.dtype,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("move:", move_grid)
@@ -188,7 +187,6 @@ def test_faster_vs_pure_gpu(
     rand_grid: bool,
     dtype_tensor: torch.dtype,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("move:", move_grid)
@@ -316,7 +314,6 @@ def test_native_vs_pure_cpu(
     rand_grid: bool,
     dtype_tensor: torch.dtype,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("move:", move_grid)
@@ -435,7 +432,6 @@ def test_native_vs_pure_gpu(
     rand_grid: bool,
     dtype_tensor: torch.dtype,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("dtype_tensor:", dtype_tensor)
@@ -555,7 +551,6 @@ def test_native_vs_cv2_cpu(
     rand_grid: bool,
     dtype_tensor: torch.dtype,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("dtype_tensor:", dtype_tensor)
@@ -679,7 +674,6 @@ def test_native_vs_cv2_gpu(
     rand_grid: bool,
     dtype_tensor: torch.dtype,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("dtype_tensor:", dtype_tensor)
@@ -805,7 +799,6 @@ def test_native_vs_scipy_cpu(
     rand_grid: bool,
     dtype_tensor: torch.dtype,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("dtype_tensor:", dtype_tensor)
@@ -932,7 +925,6 @@ def test_native_vs_scipy_gpu(
     rand_grid: bool,
     dtype_tensor: torch.dtype,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("dtype_tensor:", dtype_tensor)

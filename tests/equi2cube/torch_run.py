@@ -71,7 +71,6 @@ def bench_cpu(
     rotation: str = "forward",
     save_outputs: bool = False,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("bs, w_face:", bs, w_face)
@@ -209,7 +208,7 @@ def bench_cpu(
         assert isinstance(native_out, list)
         for b in range(bs):
             assert isinstance(native_out[b], list)
-            for (i, face) in enumerate(["F", "R", "B", "L", "U", "D"]):
+            for i, face in enumerate(["F", "R", "B", "L", "U", "D"]):
                 print()
                 print(f">>> Testing batch: {b}, face: {face}")
                 _numpy_out = torch.from_numpy(numpy_out[b][i])
@@ -370,7 +369,6 @@ def bench_gpu(
     rotation: str = "forward",
     save_outputs: bool = False,
 ) -> None:
-
     device = torch.device("cuda")
     assert torch_dtype in (torch.float16, torch.float32, torch.float64)
 
@@ -508,7 +506,7 @@ def bench_gpu(
         assert isinstance(native_out, list)
         for b in range(bs):
             assert isinstance(native_out[b], list)
-            for (i, face) in enumerate(["F", "R", "B", "L", "U", "D"]):
+            for i, face in enumerate(["F", "R", "B", "L", "U", "D"]):
                 print()
                 print(f">>> Testing batch: {b}, face: {face}")
                 _numpy_out = (

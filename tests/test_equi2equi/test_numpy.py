@@ -70,7 +70,6 @@ def bench_baselines(
     rotation: str = "forward",
     save_outputs: bool = False,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("bs, grid(height, width):", bs, (height, width))

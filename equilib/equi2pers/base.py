@@ -24,6 +24,7 @@ class Equi2Pers(object):
     - sampling_method (str)
     - z_down (bool)
     - mode (str)
+    - clip_output (bool)
 
     inputs:
     - equi (np.ndarray, torch.Tensor)
@@ -42,6 +43,7 @@ class Equi2Pers(object):
         skew: float = 0.0,
         z_down: bool = False,
         mode: str = "bilinear",
+        clip_output: bool = True,
     ) -> None:
         self.height = height
         self.width = width
@@ -49,6 +51,7 @@ class Equi2Pers(object):
         self.skew = skew
         self.mode = mode
         self.z_down = z_down
+        self.clip_output = clip_output
         # FIXME: maybe do useful stuff like precalculating the grid or something
 
     def __call__(self, equi: ArrayLike, rots: Rot, **kwargs) -> ArrayLike:
@@ -65,6 +68,7 @@ class Equi2Pers(object):
             skew=self.skew,
             z_down=self.z_down,
             mode=self.mode,
+            clip_output=self.clip_output,
             **kwargs,
         )
 
@@ -89,6 +93,7 @@ def equi2pers(
     skew: float = 0.0,
     mode: str = "bilinear",
     z_down: bool = False,
+    clip_output: bool = True,
     **kwargs,
 ) -> ArrayLike:
     """
@@ -133,6 +138,7 @@ def equi2pers(
             fov_x=fov_x,
             skew=skew,
             z_down=z_down,
+            clip_output=clip_output,
             mode=mode,
             **kwargs,
         )
@@ -145,6 +151,7 @@ def equi2pers(
             fov_x=fov_x,
             skew=skew,
             z_down=z_down,
+            clip_output=clip_output,
             mode=mode,
             **kwargs,
         )

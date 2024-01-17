@@ -46,11 +46,17 @@ class Cube2Equi(object):
     """
 
     def __init__(
-        self, height: int, width: int, cube_format: str, mode: str = "bilinear"
+        self,
+        height: int,
+        width: int,
+        cube_format: str,
+        clip_output: bool = True,
+        mode: str = "bilinear",
     ) -> None:
         self.height = height
         self.width = width
         self.cube_format = cube_format
+        self.clip_output = clip_output
         self.mode = mode
 
     def __call__(self, cubemap: CubeMaps, **kwargs) -> ArrayLike:
@@ -59,6 +65,7 @@ class Cube2Equi(object):
             cube_format=self.cube_format,
             width=self.width,
             height=self.height,
+            clip_output=self.clip_output,
             mode=self.mode,
             **kwargs,
         )
@@ -69,6 +76,7 @@ def cube2equi(
     cube_format: str,
     height: int,
     width: int,
+    clip_output: bool = True,
     mode: str = "bilinear",
     **kwargs,
 ) -> ArrayLike:
@@ -124,14 +132,24 @@ def cube2equi(
             cubemap=cubemap, cube_format=cube_format
         )
         out = run_numpy(
-            horizon=horizon, height=height, width=width, mode=mode, **kwargs
+            horizon=horizon,
+            height=height,
+            width=width,
+            clip_output=clip_output,
+            mode=mode,
+            **kwargs,
         )
     elif _type == "torch":
         horizon = convert2horizon_torch(
             cubemap=cubemap, cube_format=cube_format
         )
         out = run_torch(
-            horizon=horizon, height=height, width=width, mode=mode, **kwargs
+            horizon=horizon,
+            height=height,
+            width=width,
+            clip_output=clip_output,
+            mode=mode,
+            **kwargs,
         )
     else:
         raise ValueError("Oops something went wrong here")

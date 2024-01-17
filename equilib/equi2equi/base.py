@@ -19,7 +19,7 @@ class Equi2Equi(object):
     """
     params:
     - w_out, h_out (optional int): equi image size
-    - sampling_method (str): defaults to "default"
+    - clip_output (bool) whether to clip values in the range of input
     - mode (str): interpolation mode, defaults to "bilinear"
     - z_down (bool)
 
@@ -35,23 +35,31 @@ class Equi2Equi(object):
         self,
         height: Optional[int] = None,
         width: Optional[int] = None,
+        clip_output: bool = True,
         mode: str = "bilinear",
         z_down: bool = False,
     ) -> None:
         self.height = height
         self.width = width
+        self.clip_output = clip_output
         self.mode = mode
         self.z_down = z_down
 
     def __call__(self, src: ArrayLike, rots: Rot, **kwargs) -> ArrayLike:
         return equi2equi(
-            src=src, rots=rots, mode=self.mode, z_down=self.z_down, **kwargs
+            src=src,
+            rots=rots,
+            clip_output=self.clip_output,
+            mode=self.mode,
+            z_down=self.z_down,
+            **kwargs,
         )
 
 
 def equi2equi(
     src: ArrayLike,
     rots: Rot,
+    clip_output: bool = True,
     mode: str = "bilinear",
     z_down: bool = False,
     height: Optional[int] = None,
@@ -98,6 +106,7 @@ def equi2equi(
             z_down=z_down,
             height=height,
             width=width,
+            clip_output=clip_output,
             **kwargs,
         )
     elif _type == "torch":
@@ -108,6 +117,7 @@ def equi2equi(
             z_down=z_down,
             height=height,
             width=width,
+            clip_output=clip_output,
             **kwargs,
         )
     else:

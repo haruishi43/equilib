@@ -250,6 +250,7 @@ def run(
     height: int,
     width: int,
     mode: str,
+    clip_output: bool = True,
     backend: str = "native",
 ) -> torch.Tensor:
     """Run Cube2Equi
@@ -349,8 +350,8 @@ def run(
 
     out = (
         out.type(horizon_dtype)
-        if horizon_dtype == torch.uint8
-        else torch.clip(out, 0.0, 1.0)
+        if horizon_dtype == torch.uint8 or not clip_output
+        else torch.clip(out, torch.min(horizon), torch.max(horizon))
     )
 
     return out

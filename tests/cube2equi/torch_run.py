@@ -68,7 +68,6 @@ def bench_cpu(
     dtype: np.dtype = np.dtype(np.float32),
     save_outputs: bool = False,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("bs, grid(height, width):", bs, (height, width))
@@ -184,7 +183,6 @@ def bench_gpu(
     torch_dtype: torch.dtype = torch.float32,
     save_outputs: bool = False,
 ) -> None:
-
     device = torch.device("cuda")
     assert torch_dtype in (torch.float16, torch.float32, torch.float64)
 
@@ -297,7 +295,6 @@ def bench_gpu(
 
 
 if __name__ == "__main__":
-
     # parameters
     save_outputs = True
 

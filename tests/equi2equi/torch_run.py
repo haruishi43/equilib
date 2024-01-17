@@ -76,7 +76,6 @@ def bench_cpu(
     rotation: str = "forward",
     save_outputs: bool = False,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("bs, grid(height, width):", bs, (height, width))
@@ -218,7 +217,6 @@ def bench_gpu(
     rotation: str = "forward",
     save_outputs: bool = False,
 ) -> None:
-
     device = torch.device("cuda")
     assert torch_dtype in (torch.float16, torch.float32, torch.float64)
 

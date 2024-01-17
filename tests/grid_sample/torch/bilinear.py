@@ -20,7 +20,6 @@ def naive_bilinear(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
 def faster_bilinear(
     img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
-
     b_in, _, h_in, w_in = img.shape
 
     min_grid = torch.floor(grid).type(torch.int64)
@@ -61,7 +60,6 @@ def faster_bilinear(
 
 
 def compare_baseline():
-
     dtype_img = dtype_grid = np.dtype(np.float32)
     b = 16
     c = 3

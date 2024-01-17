@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -153,8 +153,7 @@ def create_equi_grid(
     w_face: int,
     batch: int,
     dtype: np.dtype = np.dtype(np.float32),
-) -> np.ndarray:
-
+) -> Tuple[np.ndarray, np.ndarray]:
     w_ratio = (w_out - 1) / w_out
     h_ratio = (h_out - 1) / h_out
     theta = np.linspace(
@@ -224,7 +223,6 @@ def numpy_grid_sample(
 
     # FIXME: any way to do efficient batch?
     for i in range(b):
-
         for y in range(grid_h):
             for x in range(grid_w):
                 if (
@@ -258,6 +256,7 @@ def run(
     height: int,
     width: int,
     mode: str,
+    clip_output: bool = True,
     override_func: Optional[Callable[[], Any]] = None,
 ) -> np.ndarray:
     """Run Cube2Equi
@@ -320,10 +319,11 @@ def run(
             img=horizon, grid=grid, out=out, cube_face_id=tp
         )
 
+    # clip by the input
     out = (
         out.astype(horizon_dtype)
-        if horizon_dtype == np.dtype(np.uint8)
-        else np.clip(out, np.nanmin(out), np.nanmax(out))
+        if horizon_dtype == np.dtype(np.uint8) or not clip_output
+        else np.clip(out, np.min(horizon), np.max(horizon))
     )
 
     return out

@@ -41,7 +41,6 @@ def preprocess(
 def draw_lines(
     equi: np.ndarray, points: np.ndarray, to_cv2: bool = False
 ) -> np.ndarray:
-
     if to_cv2:
         equi = cv2.cvtColor(equi, cv2.COLOR_RGB2BGR)
 

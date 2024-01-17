@@ -62,7 +62,6 @@ def numpy_single(
     mode: str,
     dtype: np.dtype,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("grid(height, width):", (height, width))
@@ -98,7 +97,6 @@ def torch_single(
     mode: str,
     dtype: torch.dtype,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("grid(height, width):", (height, width))

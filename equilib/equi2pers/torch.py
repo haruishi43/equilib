@@ -26,7 +26,6 @@ def create_cam2global_matrix(
     dtype: torch.dtype = torch.float32,
     device: torch.device = torch.device("cpu"),
 ) -> torch.Tensor:
-
     K = create_intrinsic_matrix(
         height=height,
         width=width,
@@ -49,7 +48,6 @@ def prep_matrices(
     dtype: torch.dtype = torch.float32,
     device: torch.device = torch.device("cpu"),
 ) -> Tuple[torch.Tensor, torch.Tensor]:
-
     m = create_grid(
         height=height, width=width, batch=batch, dtype=dtype, device=device
     )
@@ -67,7 +65,6 @@ def prep_matrices(
 
 
 def matmul(m: torch.Tensor, G: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
-
     M = torch.matmul(torch.matmul(R, G)[:, None, None, ...], m)
     M = M.squeeze(-1)
 
@@ -77,7 +74,6 @@ def matmul(m: torch.Tensor, G: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
 def convert_grid(
     M: torch.Tensor, h_equi: int, w_equi: int, method: str = "robust"
 ) -> torch.Tensor:
-
     # convert to rotation
     phi = torch.asin(M[..., 2] / torch.norm(M, dim=-1))
     theta = torch.atan2(M[..., 1], M[..., 0])
@@ -116,8 +112,8 @@ def run(
     skew: float,
     z_down: bool,
     mode: str,
-    backend: str = "native",
     clip_output: bool = True,
+    backend: str = "native",
 ) -> torch.Tensor:
     """Run Equi2Pers
 
@@ -244,7 +240,7 @@ def run(
     out = (
         out.type(equi_dtype)
         if equi_dtype == torch.uint8 or not clip_output
-        else torch.clip(out, 0.0, 1.0)
+        else torch.clip(out, torch.min(equi), torch.max(equi))
     )
 
     return out

@@ -69,7 +69,6 @@ def bench_baselines(
     rotation: str = "forward",
     save_outputs: bool = False,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("bs, w_face:", bs, w_face)
@@ -205,7 +204,7 @@ def bench_baselines(
         assert isinstance(out, list)
         for b in range(bs):
             assert isinstance(out[b], list)
-            for (i, face) in enumerate(["F", "R", "B", "L", "U", "D"]):
+            for i, face in enumerate(["F", "R", "B", "L", "U", "D"]):
                 print()
                 print(f">>> Testing batch: {b}, face: {face}")
                 _out = out[b][i]

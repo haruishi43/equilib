@@ -64,7 +64,6 @@ def test_against_bench(
     rand_img: bool,
     rand_grid: bool,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("move:", move_grid)
@@ -231,7 +230,6 @@ def test_against_cv2(
     rand_img: bool,
     rand_grid: bool,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("move:", move_grid)
@@ -342,7 +340,6 @@ def test_against_scipy(
     rand_img: bool,
     rand_grid: bool,
 ) -> None:
-
     print("\n")
     print("dtype_img:", dtype_img, "dtype_grid:", dtype_grid)
     print("move:", move_grid)

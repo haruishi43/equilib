@@ -22,7 +22,6 @@ def create_cam2global_matrix(
     skew: float = 0.0,
     dtype: np.dtype = np.dtype(np.float32),
 ) -> np.ndarray:
-
     K = create_intrinsic_matrix(
         height=height, width=width, fov_x=fov_x, skew=skew, dtype=dtype
     )
@@ -42,7 +41,6 @@ def prep_matrices(
     skew: float = 0.0,
     dtype: np.dtype = np.dtype(np.float32),
 ) -> Tuple[np.ndarray, np.ndarray]:
-
     m = create_grid(height=height, width=width, batch=batch, dtype=dtype)
     m = m[..., np.newaxis]
     G = create_cam2global_matrix(
@@ -55,7 +53,6 @@ def prep_matrices(
 def matmul(
     m: np.ndarray, G: np.ndarray, R: np.ndarray, method: str = "faster"
 ) -> np.ndarray:
-
     if method == "robust":
         # When target image size is smaller, it might be faster with `matmul`
         # but not by much
@@ -83,7 +80,6 @@ def matmul(
 def convert_grid(
     M: np.ndarray, h_equi: int, w_equi: int, method: str = "robust"
 ) -> np.ndarray:
-
     # convert to rotation
     phi = np.arcsin(M[..., 2] / np.linalg.norm(M, axis=-1))
     theta = np.arctan2(M[..., 1], M[..., 0])
@@ -130,8 +126,8 @@ def run(
     skew: float,
     z_down: bool,
     mode: str,
-    override_func: Optional[Callable[[], Any]] = None,
     clip_output: bool = True,
+    override_func: Optional[Callable[[], Any]] = None,
 ) -> np.ndarray:
     """Run Equi2Pers
 
@@ -226,7 +222,7 @@ def run(
     out = (
         out.astype(equi_dtype)
         if equi_dtype == np.dtype(np.uint8) or not clip_output
-        else np.clip(out, np.nanmin(out), np.nanmax(out))
+        else np.clip(out, np.min(equi), np.max(equi))
     )
 
     return out

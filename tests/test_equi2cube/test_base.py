@@ -62,7 +62,6 @@ def numpy_single(
     mode: str,
     dtype: np.dtype,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("w_face:", w_face)
@@ -113,7 +112,6 @@ def torch_single(
     mode: str,
     dtype: torch.dtype,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("w_face:", w_face)

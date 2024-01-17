@@ -76,7 +76,6 @@ def cube_h2dice(cube_h: torch.Tensor) -> torch.Tensor:
 
 
 def matmul(m: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
-
     M = torch.matmul(R[:, None, None, ...], m)
     M = M.squeeze(-1)
 
@@ -86,7 +85,6 @@ def matmul(m: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
 def convert_grid(
     xyz: torch.Tensor, h_equi: int, w_equi: int, method: str = "robust"
 ) -> torch.Tensor:
-
     # convert to rotation
     phi = torch.asin(xyz[..., 2] / torch.norm(xyz, dim=-1))
     theta = torch.atan2(xyz[..., 1], xyz[..., 0])
@@ -118,8 +116,11 @@ def run(
     cube_format: str,
     z_down: bool,
     mode: str,
+    clip_output: bool = True,
     backend: str = "native",
-) -> Union[torch.Tensor, List[torch.Tensor], List[Dict[str, torch.Tensor]]]:
+) -> Union[
+    torch.Tensor, List[List[torch.Tensor]], List[Dict[str, torch.Tensor]]
+]:
     """Run Equi2Cube
 
     params:
@@ -232,10 +233,11 @@ def run(
         img=equi, grid=grid, out=out, mode=mode, backend=backend
     )
 
+    # clip by input
     out = (
         out.type(equi_dtype)
-        if equi_dtype == torch.uint8
-        else torch.clip(out, 0.0, 1.0)
+        if equi_dtype == torch.uint8 or not clip_output
+        else torch.clip(out, torch.min(equi), torch.max(equi))
     )
 
     # reformat the output

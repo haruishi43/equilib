@@ -95,7 +95,6 @@ def vecinv(A):
 
 
 if __name__ == "__main__":
-
     from numpy.linalg import inv as npinv  # noqa
 
     np.random.seed(0)

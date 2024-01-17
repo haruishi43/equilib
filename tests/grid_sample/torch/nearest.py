@@ -16,7 +16,6 @@ from tests.helpers.timer import func_timer
 
 
 def old_naive_nearest(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
-
     b_in, c_in, h_in, w_in = img.shape
     b_out, _, h_out, w_out = grid.shape
     dtype = img.dtype
@@ -39,7 +38,6 @@ def old_naive_nearest(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
 def naive_nearest(
     img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
-
     b_in, c_in, h_in, w_in = img.shape
     b_out, _, h_out, w_out = out.shape
 
@@ -153,7 +151,6 @@ def check_gpu():
 
 
 def compare_baseline():
-
     dtype_img = dtype_grid = np.dtype(np.float32)
     b = 2
     c = 3

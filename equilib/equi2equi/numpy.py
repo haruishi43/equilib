@@ -9,7 +9,6 @@ from equilib.numpy_utils import create_normalized_grid, create_rotation_matrices
 
 
 def matmul(m: np.ndarray, R: np.ndarray, method: str = "faster") -> np.ndarray:
-
     if method == "robust":
         # When target image size is smaller, it might be faster with `matmul`
         # but not by much
@@ -36,7 +35,6 @@ def matmul(m: np.ndarray, R: np.ndarray, method: str = "faster") -> np.ndarray:
 def convert_grid(
     M: np.ndarray, h_equi: int, w_equi: int, method: str = "robust"
 ) -> np.ndarray:
-
     # convert to rotation
     phi = np.arcsin(M[..., 2] / np.linalg.norm(M, axis=-1))
     theta = np.arctan2(M[..., 1], M[..., 0])
@@ -81,6 +79,7 @@ def run(
     mode: str,
     height: Optional[int] = None,
     width: Optional[int] = None,
+    clip_output: bool = True,
     override_func: Optional[Callable[[], Any]] = None,
 ) -> np.ndarray:
     """Run Equi2Equi
@@ -169,10 +168,11 @@ def run(
     else:
         out = numpy_grid_sample(img=src, grid=grid, out=out, mode=mode)
 
+    # clip by input
     out = (
         out.astype(src_dtype)
-        if src_dtype == np.dtype(np.uint8)
-        else np.clip(out, np.nanmin(out), np.nanmax(out))
+        if src_dtype == np.dtype(np.uint8) or not clip_output
+        else np.clip(out, np.min(src), np.max(src))
     )
 
     return out

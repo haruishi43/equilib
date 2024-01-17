@@ -25,7 +25,6 @@ def kernel(s, a):
 def bicubic(
     img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
-
     # FIXME: out being initialized doesn't really matter?
 
     b_in, c_in, h_in, w_in = img.shape

@@ -56,7 +56,6 @@ def bench_baselines(
     dtype: np.dtype = np.dtype(np.float32),
     save_outputs: bool = False,
 ) -> None:
-
     # print parameters for debugging
     print()
     print("bs, (height, width):", bs, (height, width))

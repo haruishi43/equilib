@@ -62,7 +62,6 @@ def cube_h2dice(cube_h: np.ndarray) -> np.ndarray:
 
 
 def matmul(m: np.ndarray, R: np.ndarray, method: str = "faster") -> np.ndarray:
-
     if method == "robust":
         # When target image size is smaller, it might be faster with `matmul`
         # but not by much
@@ -89,7 +88,6 @@ def matmul(m: np.ndarray, R: np.ndarray, method: str = "faster") -> np.ndarray:
 def convert_grid(
     xyz: np.ndarray, h_equi: int, w_equi: int, method: str = "robust"
 ) -> np.ndarray:
-
     # convert to rotation
     phi = np.arcsin(xyz[..., 2] / np.linalg.norm(xyz, axis=-1))
     theta = np.arctan2(xyz[..., 1], xyz[..., 0])
@@ -129,6 +127,7 @@ def run(
     cube_format: str,
     z_down: bool,
     mode: str,
+    clip_output: bool = True,
     override_func: Optional[Callable[[], Any]] = None,
 ) -> Union[np.ndarray, List[List[np.ndarray]], List[Dict[str, np.ndarray]]]:
     """Call Equi2Cube
@@ -203,10 +202,11 @@ def run(
     else:
         out = numpy_grid_sample(img=equi, grid=grid, out=out, mode=mode)
 
+    # clip by input
     out = (
         out.astype(equi_dtype)
-        if equi_dtype == np.dtype(np.uint8)
-        else np.clip(out, np.nanmin(out), np.nanmax(out))
+        if equi_dtype == np.dtype(np.uint8) or not clip_output
+        else np.clip(out, np.min(equi), np.max(equi))
     )
 
     # reformat the output

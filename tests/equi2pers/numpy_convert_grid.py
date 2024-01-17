@@ -143,7 +143,6 @@ def refine_v4(phi, theta, h_equi, w_equi):
 
 
 def bench():
-
     h_equi = 2000
     w_equi = 4000
 

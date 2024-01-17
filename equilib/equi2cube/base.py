@@ -53,21 +53,25 @@ class Equi2Cube(object):
         w_face: int,
         cube_format: str,
         z_down: bool = False,
+        clip_output: bool = True,
         mode: str = "bilinear",
     ) -> None:
         self.w_face = w_face
         self.cube_format = cube_format
         self.z_down = z_down
+        self.clip_output = clip_output
         self.mode = mode
 
-    def __call__(self, equi: ArrayLike, rots: Rot) -> CubeMaps:
+    def __call__(self, equi: ArrayLike, rots: Rot, **kwargs) -> CubeMaps:
         return equi2cube(
             equi=equi,
             rots=rots,
             w_face=self.w_face,
             cube_format=self.cube_format,
             z_down=self.z_down,
+            clip_output=self.clip_output,
             mode=self.mode,
+            **kwargs,
         )
 
 
@@ -77,6 +81,7 @@ def equi2cube(
     w_face: int,
     cube_format: str,
     z_down: bool = False,
+    clip_output: bool = True,
     mode: str = "bilinear",
     **kwargs,
 ) -> CubeMaps:
@@ -120,6 +125,7 @@ def equi2cube(
             w_face=w_face,
             cube_format=cube_format,
             z_down=z_down,
+            clip_output=clip_output,
             mode=mode,
             **kwargs,
         )
@@ -130,6 +136,7 @@ def equi2cube(
             w_face=w_face,
             cube_format=cube_format,
             z_down=z_down,
+            clip_output=clip_output,
             mode=mode,
             **kwargs,
         )

@@ -296,7 +296,6 @@ def bench_time():
 
 
 def compare_accuracy():
-
     data = DATA[3]
     m, G, R = example(**data)
     args = {"R": R, "G": G, "m": m}

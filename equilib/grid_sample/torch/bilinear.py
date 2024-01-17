@@ -18,7 +18,6 @@ def interp2d(q00, q10, q01, q11, dy, dx):
 def bilinear(
     img: torch.Tensor, grid: torch.Tensor, out: torch.Tensor
 ) -> torch.Tensor:
-
     b, _, h, w = img.shape
 
     min_grid = torch.floor(grid).type(torch.int64)

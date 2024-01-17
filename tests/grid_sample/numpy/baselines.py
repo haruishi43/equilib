@@ -115,7 +115,6 @@ baseline_scipy_cubic = wrapped_partial(baseline_scipy, order=3)
 def grid_sample_scipy(
     img: np.ndarray, grid: np.ndarray, out: np.ndarray, mode: str = "bilinear"
 ) -> np.ndarray:
-
     if mode == "nearest":
         out = baseline_scipy_nearest(img, grid, out)
     elif mode == "bilinear":
@@ -182,7 +181,6 @@ baseline_cv2_cubic = wrapped_partial(baseline_cv2, mode="cubic")
 def grid_sample_cv2(
     img: np.ndarray, grid: np.ndarray, out: np.ndarray, mode: str = "bilinear"
 ) -> np.ndarray:
-
     if mode == "nearest":
         out = baseline_cv2_nearest(img, grid, out)
     elif mode == "bilinear":

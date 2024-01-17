@@ -34,7 +34,6 @@ def create_single_data(
     dtype_img: np.dtype = np.dtype(np.uint8),
     dtype_grid: np.dtype = np.dtype(np.float32),
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-
     img = create_single_img(c=c, h=h, w=w, rand=rand_img, dtype=dtype_img)
 
     grid = create_single_grid(
@@ -65,7 +64,6 @@ def create_batch_data(
     dtype_img: np.dtype = np.dtype(np.uint8),
     dtype_grid: np.dtype = np.dtype(np.float32),
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-
     img = create_batch_img(b=b, c=c, h=h, w=w, rand=rand_img, dtype=dtype_img)
 
     grid = create_batch_grid(
@@ -111,7 +109,6 @@ def create_single_img(
     rand: bool = False,
     dtype: np.dtype = np.dtype(np.uint8),
 ) -> np.ndarray:
-
     if rand:
         img = (np.random.rand(c, h, w) * 255).astype(dtype)
     else:
@@ -140,7 +137,6 @@ def create_batch_img(
     rand: bool = False,
     dtype: np.dtype = np.dtype(np.uint8),
 ) -> np.ndarray:
-
     imgs = np.empty((b, c, h, w), dtype=dtype)
     for i in range(b):
         imgs[i, ...] = create_single_img(c, h, w, rand=rand, dtype=dtype)
@@ -157,7 +153,6 @@ def create_single_grid(
     move: bool = False,
     dtype: np.dtype = np.dtype(np.float32),
 ) -> np.ndarray:
-
     assert h >= h_grid and w >= w_grid
     assert dtype in NP_FLOATS
 
@@ -220,7 +215,6 @@ def create_batch_grid(
     move: bool = False,
     dtype: np.dtype = np.dtype(np.float32),
 ) -> np.ndarray:
-
     grids = np.empty((b, 2, h_grid, w_grid), dtype=dtype)
     for i in range(b):
         grids[i, ...] = create_single_grid(

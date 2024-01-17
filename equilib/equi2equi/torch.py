@@ -14,7 +14,6 @@ from equilib.torch_utils import (
 
 
 def matmul(m: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
-
     M = torch.matmul(R[:, None, None, ...], m)
     M = M.squeeze(-1)
 
@@ -24,7 +23,6 @@ def matmul(m: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
 def convert_grid(
     M: torch.Tensor, h_equi: int, w_equi: int, method: str = "robust"
 ) -> torch.Tensor:
-
     # convert to rotation
     phi = torch.asin(M[..., 2] / torch.norm(M, dim=-1))
     theta = torch.atan2(M[..., 1], M[..., 0])
@@ -61,6 +59,7 @@ def run(
     mode: str,
     height: Optional[int] = None,
     width: Optional[int] = None,
+    clip_output: bool = True,
     backend: str = "native",
 ) -> torch.Tensor:
     """Run Equi2Equi
@@ -191,10 +190,11 @@ def run(
 
     # NOTE: we assume that `out` keeps it's dtype
 
+    # clip by input
     out = (
         out.type(src_dtype)
-        if src_dtype == torch.uint8
-        else torch.clip(out, 0.0, 1.0)
+        if src_dtype == torch.uint8 or not clip_output
+        else torch.clip(out, torch.min(src), torch.max(src))
     )
 
     return out
