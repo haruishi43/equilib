@@ -20,6 +20,7 @@
 - Compatible with `cuda` tensors for faster processing.
 - No need for other dependencies except for `numpy` and `torch`.
 - Added functionality like creating rotation matrices, batched processing, and automatic type detection.
+- Works with various input modals
 - Highly modular
 
 If you found this module helpful to your project, please site this repository:
@@ -72,6 +73,11 @@ There are no _real_ differences in `class` or `func` APIs:
 - both `class` and `func` APIs are extensible, so you can extend them to your use-cases or create a method that's more optimized (pull requests are welcome btw)
 
 Each API automatically detects the input type (`numpy.ndarray` or `torch.Tensor`), and outputs are the same type.
+
+The arguments for each `class` or `func` depends on the transform, but here are the common arguments:
+- `z_down (bool)`: whether to use a coordinate system with z-axis pointing down, defaults to `False`
+- `mode (str)`: interpolation mode, defaults to `bilinear`
+- `clip_output (bool)`: whether to clip values based on the range of the input values, default to `True`
 
 An example for `Equi2Pers`/`equi2pers`:
 
