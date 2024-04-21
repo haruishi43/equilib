@@ -9,6 +9,10 @@ from .rotation import (
     create_rotation_matrix_at_once,
 )
 from .func import get_device, sizeof
+from .icosahedron import (
+    calculate_tangent_rots,
+    calculate_tangent_angles
+)
 
 __all__ = [
     "create_global2camera_rotation_matrix",
@@ -22,4 +26,6 @@ __all__ = [
     "get_device",
     "sizeof",
     "pi",
+    "calculate_tangent_rots",
+    "calculate_tangent_angles",
 ]

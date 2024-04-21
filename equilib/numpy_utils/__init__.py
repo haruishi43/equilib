@@ -8,6 +8,10 @@ from .rotation import (
     create_rotation_matrix,
     create_rotation_matrix_at_once,
 )
+from .icosahedron import (
+    calculate_tangent_rots,
+    calculate_tangent_angles
+)
 
 __all__ = [
     "create_grid",
@@ -18,4 +22,6 @@ __all__ = [
     "create_rotation_matrix",
     "create_rotation_matrix_at_once",
     "create_xyz_grid",
+    "calculate_tangent_rots",
+    "calculate_tangent_angles",
 ]

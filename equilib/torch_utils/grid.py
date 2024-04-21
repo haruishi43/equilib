@@ -4,7 +4,7 @@ from typing import Optional
 
 import torch
 
-from equilib.torch_utils.intrinsic import pi
+from  torch_utils.intrinsic import pi
 
 
 def create_grid(
