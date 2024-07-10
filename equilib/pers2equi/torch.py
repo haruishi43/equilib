@@ -219,7 +219,7 @@ def run(
         grid = grid.to(pers.device)
 
     mask = torch.logical_or(grid[:, 0] < 0, grid[:, 1] < 0)
-    mask = mask[:, None].repeat_interleave(3, dim=1)
+    mask = mask[:, None].repeat_interleave(pers.shape[1], dim=1)
     
     # grid sample
     out = torch_grid_sample(
