@@ -205,7 +205,7 @@ def run(
         )
 
     mask = (grid[:, 0] < 0) | (grid[:, 1] < 0)
-    mask = mask[:, None].repeat(3, axis=1)
+    mask = mask[:, None].repeat(pers.shape[1], axis=1)
     out[mask] = 0
 
     out = (
