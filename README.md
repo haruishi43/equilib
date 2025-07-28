@@ -73,9 +73,10 @@ There are no _real_ differences in `class` or `func` APIs:
 - `func` APIs are useful when there are no repetitive calls
 - both `class` and `func` APIs are extensible, so you can extend them to your use-cases or create a method that's more optimized (pull requests are welcome btw)
 
-Each API automatically detects the input type (`numpy.ndarray` or `torch.Tensor`), and outputs are the same type.
+Each API automatically detects the input data type (`numpy.ndarray` or `torch.Tensor`), and outputs are the same type. The data layout for input images should be channel-first with dimensions either `BxCxHxW` or `CxHxW`.
 
 The arguments for each `class` or `func` depends on the transform, but here are the common arguments:
+- `rots`: used to specify the rotation using three angles [pitch, yaw, roll](https://simple.wikipedia.org/wiki/Pitch,_yaw,_and_roll) in radians.
 - `z_down (bool)`: whether to use a coordinate system with z-axis pointing down, defaults to `False`
 - `mode (str)`: interpolation mode, defaults to `bilinear`
 - `clip_output (bool)`: whether to clip values based on the range of the input values, default to `True`
