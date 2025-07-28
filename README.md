@@ -66,6 +66,7 @@ __NOTE__: might not work for PyTorch>=2.0. If you have any issues, please open a
 - `Equi2Cube`/`equi2cube`: equirectangular to cubemap transform
 - `Equi2Equi`/`equi2equi`: equirectangular transform
 - `Equi2Pers`/`equi2pers`: equirectangular to perspective transform
+- `Pers2Equi`/`pers2equi`: perspective to equirectangular transform
 
 There are no _real_ differences in `class` or `func` APIs:
 - `class` APIs will allow instantiating a class which you can call many times without having to specify configurations (`class` APIs call the `func` API)
