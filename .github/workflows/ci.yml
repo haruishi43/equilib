@@ -27,6 +27,8 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true  # test suite loads images stored in Git LFS
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:

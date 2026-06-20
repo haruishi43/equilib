@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true  # the hero image is stored in Git LFS
       - name: Install uv
         uses: astral-sh/setup-uv@v5
       - name: Build docs
@@ -28,6 +30,8 @@ jobs:
       contents: write  # required to push to the gh-pages branch
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true  # the hero image is stored in Git LFS
       - name: Install uv
         uses: astral-sh/setup-uv@v5
       - name: Deploy to GitHub Pages
