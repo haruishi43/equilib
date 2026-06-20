@@ -38,7 +38,7 @@ If you found this module helpful to your project, please cite this repository:
   author = {Haruya Ishikawa},
   title = {PyEquilib: Processing Equirectangular Images with Python},
   url = {http://github.com/haruishi43/equilib},
-  version = {0.5.8},
+  version = {0.6.0},
   year = {2021},
 }
 ```
