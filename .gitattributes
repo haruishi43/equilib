@@ -1,0 +1,8 @@
+# Store large binary assets via Git LFS.
+# Requires `git lfs install` once per machine; clones without git-lfs will
+# fetch pointer files instead of the binaries.
+*.jpg  filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.png  filter=lfs diff=lfs merge=lfs -text
+*.mp4  filter=lfs diff=lfs merge=lfs -text
+*.MP4  filter=lfs diff=lfs merge=lfs -text
