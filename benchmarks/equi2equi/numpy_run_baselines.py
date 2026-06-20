@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-"""Create baseline methods using cv2 and scipy for comparison
-
-"""
+"""Create baseline methods using cv2 and scipy for comparison"""
 
 from copy import deepcopy
 import os
@@ -125,9 +123,9 @@ def bench_baselines(
     )
 
     assert out_scipy.shape == out_cv2.shape == out.shape
-    assert (
-        out.dtype == out_scipy.dtype == out_cv2.dtype == dtype
-    ), "output dtypes should match"
+    assert out.dtype == out_scipy.dtype == out_cv2.dtype == dtype, (
+        "output dtypes should match"
+    )
 
     # FIXME: add valid assertions
 

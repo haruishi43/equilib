@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-"""Module for managing paths for batched rots
-"""
+"""Module for managing paths for batched rots"""
 
 from typing import Optional
 import numpy as np

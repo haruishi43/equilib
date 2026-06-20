@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-"""Nearest Neighbor
-
-"""
+"""Nearest Neighbor"""
 
 from numba import njit
 

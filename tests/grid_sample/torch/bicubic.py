@@ -15,8 +15,7 @@ from tests.helpers.benchmarking import check_close, mae, mse
 from tests.helpers.timer import func_timer
 
 
-def naive_bicubic(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
-    ...
+def naive_bicubic(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor: ...
 
 
 def faster_bicubic(

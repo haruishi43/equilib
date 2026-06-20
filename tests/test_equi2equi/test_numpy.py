@@ -133,9 +133,9 @@ def bench_baselines(
         width=width,
     )
 
-    assert (
-        out.dtype == out_scipy.dtype == out_cv2.dtype == dtype
-    ), "output dims should match"
+    assert out.dtype == out_scipy.dtype == out_cv2.dtype == dtype, (
+        "output dims should match"
+    )
 
     # FIXME: add valid assertions
 

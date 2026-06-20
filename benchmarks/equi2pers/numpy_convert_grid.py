@@ -16,8 +16,8 @@ from itertools import combinations
 
 import numpy as np
 
-from tests.equi2pers.numpy_prep import example
-from tests.equi2pers.numpy_matmul import DATA, baseline_v2
+from benchmarks.equi2pers.numpy_prep import example
+from benchmarks.equi2pers.numpy_matmul import DATA, baseline_v2
 from tests.helpers.benchmarking import check_close, mae, mse
 from tests.helpers.timer import func_timer
 
@@ -155,7 +155,7 @@ def bench():
 
     for i, data in enumerate(DATA):
         print()
-        print(f"TEST {i+1}")
+        print(f"TEST {i + 1}")
         print(f"batch size: {data['batch']}")
         print(
             f"height/width/type: {data['height']}/{data['width']}/{data['dtype']}"
