@@ -1,56 +1,64 @@
 # Contributing to equilib
 
-I want to make contributing to this project as easy and transparent as possible.
+Thanks for your interest in improving `equilib`! Bug reports, fixes, features,
+and documentation improvements are all welcome.
 
 ## Issues
 
-See [GitHub issues](../../issues) to track public bugs. Please ensure your description is clear and has sufficient instructions to be able to reproduce the issue.
+Use [GitHub issues](https://github.com/haruishi43/equilib/issues) for bugs and
+feature requests. For bugs, please include clear steps to reproduce.
 
 ## Development setup
 
 This project uses [uv](https://docs.astral.sh/uv/) for environments and
-dependencies, and [Ruff](https://docs.astral.sh/ruff/) for linting and
-formatting.
+dependencies, [Ruff](https://docs.astral.sh/ruff/) for linting and formatting,
+and [Git LFS](https://git-lfs.com/) for image/video assets.
 
 ```bash
-uv sync --group dev
-uv run pre-commit install   # optional: run Ruff automatically on commit
+git lfs install             # once per machine, before cloning
+git clone https://github.com/haruishi43/equilib.git
+cd equilib
+
+uv sync --group dev         # create the venv and install package + dev tools
+uv run pre-commit install   # optional: run Ruff automatically on each commit
 ```
 
-## Test
+## Tests
 
-Use the pytest testing framework and make sure the tests pass before submitting:
+Make sure the test suite passes before submitting:
 
 ```bash
 uv run pytest tests
 ```
 
-## Coding Style
+## Coding style
 
 - We follow PEP8 and use [typing](https://docs.python.org/3/library/typing.html).
-- Linting and formatting are handled by Ruff:
+- Linting and formatting are handled by Ruff (and run automatically by the
+  pre-commit hooks):
 
 ```bash
 uv run ruff check .          # lint
 uv run ruff format .         # format
 ```
 
-Pre-commit hooks run the same Ruff checks. Install them with
-`uv run pre-commit install`.
-
 ## Documentation
 
-Documentation is built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/).
-Preview it locally:
+Documentation is built with
+[MkDocs Material](https://squidfunk.github.io/mkdocs-material/). Preview it
+locally:
 
 ```bash
 uv run --group docs mkdocs serve
 ```
 
-## Large files
+## Pull requests
 
-Image and video assets are stored with [Git LFS](https://git-lfs.com/). Install
-it once (`git lfs install`) before cloning or committing binary assets.
+1. Branch off `master`.
+2. Keep changes focused; update tests and docs alongside code.
+3. Ensure `uv run ruff check .`, `uv run ruff format --check .`, and
+   `uv run pytest tests` all pass.
+4. Open the PR with a clear description of the change.
 
 ## Releasing (maintainers)
 
@@ -96,7 +104,7 @@ The publish job runs in a `pypi` GitHub Environment; create it under the repo's
 Pre-releases are not installed by `pip install pyequilib`; users must opt in with
 `pip install --pre pyequilib` (or pin the exact version).
 
-## TODO
+## Roadmap
 
 - [ ] Better type hints
 - [ ] Type hints for `tests`
