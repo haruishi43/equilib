@@ -134,12 +134,12 @@ def run(
 
     """
 
-    assert (
-        len(equi.shape) == 4
-    ), f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
-    assert len(equi) == len(
-        rots
-    ), f"ERR: length of equi and rot differs: {len(equi)} vs {len(rots)}"
+    assert len(equi.shape) == 4, (
+        f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
+    )
+    assert len(equi) == len(rots), (
+        f"ERR: length of equi and rot differs: {len(equi)} vs {len(rots)}"
+    )
 
     equi_dtype = equi.dtype
     assert equi_dtype in (
@@ -255,12 +255,12 @@ def get_bounding_fov(
     skew: float,
     z_down: bool,
 ) -> torch.Tensor:
-    assert (
-        len(equi.shape) == 4
-    ), f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
-    assert len(equi) == len(
-        rots
-    ), f"ERR: length of equi and rot differs: {len(equi)} vs {len(rots)}"
+    assert len(equi.shape) == 4, (
+        f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
+    )
+    assert len(equi) == len(rots), (
+        f"ERR: length of equi and rot differs: {len(equi)} vs {len(rots)}"
+    )
 
     equi_dtype = equi.dtype
     assert equi_dtype in (

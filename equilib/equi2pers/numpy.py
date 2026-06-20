@@ -155,12 +155,12 @@ def run(
     """
 
     # NOTE: Assume that the inputs `equi` and `rots` are already batched up
-    assert (
-        len(equi.shape) == 4
-    ), f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
-    assert len(equi) == len(
-        rots
-    ), f"ERR: batch size of equi and rot differs: {len(equi)} vs {len(rots)}"
+    assert len(equi.shape) == 4, (
+        f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
+    )
+    assert len(equi) == len(rots), (
+        f"ERR: batch size of equi and rot differs: {len(equi)} vs {len(rots)}"
+    )
 
     equi_dtype = equi.dtype
     assert equi_dtype in (np.uint8, np.float32, np.float64), (
@@ -238,12 +238,12 @@ def get_bounding_fov(
     z_down: bool,
 ) -> np.ndarray:
     # NOTE: Assume that the inputs `equi` and `rots` are already batched up
-    assert (
-        len(equi.shape) == 4
-    ), f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
-    assert len(equi) == len(
-        rots
-    ), f"ERR: batch size of equi and rot differs: {len(equi)} vs {len(rots)}"
+    assert len(equi.shape) == 4, (
+        f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
+    )
+    assert len(equi) == len(rots), (
+        f"ERR: batch size of equi and rot differs: {len(equi)} vs {len(rots)}"
+    )
 
     equi_dtype = equi.dtype
     assert equi_dtype in (np.uint8, np.float32, np.float64), (

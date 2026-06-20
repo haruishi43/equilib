@@ -68,9 +68,9 @@ def cube_h2dice(cube_h: torch.Tensor) -> torch.Tensor:
     sxy = [(1, 1), (2, 1), (3, 1), (0, 1), (1, 0), (1, 2)]
     for b in range(bs):
         for i, (sx, sy) in enumerate(sxy):
-            cube_dice[
-                b, :, sy * w : (sy + 1) * w, sx * w : (sx + 1) * w
-            ] = cube_list[i][b, ...].clone()
+            cube_dice[b, :, sy * w : (sy + 1) * w, sx * w : (sx + 1) * w] = (
+                cube_list[i][b, ...].clone()
+            )
 
     return cube_dice
 
@@ -139,12 +139,12 @@ def run(
 
     """
 
-    assert (
-        len(equi.shape) == 4
-    ), f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
-    assert len(equi) == len(
-        rots
-    ), f"ERR: length of equi and rot differs: {len(equi)} vs {len(rots)}"
+    assert len(equi.shape) == 4, (
+        f"ERR: input `equi` should be 4-dim (b, c, h, w), but got {len(equi.shape)}"
+    )
+    assert len(equi) == len(rots), (
+        f"ERR: length of equi and rot differs: {len(equi)} vs {len(rots)}"
+    )
 
     equi_dtype = equi.dtype
     assert equi_dtype in (

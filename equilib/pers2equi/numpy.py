@@ -43,7 +43,9 @@ def prep_matrices(
     skew: float = 0.0,
     dtype: np.dtype = np.dtype(np.float32),
 ) -> Tuple[np.ndarray, np.ndarray]:
-    m = create_normalized_grid(height=height, width=width, batch=batch, dtype=dtype)
+    m = create_normalized_grid(
+        height=height, width=width, batch=batch, dtype=dtype
+    )
     m = m[..., np.newaxis]
 
     G = create_global2cam_matrix(
@@ -59,7 +61,9 @@ def matmul(
     if method == "robust":
         # When target image size is smaller, it might be faster with `matmul`
         # but not by much
-        M = np.matmul(np.matmul(G[np.newaxis, ...], R)[:, np.newaxis, np.newaxis, ...], m)
+        M = np.matmul(
+            np.matmul(G[np.newaxis, ...], R)[:, np.newaxis, np.newaxis, ...], m
+        )
     elif method == "faster":
         # `einsum` is probably fastest, but it might not be accurate
         # I've tested it, and it's really close when it is float64,
@@ -79,9 +83,7 @@ def matmul(
     return M
 
 
-def convert_grid(
-    M: np.ndarray, h_pers: int, w_pers: int
-) -> np.ndarray:
+def convert_grid(M: np.ndarray, h_pers: int, w_pers: int) -> np.ndarray:
     # calculate image coordinates
     ui = M[..., 0] / M[..., 2]
     uj = M[..., 1] / M[..., 2]
@@ -138,12 +140,12 @@ def run(
     """
 
     # NOTE: Assume that the inputs `pers` and `rots` are already batched up
-    assert (
-        len(pers.shape) == 4
-    ), f"ERR: input `pers` should be 4-dim (b, c, h, w), but got {len(pers.shape)}"
-    assert len(pers) == len(
-        rots
-    ), f"ERR: batch size of pers and rot differs: {len(pers)} vs {len(rots)}"
+    assert len(pers.shape) == 4, (
+        f"ERR: input `pers` should be 4-dim (b, c, h, w), but got {len(pers.shape)}"
+    )
+    assert len(pers) == len(rots), (
+        f"ERR: batch size of pers and rot differs: {len(pers)} vs {len(rots)}"
+    )
 
     pers_dtype = pers.dtype
     assert pers_dtype in (np.uint8, np.float32, np.float64), (

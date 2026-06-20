@@ -37,12 +37,12 @@ def create_grid(
 
     # batched (stacked copies)
     if batch is not None:
-        assert isinstance(
-            batch, int
-        ), f"ERR: batch needs to be integer: batch={batch}"
-        assert (
-            batch > 0
-        ), f"ERR: batch size needs to be larger than 0: batch={batch}"
+        assert isinstance(batch, int), (
+            f"ERR: batch needs to be integer: batch={batch}"
+        )
+        assert batch > 0, (
+            f"ERR: batch size needs to be larger than 0: batch={batch}"
+        )
         # FIXME: faster way of copying?
         grid = np.concatenate([grid[np.newaxis, ...]] * batch)
         # grid shape is (b, h, w, 3)
@@ -84,12 +84,12 @@ def create_normalized_grid(
     grid = np.stack((x, y, z), axis=-1)
 
     if batch is not None:
-        assert isinstance(
-            batch, int
-        ), f"ERR: batch needs to be integer: batch={batch}"
-        assert (
-            batch > 0
-        ), f"ERR: batch size needs to be larger than 0: batch={batch}"
+        assert isinstance(batch, int), (
+            f"ERR: batch needs to be integer: batch={batch}"
+        )
+        assert batch > 0, (
+            f"ERR: batch size needs to be larger than 0: batch={batch}"
+        )
         # FIXME: faster way of copying?
         grid = np.concatenate([grid[np.newaxis, ...]] * batch)
         # grid shape is (b, h, w, 3)
@@ -146,12 +146,12 @@ def create_xyz_grid(
     out[:, 5 * w_face : 6 * w_face, 2] = -0.5
 
     if batch is not None:
-        assert isinstance(
-            batch, int
-        ), f"ERR: batch needs to be integer: batch={batch}"
-        assert (
-            batch > 0
-        ), f"ERR: batch size needs to be larger than 0: batch={batch}"
+        assert isinstance(batch, int), (
+            f"ERR: batch needs to be integer: batch={batch}"
+        )
+        assert batch > 0, (
+            f"ERR: batch size needs to be larger than 0: batch={batch}"
+        )
         # FIXME: faster way of copying?
         out = np.concatenate([out[np.newaxis, ...]] * batch)
 

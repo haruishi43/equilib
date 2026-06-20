@@ -3,7 +3,6 @@
 from functools import lru_cache
 from typing import Dict, List, Tuple
 
-import numpy as np
 import torch
 
 from equilib.grid_sample import torch_grid_sample
@@ -13,7 +12,6 @@ from equilib.torch_utils import (
     create_intrinsic_matrix,
     create_rotation_matrices,
     get_device,
-    pi,
 )
 
 
@@ -74,7 +72,9 @@ def matmul(m: torch.Tensor, G: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
 
 
 def convert_grid(
-    M: torch.Tensor, h_pers: int, w_pers: int,
+    M: torch.Tensor,
+    h_pers: int,
+    w_pers: int,
 ) -> torch.Tensor:
     # calculate image coordinates
     ui = M[..., 0] / M[..., 2]
@@ -124,12 +124,12 @@ def run(
 
     """
 
-    assert (
-        len(pers.shape) == 4
-    ), f"ERR: input `pers` should be 4-dim (b, c, h, w), but got {len(pers.shape)}"
-    assert len(pers) == len(
-        rots
-    ), f"ERR: length of pers and rot differs: {len(pers)} vs {len(rots)}"
+    assert len(pers.shape) == 4, (
+        f"ERR: input `pers` should be 4-dim (b, c, h, w), but got {len(pers.shape)}"
+    )
+    assert len(pers) == len(rots), (
+        f"ERR: length of pers and rot differs: {len(pers)} vs {len(rots)}"
+    )
 
     pers_dtype = pers.dtype
     assert pers_dtype in (
@@ -220,7 +220,7 @@ def run(
 
     mask = torch.logical_or(grid[:, 0] < 0, grid[:, 1] < 0)
     mask = mask[:, None].repeat_interleave(pers.shape[1], dim=1)
-    
+
     # grid sample
     out = torch_grid_sample(
         img=pers,
@@ -240,4 +240,3 @@ def run(
     )
 
     return out
-
