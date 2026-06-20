@@ -64,7 +64,6 @@ exclude = [
   "/benchmarks",
   "/data",
   "/results",
-  "/.img",
   "/.github",
   "/docs",
 ]

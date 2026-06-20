@@ -2,7 +2,7 @@
 
 **Processing Equirectangular Images with Python**
 
-![equilib](https://raw.githubusercontent.com/haruishi43/equilib/master/.img/equilib.png)
+![equilib](img/equilib.png)
 
 `equilib` is a library for processing equirectangular (360°) images in Python.
 
