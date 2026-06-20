@@ -3,7 +3,7 @@
 __version__ = "0.5.8"
 __author__ = "Haruya Ishikawa"
 __email__ = "haru.ishi43@gmail.com"
-__homepage__ = "www.hoge.com"
+__homepage__ = "https://github.com/haruishi43/equilib"
 __description__ = (
     "equirectangular image processing with python using minimum dependencies"
 )
