@@ -11,12 +11,13 @@
   <a href="https://pypi.org/project/pyequilib"><img src="https://img.shields.io/pypi/pyversions/pyequilib"></a>
   <a href="https://github.com/haruishi43/equilib/actions"><img src="https://github.com/haruishi43/equilib/workflows/ci/badge.svg"></a>
   <a href="https://github.com/haruishi43/equilib/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/haruishi43/equilib"></a>
+  <a href="https://haruishi43.github.io/equilib/"><img alt="Documentation" src="https://img.shields.io/badge/docs-mkdocs-blue"></a>
 </div>
 
 <img src=".img/equilib.png" alt="equilib" width="720"/>
 
 - A library for processing equirectangular image that runs on Python.
-- Developed using Python>=3.6 (`c++` is WIP).
+- Developed using Python>=3.9 (`c++` is WIP).
 - Compatible with `cuda` tensors for faster processing.
 - No need for other dependencies except for `numpy` and `torch`.
 - Added functionality like creating rotation matrices, batched processing, and automatic type detection.
@@ -29,7 +30,7 @@ If you found this module helpful to your project, please site this repository:
   author = {Haruya Ishikawa},
   title = {PyEquilib: Processing Equirectangular Images with Python},
   url = {http://github.com/haruishi43/equilib},
-  version = {0.5.0},
+  version = {0.5.8},
   year = {2021},
 }
 ```
@@ -37,25 +38,25 @@ If you found this module helpful to your project, please site this repository:
 ## Installation:
 
 Prerequisites:
-- Python (>=3.6)
+- Python (>=3.9)
 - Pytorch (tested on 1.12)
 
 ```Bash
 pip install pyequilib
 ```
 
-For developing, use:
+For developing, this project uses [uv](https://docs.astral.sh/uv/):
 
 ```Bash
-git clone --recursive https://github.com/haruishi43/equilib.git
+git clone https://github.com/haruishi43/equilib.git
 cd equilib
 
-pip install -r requirements.txt
-
-pip install -e .
-# or
-python setup.py develop
+# create the virtual environment and install the package + dev tools
+uv sync --group dev
 ```
+
+Image and video assets are stored with [Git LFS](https://git-lfs.com/); run
+`git lfs install` once before cloning.
 
 __NOTE__: might not work for PyTorch>=2.0. If you have any issues, please open an issue.
 
@@ -163,7 +164,7 @@ pers_img = equi2pers(
 </td>
 </table>
 
-For more information about how each APIs work, take a look in [.readme](.readme/) or go through example codes in the `tests` or `scripts`.
+For more information about how each API works, see the [documentation](https://haruishi43.github.io/equilib/) or go through the example codes in `tests`, `benchmarks`, or `scripts`.
 
 
 ### Coordinate System:
@@ -196,9 +197,9 @@ See [here](equilib/grid_sample/README.md) for more info on implementations.
 
 Some notes:
 
-- By default, `numpy`'s [`grid_sample`](equilib/grid_sample/numpy/) will use pure `numpy` implementation. It is possible to override this implementation with `scipy` and `cv2`'s implementation using [`override_func`](tests/equi2pers/numpy_run_baselines.py).
+- By default, `numpy`'s [`grid_sample`](equilib/grid_sample/numpy/) will use pure `numpy` implementation. It is possible to override this implementation with `scipy` and `cv2`'s implementation using [`override_func`](benchmarks/equi2pers/numpy_run_baselines.py).
 - By default, `torch`'s [`grid_sample`](equilib/grid_sample/torch/) will use the official implementation.
-- Benchmarking codes are stored in `tests/`. For example, benchmarking codes for `numpy`'s `equi2pers` is located in [`tests/equi2pers/numpy_run_baselines.py`](tests/equi2pers/numpy_run_baselines.py) and you can benchmark the runtime performance using different parameters against `scipy` and `cv2`.
+- Benchmarking codes are stored in `benchmarks/`. For example, benchmarking codes for `numpy`'s `equi2pers` are located in [`benchmarks/equi2pers/numpy_run_baselines.py`](benchmarks/equi2pers/numpy_run_baselines.py) and you can benchmark the runtime performance using different parameters against `scipy` and `cv2`.
 
 ## Develop:
 
@@ -206,7 +207,7 @@ Test files for `equilib` are included under `tests`.
 
 Running tests:
 ```Bash
-pytest tests
+uv run pytest tests
 ```
 
 Note that I have added codes to benchmark every step of the process so that it is possible to optimize the code.
@@ -216,7 +217,7 @@ Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
 
 ### TODO:
 
-- [ ] Documentations for each transform
+- [x] Documentations for each transform
 - [x] Add table and statistics for speed improvements
 - [x] Batch processing for `numpy`
 - [x] Mixed precision for `torch`
