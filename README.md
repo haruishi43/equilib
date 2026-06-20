@@ -39,7 +39,7 @@ If you found this module helpful to your project, please site this repository:
 
 Prerequisites:
 - Python (>=3.9)
-- Pytorch (tested on 1.12)
+- PyTorch (>=2.8)
 
 ```Bash
 pip install pyequilib
@@ -58,7 +58,7 @@ uv sync --group dev
 Image and video assets are stored with [Git LFS](https://git-lfs.com/); run
 `git lfs install` once before cloning.
 
-__NOTE__: might not work for PyTorch>=2.0. If you have any issues, please open an issue.
+__NOTE__: tested against PyTorch>=2.8. If you have any issues, please open an issue.
 
 ## Basic Usage:
 

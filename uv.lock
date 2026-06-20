@@ -1888,7 +1888,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "numpy" },
-    { name = "torch" },
+    { name = "torch", specifier = ">=2.8" },
 ]
 
 [package.metadata.requires-dev]

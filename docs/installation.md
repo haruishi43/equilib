@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Python `>=3.9`
-- PyTorch (a recent release; see the note below)
+- PyTorch `>=2.8`
 
 ## Install from PyPI
 
@@ -33,6 +33,6 @@ uv run ruff format .         # format
 ```
 
 !!! note
-    `equilib` was originally developed and tested against PyTorch 1.12. Newer
-    PyTorch releases generally work, but if you hit a numerical or API issue,
-    please [open an issue](https://github.com/haruishi43/equilib/issues).
+    `equilib` is tested against PyTorch `>=2.8`. Older releases may work but are
+    not supported; if you hit a numerical or API issue, please
+    [open an issue](https://github.com/haruishi43/equilib/issues).
