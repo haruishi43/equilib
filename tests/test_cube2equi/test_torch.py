@@ -117,9 +117,9 @@ def bench_cpu(
     assert (
         numpy_out.dtype == native_out.dtype == pure_out.dtype == torch_dtype
     ), "output dtypes should match"
-    assert (
-        numpy_out.shape == native_out.shape == pure_out.shape
-    ), "output dims should match"
+    assert numpy_out.shape == native_out.shape == pure_out.shape, (
+        "output dims should match"
+    )
 
     # quantitative
     print()
@@ -241,9 +241,9 @@ def bench_gpu(
     assert (
         numpy_out.dtype == native_out.dtype == pure_out.dtype == torch_dtype
     ), "output dtypes should match"
-    assert (
-        numpy_out.shape == native_out.shape == pure_out.shape
-    ), "output dims should match"
+    assert numpy_out.shape == native_out.shape == pure_out.shape, (
+        "output dims should match"
+    )
 
     # quantitative
     print()

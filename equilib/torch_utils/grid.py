@@ -47,12 +47,12 @@ def create_grid(
 
     # batched (stacked copies)
     if batch is not None:
-        assert isinstance(
-            batch, int
-        ), f"ERR: batch needs to be integer: batch={batch}"
-        assert (
-            batch > 0
-        ), f"ERR: batch size needs to be larger than 0: batch={batch}"
+        assert isinstance(batch, int), (
+            f"ERR: batch needs to be integer: batch={batch}"
+        )
+        assert batch > 0, (
+            f"ERR: batch size needs to be larger than 0: batch={batch}"
+        )
         # FIXME: faster way of copying?
         grid = torch.cat([grid.unsqueeze(0)] * batch)
         # grid shape is (b, h, w, 3)
@@ -103,12 +103,12 @@ def create_normalized_grid(
 
     # batched (stacked copies)
     if batch is not None:
-        assert isinstance(
-            batch, int
-        ), f"ERR: batch needs to be integer: batch={batch}"
-        assert (
-            batch > 0
-        ), f"ERR: batch size needs to be larger than 0: batch={batch}"
+        assert isinstance(batch, int), (
+            f"ERR: batch needs to be integer: batch={batch}"
+        )
+        assert batch > 0, (
+            f"ERR: batch size needs to be larger than 0: batch={batch}"
+        )
         # FIXME: faster way of copying?
         grid = torch.cat([grid.unsqueeze(0)] * batch)
         # grid shape is (b, h, w, 3)
@@ -171,12 +171,12 @@ def create_xyz_grid(
     out[:, 5 * w_face : 6 * w_face, 2] = -0.5
 
     if batch is not None:
-        assert isinstance(
-            batch, int
-        ), f"ERR: batch needs to be integer: batch={batch}"
-        assert (
-            batch > 0
-        ), f"ERR: batch size needs to be larger than 0: batch={batch}"
+        assert isinstance(batch, int), (
+            f"ERR: batch needs to be integer: batch={batch}"
+        )
+        assert batch > 0, (
+            f"ERR: batch size needs to be larger than 0: batch={batch}"
+        )
         # FIXME: faster way of copying?
         out = torch.cat([out.unsqueeze(0)] * batch)
         # grid shape is (b, h, w, 3)

@@ -41,9 +41,9 @@ def native(
 
     """
 
-    assert (
-        grid.dtype == img.dtype
-    ), "ERR: img and grid should have the same dtype"
+    assert grid.dtype == img.dtype, (
+        "ERR: img and grid should have the same dtype"
+    )
 
     _, _, h, w = img.shape
 

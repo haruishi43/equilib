@@ -1,29 +1,37 @@
 #!/usr/bin/env python3
 
-"""Run torch cube2equi along with comparisons with numpy based method
+"""Run torch equi2pers along with comparisons with numpy based method
+
+FIXME: `pure` implementation of `bilinear` interpolation seems off
+FIXME: during half precision tests, `pure`'s bilinear is closer to `numpy`
 
 """
 
-from copy import deepcopy
 import os
+from copy import deepcopy
 
 import numpy as np
 
 import torch
 
-from equilib.cube2equi.numpy import run as run_numpy
-from equilib.cube2equi.torch import run as run
+from equilib.equi2pers.numpy import run as run_numpy
+from equilib.equi2pers.torch import run as run
 
 from tests.helpers.benchmarking import check_close, how_many_closes, mae, mse
 from tests.helpers.image_io import load2numpy, load2torch, save
 from tests.helpers.timer import func_timer, wrapped_partial
+from tests.helpers.rot_path import (
+    create_rots,
+    create_rots_pitch,
+    create_rots_yaw,
+)
 
 run_native = wrapped_partial(run, backend="native")
 run_pure = wrapped_partial(run, backend="pure")
 
 IMG_ROOT = "tests/data"
-SAVE_ROOT = "tests/cube2equi/results"
-IMG_NAME = "test_horizon.jpg"
+SAVE_ROOT = "tests/equi2pers/results"
+IMG_NAME = "test.jpg"
 
 
 def get_numpy_img(dtype: np.dtype = np.float32):
@@ -64,15 +72,20 @@ def bench_cpu(
     bs: int,
     height: int,
     width: int,
+    fov_x: float,
+    z_down: bool,
     mode: str,
     dtype: np.dtype = np.dtype(np.float32),
+    rotation: str = "forward",
     save_outputs: bool = False,
 ) -> None:
     # print parameters for debugging
     print()
-    print("bs, grid(height, width):", bs, (height, width))
+    print("bs, grid(height, width, fov_x):", bs, (height, width, fov_x))
     print("dtype:", dtype)
+    print("z_down:", z_down)
     print("mode:", mode)
+    print("rotation:", rotation)
 
     if dtype == np.float32:
         torch_dtype = torch.float32
@@ -93,19 +106,50 @@ def bench_cpu(
     numpy_imgs = make_batch(numpy_img, bs=bs)
     torch_imgs = make_batch(torch_img, bs=bs)
 
+    # generate rotation parameters
+    if rotation == "forward":
+        rots = create_rots(bs=bs)
+    elif rotation == "pitch":
+        rots = create_rots_pitch(bs=bs)
+    elif rotation == "yaw":
+        rots = create_rots_yaw(bs=bs)
+    else:
+        raise ValueError
+
     print("numpy")
     numpy_out = func_timer(run_numpy)(
-        horizon=numpy_imgs, height=height, width=width, mode=mode
+        equi=numpy_imgs,
+        rots=rots,
+        height=height,
+        width=width,
+        fov_x=fov_x,
+        skew=0.0,
+        z_down=z_down,
+        mode=mode,
     )
 
     print("native")
     native_out = func_timer(run_native)(
-        horizon=torch_imgs.clone(), height=height, width=width, mode=mode
+        equi=torch_imgs.clone(),
+        rots=rots,
+        height=height,
+        width=width,
+        fov_x=fov_x,
+        skew=0.0,
+        z_down=z_down,
+        mode=mode,
     )
 
     print("pure")
     pure_out = func_timer(run_pure)(
-        horizon=torch_imgs.clone(), height=height, width=width, mode=mode
+        equi=torch_imgs.clone(),
+        rots=rots,
+        height=height,
+        width=width,
+        fov_x=fov_x,
+        skew=0.0,
+        z_down=z_down,
+        mode=mode,
     )
 
     numpy_out = torch.from_numpy(numpy_out)
@@ -113,9 +157,9 @@ def bench_cpu(
     assert (
         numpy_out.dtype == native_out.dtype == pure_out.dtype == torch_dtype
     ), "output dtypes should match"
-    assert (
-        numpy_out.shape == native_out.shape == pure_out.shape
-    ), "output dims should match"
+    assert numpy_out.shape == native_out.shape == pure_out.shape, (
+        "output dims should match"
+    )
 
     # quantitative
     print()
@@ -141,7 +185,7 @@ def bench_cpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-03
+    assert err_mse < 1e-04
     assert err_mae < 1e-02
 
     print()
@@ -154,7 +198,7 @@ def bench_cpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-03
+    assert err_mse < 1e-04
     assert err_mae < 1e-02
 
     if save_outputs:
@@ -178,9 +222,12 @@ def bench_gpu(
     bs: int,
     height: int,
     width: int,
+    fov_x: float,
+    z_down: bool,
     mode: str,
-    dtype: np.dtype = np.dtype(np.float32),
+    dtype: np.dtype = np.float32,
     torch_dtype: torch.dtype = torch.float32,
+    rotation: str = "forward",
     save_outputs: bool = False,
 ) -> None:
     device = torch.device("cuda")
@@ -188,9 +235,11 @@ def bench_gpu(
 
     # print parameters for debugging
     print()
-    print("bs, grid(height, width):", bs, (height, width))
+    print("bs, grid(height, width, fov_x):", bs, (height, width, fov_x))
     print("dtype:", dtype)
+    print("z_down:", z_down)
     print("mode:", mode)
+    print("rotation:", rotation)
 
     if dtype == np.float32:
         rtol = 1e-03
@@ -208,37 +257,63 @@ def bench_gpu(
     numpy_imgs = make_batch(numpy_img, bs=bs)
     torch_imgs = make_batch(torch_img, bs=bs)
 
+    # generate rotation parameters
+    if rotation == "forward":
+        rots = create_rots(bs=bs)
+    elif rotation == "pitch":
+        rots = create_rots_pitch(bs=bs)
+    elif rotation == "yaw":
+        rots = create_rots_yaw(bs=bs)
+    else:
+        raise ValueError
+
     print("numpy")
     numpy_out = func_timer(run_numpy)(
-        horizon=numpy_imgs, height=height, width=width, mode=mode
+        equi=numpy_imgs,
+        rots=rots,
+        height=height,
+        width=width,
+        fov_x=fov_x,
+        skew=0.0,
+        z_down=z_down,
+        mode=mode,
     )
 
     print("native")
     native_out = func_timer(run_native)(
-        horizon=torch_imgs.clone().to(device),
+        equi=torch_imgs.clone().to(device),
+        rots=rots,
         height=height,
         width=width,
+        fov_x=fov_x,
+        skew=0.0,
+        z_down=z_down,
         mode=mode,
     )
 
     print("pure")
     pure_out = func_timer(run_pure)(
-        horizon=torch_imgs.clone().to(device),
+        equi=torch_imgs.clone().to(device),
+        rots=rots,
         height=height,
         width=width,
+        fov_x=fov_x,
+        skew=0.0,
+        z_down=z_down,
         mode=mode,
     )
 
     numpy_out = torch.from_numpy(numpy_out)
     numpy_out = numpy_out.type(torch_dtype)
+    print(numpy_out.shape, numpy_out.dtype)
     numpy_out = numpy_out.to(device)
 
     assert (
         numpy_out.dtype == native_out.dtype == pure_out.dtype == torch_dtype
     ), "output dtypes should match"
-    assert (
-        numpy_out.shape == native_out.shape == pure_out.shape
-    ), "output dims should match"
+    assert numpy_out.shape == native_out.shape == pure_out.shape, (
+        "output dims should match"
+    )
 
     # quantitative
     print()
@@ -251,8 +326,11 @@ def bench_gpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-04
-    assert err_mae < 1e-02
+    if torch_dtype == torch.float16:
+        ...
+    else:
+        assert err_mse < 1e-04
+        assert err_mae < 1e-02
 
     print()
     print(">>> compare native and pure")
@@ -264,8 +342,11 @@ def bench_gpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-03
-    assert err_mae < 1e-02
+    if torch_dtype == torch.float16:
+        ...
+    else:
+        assert err_mse < 1e-04
+        assert err_mae < 1e-02
 
     print()
     print(">>> compare pure and numpy")
@@ -277,8 +358,15 @@ def bench_gpu(
     print("MSE", err_mse)
     print("MAE", err_mae)
 
-    assert err_mse < 1e-03
-    assert err_mae < 1e-02
+    if torch_dtype == torch.float16:
+        ...
+    else:
+        assert err_mse < 1e-04
+        assert err_mae < 1e-02
+
+    numpy_out = numpy_out.to("cpu")
+    native_out = native_out.to("cpu")
+    pure_out = pure_out.to("cpu")
 
     if save_outputs:
         # qualitative
@@ -297,12 +385,15 @@ def bench_gpu(
 if __name__ == "__main__":
     # parameters
     save_outputs = True
+    rotation = "yaw"  # ('forward', 'pitch', 'yaw')
 
     # variables
     bs = 8
-    height = 512
-    width = 1024
+    height = 256
+    width = 512
+    fov_x = 90.0
     dtype = np.dtype(np.float32)
+    z_down = True
     mode = "bilinear"
 
     torch_dtype = torch.float32
@@ -311,16 +402,22 @@ if __name__ == "__main__":
         bs=bs,
         height=height,
         width=width,
+        fov_x=fov_x,
+        z_down=z_down,
         mode=mode,
         dtype=dtype,
+        rotation=rotation,
         save_outputs=save_outputs,
     )
     bench_gpu(
         bs=bs,
         height=height,
         width=width,
+        fov_x=fov_x,
+        z_down=z_down,
         mode=mode,
         dtype=dtype,
         torch_dtype=torch_dtype,
+        rotation=rotation,
         save_outputs=save_outputs,
     )

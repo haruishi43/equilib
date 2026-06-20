@@ -1,0 +1,54 @@
+site_name: equilib
+site_description: Processing Equirectangular Images with Python
+site_url: https://haruishi43.github.io/equilib/
+repo_url: https://github.com/haruishi43/equilib
+repo_name: haruishi43/equilib
+edit_uri: edit/master/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Coordinate System: coordinate-system.md
+  - Grid Sampling: grid-sampling.md
+  - Benchmarks: benchmarks.md
+  - API Reference: api.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: null
+            show_source: true
+            show_root_heading: true
+            members_order: source

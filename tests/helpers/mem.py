@@ -11,8 +11,7 @@ import torch
 
 
 class MemSize:
-    def __init__(self, size: int) -> None:
-        ...
+    def __init__(self, size: int) -> None: ...
 
 
 def convert_size_decimal(size_bytes: int) -> str:

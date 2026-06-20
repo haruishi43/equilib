@@ -8,147 +8,97 @@
 
 <div align="center">
   <a href="https://badge.fury.io/py/pyequilib"><img src="https://badge.fury.io/py/pyequilib.svg" alt="PyPI version"></a>
-  <a href="https://pypi.org/project/pyequilib"><img src="https://img.shields.io/pypi/pyversions/pyequilib"></a>
-  <a href="https://github.com/haruishi43/equilib/actions"><img src="https://github.com/haruishi43/equilib/workflows/ci/badge.svg"></a>
+  <a href="https://pypi.org/project/pyequilib"><img src="https://img.shields.io/pypi/pyversions/pyequilib" alt="Python versions"></a>
+  <a href="https://github.com/haruishi43/equilib/actions"><img src="https://github.com/haruishi43/equilib/workflows/ci/badge.svg" alt="CI"></a>
   <a href="https://github.com/haruishi43/equilib/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/haruishi43/equilib"></a>
+  <a href="https://haruishi43.github.io/equilib/"><img alt="Documentation" src="https://img.shields.io/badge/docs-mkdocs-blue"></a>
 </div>
 
-<img src=".img/equilib.png" alt="equilib" width="720"/>
+<img src="https://raw.githubusercontent.com/haruishi43/equilib/master/docs/img/equilib.png" alt="equilib" width="720"/>
 
-- A library for processing equirectangular image that runs on Python.
-- Developed using Python>=3.6 (`c++` is WIP).
-- Compatible with `cuda` tensors for faster processing.
-- No need for other dependencies except for `numpy` and `torch`.
-- Added functionality like creating rotation matrices, batched processing, and automatic type detection.
-- Works with various input modals
-- Highly modular
+`equilib` is a library for processing equirectangular (360°) images in Python.
 
-If you found this module helpful to your project, please site this repository:
-```
-@software{pyequilib2021github,
-  author = {Haruya Ishikawa},
-  title = {PyEquilib: Processing Equirectangular Images with Python},
-  url = {http://github.com/haruishi43/equilib},
-  version = {0.5.0},
-  year = {2021},
-}
-```
+- Pure Python, with `numpy` and `torch` as the only runtime dependencies.
+- Runs on CPU and CUDA tensors, with batched and mixed-precision processing.
+- Automatic input-type detection (`numpy.ndarray` or `torch.Tensor`).
+- Extras such as rotation-matrix creation and a customizable grid sampler.
+- Highly modular and extensible.
 
-## Installation:
+📖 **Full documentation: <https://haruishi43.github.io/equilib/>**
+
+## Installation
 
 Prerequisites:
-- Python (>=3.6)
-- Pytorch (tested on 1.12)
 
-```Bash
+- Python `>=3.9`
+- PyTorch `>=2.8`
+
+```bash
 pip install pyequilib
 ```
 
-For developing, use:
+## Transforms
 
-```Bash
-git clone --recursive https://github.com/haruishi43/equilib.git
-cd equilib
+`equilib` provides transforms between equirectangular, cubemap, and perspective
+images. Each transform ships both a `class` API and a `func` API.
 
-pip install -r requirements.txt
+| Transform | Description |
+| --- | --- |
+| `Cube2Equi` / `cube2equi` | cubemap → equirectangular |
+| `Equi2Cube` / `equi2cube` | equirectangular → cubemap |
+| `Equi2Equi` / `equi2equi` | equirectangular → equirectangular |
+| `Equi2Pers` / `equi2pers` | equirectangular → perspective |
+| `Pers2Equi` / `pers2equi` | perspective → equirectangular |
 
-pip install -e .
-# or
-python setup.py develop
-```
+The `class` API instantiates a reusable object configured once; the `func` API
+takes the configuration on every call. The `class` API calls the `func` API
+internally, so there is no behavioral difference — both are extensible.
 
-__NOTE__: might not work for PyTorch>=2.0. If you have any issues, please open an issue.
+Inputs are channel-first (`BxCxHxW` or `CxHxW`); the output type matches the
+input. Common arguments shared across transforms:
 
-## Basic Usage:
+- `rots`: rotation as three angles [pitch, yaw, roll](https://simple.wikipedia.org/wiki/Pitch,_yaw,_and_roll) in radians.
+- `z_down` (`bool`): use a z-axis-down coordinate system. Default `False`.
+- `mode` (`str`): interpolation mode. Default `"bilinear"`.
+- `clip_output` (`bool`): clip values to the input range. Default `True`.
 
-`equilib` has different transforms of equirectangular (or cubemap) images (note each transform has `class` and `func` APIs):
-- `Cube2Equi`/`cube2equi`: cubemap to equirectangular transform
-- `Equi2Cube`/`equi2cube`: equirectangular to cubemap transform
-- `Equi2Equi`/`equi2equi`: equirectangular transform
-- `Equi2Pers`/`equi2pers`: equirectangular to perspective transform
-- `Pers2Equi`/`pers2equi`: perspective to equirectangular transform
+## Basic usage
 
-There are no _real_ differences in `class` or `func` APIs:
-- `class` APIs will allow instantiating a class which you can call many times without having to specify configurations (`class` APIs call the `func` API)
-- `func` APIs are useful when there are no repetitive calls
-- both `class` and `func` APIs are extensible, so you can extend them to your use-cases or create a method that's more optimized (pull requests are welcome btw)
+Example with `Equi2Pers` / `equi2pers`.
 
-Each API automatically detects the input data type (`numpy.ndarray` or `torch.Tensor`), and outputs are the same type. The data layout for input images should be channel-first with dimensions either `BxCxHxW` or `CxHxW`.
+**`class` API**
 
-The arguments for each `class` or `func` depends on the transform, but here are the common arguments:
-- `rots`: used to specify the rotation using three angles [pitch, yaw, roll](https://simple.wikipedia.org/wiki/Pitch,_yaw,_and_roll) in radians.
-- `z_down (bool)`: whether to use a coordinate system with z-axis pointing down, defaults to `False`
-- `mode (str)`: interpolation mode, defaults to `bilinear`
-- `clip_output (bool)`: whether to clip values based on the range of the input values, default to `True`
-
-An example for `Equi2Pers`/`equi2pers`:
-
-<table>
-<tr>
-<td><pre>Equi2Pers</pre></td>
-<td><pre>equi2pers</pre></td>
-</tr>
-
-<tr>
-<td>
-<pre>
-
-```Python
+```python
 import numpy as np
 from PIL import Image
 from equilib import Equi2Pers
 
-# Input equirectangular image
-equi_img = Image.open("./some_image.jpg")
-equi_img = np.asarray(equi_img)
+# Input equirectangular image (channel-first: HWC -> CHW)
+equi_img = np.asarray(Image.open("./some_image.jpg"))
 equi_img = np.transpose(equi_img, (2, 0, 1))
 
-# rotations
 rots = {
-    'roll': 0.,
-    'pitch': np.pi/4,  # rotate vertical
-    'yaw': np.pi/4,  # rotate horizontal
+    "roll": 0.0,
+    "pitch": np.pi / 4,  # rotate vertical
+    "yaw": np.pi / 4,    # rotate horizontal
 }
 
-# Intialize equi2pers
-equi2pers = Equi2Pers(
-    height=480,
-    width=640,
-    fov_x=90.0,
-    mode="bilinear",
-)
-
-# obtain perspective image
-pers_img = equi2pers(
-    equi=equi_img,
-    rots=rots,
-)
+equi2pers = Equi2Pers(height=480, width=640, fov_x=90.0, mode="bilinear")
+pers_img = equi2pers(equi=equi_img, rots=rots)
 ```
 
-</pre>
-</td>
+**`func` API**
 
-<td>
-<pre>
-
-```Python
+```python
 import numpy as np
 from PIL import Image
 from equilib import equi2pers
 
-# Input equirectangular image
-equi_img = Image.open("./some_image.jpg")
-equi_img = np.asarray(equi_img)
+equi_img = np.asarray(Image.open("./some_image.jpg"))
 equi_img = np.transpose(equi_img, (2, 0, 1))
 
-# rotations
-rots = {
-    'roll': 0.,
-    'pitch': np.pi/4,  # rotate vertical
-    'yaw': np.pi/4,  # rotate horizontal
-}
+rots = {"roll": 0.0, "pitch": np.pi / 4, "yaw": np.pi / 4}
 
-# Run equi2pers
 pers_img = equi2pers(
     equi=equi_img,
     rots=rots,
@@ -159,72 +109,80 @@ pers_img = equi2pers(
 )
 ```
 
-</pre>
-</td>
-</table>
+See the [documentation](https://haruishi43.github.io/equilib/) for every
+transform's arguments, or browse the examples under `tests`, `benchmarks`, and
+`scripts`.
 
-For more information about how each APIs work, take a look in [.readme](.readme/) or go through example codes in the `tests` or `scripts`.
+## Coordinate system
 
+A **right-handed XYZ global coordinate system**: `x-axis` faces forward and
+`z-axis` faces up.
 
-### Coordinate System:
-
-__Right-handed rule XYZ global coordinate system__. `x-axis` faces forward and `z-axis` faces up.
 - `roll`: counter-clockwise rotation about the `x-axis`
 - `pitch`: counter-clockwise rotation about the `y-axis`
 - `yaw`: counter-clockwise rotation about the `z-axis`
 
-You can chnage the right-handed coordinate system so that the `z-axis` faces down by adding `z_down=True` as a parameter.
+Pass `z_down=True` to flip the system so the `z-axis` faces down. See more in the
+[coordinate system docs](https://haruishi43.github.io/equilib/coordinate-system/).
 
-See demo scripts under `scripts`.
+## Grid sampling
 
+To process equirectangular images quickly, `equilib` relies on grid sampling and
+implements its own `numpy` and `torch` backends to minimize dependencies and
+exploit `cuda` and batching:
 
-## Grid Sampling
+- The `torch` backend uses the built-in `torch.nn.functional.grid_sample` by
+  default, with a customizable pure-`torch` implementation also available.
+- The `numpy` backend uses a pure-`numpy` implementation that is faster than
+  `scipy` and more robust than `cv2.remap`. You can override it with `scipy` or
+  `cv2` via the `override_func` argument.
 
-To process equirectangular images fast, whether to crop perspective images from the equirectangular image, the library takes advantage of grid sampling techniques.
-Some sampling techniques are already implemented, such as `scipy.ndimage.map_coordiantes` and `cv2.remap`.
-This project's goal was to reduce these dependencies and use `cuda` and batch processing with `torch` and `c++` for a faster processing of equirectangular images.
-There were not many projects online for these purposes.
-In this library, we implement varieties of methods using `c++`, `numpy`, and `torch`.
-This part of the code needs `cuda` acceleration because grid sampling is parallelizable.
-For `torch`, the built-in `torch.nn.functional.grid_sample` function is very fast and reliable.
-I have implemented a _pure_ `torch` implementation of `grid_sample` which is very customizable (might not be fast as the native function).
-For `numpy`, I have implemented grid sampling methods that are faster than `scipy` and more robust than `cv2.remap`.
-Just like with this implementation of `torch`, `numpy` implementation is just as customizable.
-It is also possible to pass the `scipy` and `cv2`'s grid sampling function through the use of `override_func` argument in `grid_sample`.
-Developing _faster_ approaches and `c++` methods are __WIP__.
-See [here](equilib/grid_sample/README.md) for more info on implementations.
+A `c++`/`cuda` implementation is **WIP**. See the
+[grid sampling docs](https://haruishi43.github.io/equilib/grid-sampling/) and the
+benchmark scripts in
+[`benchmarks/`](https://github.com/haruishi43/equilib/tree/master/benchmarks).
 
-Some notes:
+## Development
 
-- By default, `numpy`'s [`grid_sample`](equilib/grid_sample/numpy/) will use pure `numpy` implementation. It is possible to override this implementation with `scipy` and `cv2`'s implementation using [`override_func`](tests/equi2pers/numpy_run_baselines.py).
-- By default, `torch`'s [`grid_sample`](equilib/grid_sample/torch/) will use the official implementation.
-- Benchmarking codes are stored in `tests/`. For example, benchmarking codes for `numpy`'s `equi2pers` is located in [`tests/equi2pers/numpy_run_baselines.py`](tests/equi2pers/numpy_run_baselines.py) and you can benchmark the runtime performance using different parameters against `scipy` and `cv2`.
+This project uses [uv](https://docs.astral.sh/uv/) and
+[Ruff](https://docs.astral.sh/ruff/). Image/video assets are stored with
+[Git LFS](https://git-lfs.com/) (`git lfs install` once before cloning).
 
-## Develop:
+```bash
+git clone https://github.com/haruishi43/equilib.git
+cd equilib
+uv sync --group dev      # create the venv and install package + dev tools
 
-Test files for `equilib` are included under `tests`.
-
-Running tests:
-```Bash
-pytest tests
+uv run pytest tests      # run tests
+uv run ruff check .      # lint
+uv run ruff format .     # format
 ```
 
-Note that I have added codes to benchmark every step of the process so that it is possible to optimize the code.
-If you find there are optimal ways of the implementation or bugs, all pull requests and issues are welcome.
+Pull requests and issues are welcome. See
+[CONTRIBUTING.md](https://github.com/haruishi43/equilib/blob/master/CONTRIBUTING.md)
+for the full workflow, including how releases are published.
 
-Check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information
+## Roadmap
 
-### TODO:
+- [ ] `c++`/`cuda` grid sampling
+- [ ] More accurate intrinsic matrix using vertical FOV for `equi2pers`
+- [ ] Multiprocessing support (slow on `torch.distributed`)
 
-- [ ] Documentations for each transform
-- [x] Add table and statistics for speed improvements
-- [x] Batch processing for `numpy`
-- [x] Mixed precision for `torch`
-- [ ] `c++` version of grid sampling
-- [ ] More accurate intrinsic matrix formulation using vertial FOV for `equi2pers`
-- [ ] Multiprocessing support (slow when running on `torch.distributed`)
+## Citation
 
-## Acknowledgements:
+If this project was helpful to your work, please cite it:
+
+```bibtex
+@software{pyequilib2021github,
+  author = {Haruya Ishikawa},
+  title = {PyEquilib: Processing Equirectangular Images with Python},
+  url = {https://github.com/haruishi43/equilib},
+  version = {0.6.0},
+  year = {2021},
+}
+```
+
+## Acknowledgements
 
 - [py360convert](https://github.com/sunset1995/py360convert)
 - [Perspective-and-Equirectangular](https://github.com/timy90022/Perspective-and-Equirectangular)

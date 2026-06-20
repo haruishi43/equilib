@@ -47,7 +47,9 @@ class Pers2Equi(object):
         self.clip_output = clip_output
         # FIXME: maybe do useful stuff like precalculating the grid or something
 
-    def __call__(self, pers: ArrayLike, rots: Rot, fov_x: float, **kwargs) -> ArrayLike:
+    def __call__(
+        self, pers: ArrayLike, rots: Rot, fov_x: float, **kwargs
+    ) -> ArrayLike:
         # FIXME: should optimize since some parts of the code can be calculated
         # before hand.
         # 1. calculate grid

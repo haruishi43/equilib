@@ -13,8 +13,7 @@ from tests.helpers.benchmarking import check_close, mae, mse
 from tests.helpers.timer import func_timer
 
 
-def naive_bilinear(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor:
-    ...
+def naive_bilinear(img: torch.Tensor, grid: torch.Tensor) -> torch.Tensor: ...
 
 
 def faster_bilinear(

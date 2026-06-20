@@ -35,15 +35,13 @@ def get_gradient_3d(width, height, start_list, stop_list, is_horizontal_list):
 # Base Media Class
 
 
-class BaseImage:
-    ...
+class BaseImage: ...
 
 
 # Grayscale Image
 
 
-class GrayScaleImage:
-    ...
+class GrayScaleImage: ...
 
 
 def grayscale_gradient(
@@ -59,8 +57,7 @@ def grayscale_gradient(
 # RGB Image
 
 
-class RGB:
-    ...
+class RGB: ...
 
 
 def rgb_gradient(
@@ -86,8 +83,7 @@ def rgb_gradient(
 
 def depth_grayscale_gradient(
     height: int, width: int, dtype: np.dtype = np.dtype(np.float64)
-) -> np.ndarray:
-    ...
+) -> np.ndarray: ...
 
 
 if __name__ == "__main__":

@@ -78,9 +78,9 @@ def convert2horizon(
     # FIXME: better typing for mypy...
 
     if cube_format in ("horizon", "dice"):
-        assert isinstance(
-            cubemap, np.ndarray
-        ), f"ERR: cubemap {cube_format} needs to be a np.ndarray"
+        assert isinstance(cubemap, np.ndarray), (
+            f"ERR: cubemap {cube_format} needs to be a np.ndarray"
+        )
         if len(cubemap.shape) == 2:
             # single grayscale
             # NOTE: this rarely happens since we assume grayscales are (1, h, w)
@@ -95,9 +95,9 @@ def convert2horizon(
         if cube_format == "dice":
             cubemap = dice2horizon(cubemap)
     elif cube_format == "list":
-        assert isinstance(
-            cubemap, list
-        ), f"ERR: cubemap {cube_format} needs to be a list"
+        assert isinstance(cubemap, list), (
+            f"ERR: cubemap {cube_format} needs to be a list"
+        )
         if isinstance(cubemap[0], np.ndarray):
             # single
             cubemap = [cubemap]
@@ -106,16 +106,16 @@ def convert2horizon(
         if isinstance(cubemap, dict):
             cubemap = [cubemap]
         assert isinstance(cubemap, list)
-        assert isinstance(
-            cubemap[0], dict
-        ), f"ERR: cubemap {cube_format} needs to have dict inside the list"
+        assert isinstance(cubemap[0], dict), (
+            f"ERR: cubemap {cube_format} needs to have dict inside the list"
+        )
         cubemap = dict2horizon(cubemap)  # type: ignore
     else:
         raise ValueError(f"ERR: {cube_format} is not supported")
 
-    assert (
-        len(cubemap.shape) == 4
-    ), f"ERR: cubemap needs to be 4 dim, but got {cubemap.shape}"
+    assert len(cubemap.shape) == 4, (
+        f"ERR: cubemap needs to be 4 dim, but got {cubemap.shape}"
+    )
 
     return cubemap
 
@@ -273,9 +273,9 @@ def run(
 
     """
 
-    assert (
-        len(horizon.shape) == 4
-    ), f"ERR: `horizon` should be 4-dim (b, c, h, w), but got {horizon.shape}"
+    assert len(horizon.shape) == 4, (
+        f"ERR: `horizon` should be 4-dim (b, c, h, w), but got {horizon.shape}"
+    )
 
     horizon_dtype = horizon.dtype
     assert horizon_dtype in (np.uint8, np.float32, np.float64), (

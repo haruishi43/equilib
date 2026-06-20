@@ -85,12 +85,12 @@ def run(
 
     """
 
-    assert (
-        len(src.shape) == 4
-    ), f"ERR: input `src` should be 4-dim (b, c, h, w), but got {len(src.shape)}"
-    assert len(src) == len(
-        rots
-    ), f"ERR: length of `src` and `rot` differs: {len(src)} vs {len(rots)}"
+    assert len(src.shape) == 4, (
+        f"ERR: input `src` should be 4-dim (b, c, h, w), but got {len(src.shape)}"
+    )
+    assert len(src) == len(rots), (
+        f"ERR: length of `src` and `rot` differs: {len(src)} vs {len(rots)}"
+    )
 
     src_dtype = src.dtype
     assert src_dtype in (
@@ -129,9 +129,9 @@ def run(
     bs, c, h_equi, w_equi = src.shape
     src_device = get_device(src)
 
-    assert type(height) == type(
-        width
-    ), "ERR: `height` and `width` does not match types (maybe it was set separately?)"
+    assert type(height) == type(width), (
+        "ERR: `height` and `width` does not match types (maybe it was set separately?)"
+    )
     if height is None and width is None:
         height = h_equi
         width = w_equi

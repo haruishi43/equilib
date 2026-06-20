@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-"""Some codes to figure out if the 3x3 matrix inverse could be optimized
-"""
+"""Some codes to figure out if the 3x3 matrix inverse could be optimized"""
 
 from timeit import timeit
 

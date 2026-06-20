@@ -1,24 +1,91 @@
 [build-system]
-requires = [
-  "numpy",
-  "setuptools",
-  "torch",
-  "torchvision",
-  "wheel",
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyequilib"
+dynamic = ["version"]
+description = "equirectangular image processing with python using minimum dependencies"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [
+  { name = "Haruya Ishikawa", email = "haru.ishi43@gmail.com" },
 ]
-[tool.black]
-line_length = 80
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | github2pypi
-)/
-'''
+keywords = ["Equirectangular", "Computer Vision"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "numpy",
+  "torch>=2.8",
+]
+
+[project.urls]
+Homepage = "https://github.com/haruishi43/equilib"
+Repository = "https://github.com/haruishi43/equilib"
+Documentation = "https://haruishi43.github.io/equilib/"
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "numba",
+  "scipy",
+  "opencv-python-headless",
+  "pillow",
+  "torchvision",
+  "ruff",
+  "pre-commit",
+]
+docs = [
+  "mkdocs-material",
+  "mkdocstrings[python]",
+]
+
+[tool.hatch.version]
+path = "equilib/info.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["equilib"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/tests",
+  "/scripts",
+  "/benchmarks",
+  "/data",
+  "/results",
+  "/.github",
+  "/docs",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 80
+target-version = "py39"
+
+[tool.ruff.lint]
+# Keep the project's historically tolerant naming/style rules.
+ignore = [
+  "E203",  # whitespace before punctuation
+  "E501",  # line too long (formatter handles wrapping)
+  "E721",  # type-equality comparison (used intentionally for array-type detection)
+  "E731",  # lambda assignment
+  "N802",  # function name should be lowercase
+  "N803",  # argument name should be lowercase
+  "N806",  # variable in function should be lowercase
+  "N812",  # lowercase imported as non-lowercase
+  "N817",  # camelcase imported as acronym
+]

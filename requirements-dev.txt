@@ -1,7 +1,0 @@
-black
-hacking
-numba
-opencv-python
-pillow  # pillow-simd
-pre-commit
-scipy

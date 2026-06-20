@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-"""Bilinear Intopolation
-
-"""
+"""Bilinear Intopolation"""
 
 import numpy as np
 
