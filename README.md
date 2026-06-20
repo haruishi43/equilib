@@ -14,7 +14,7 @@
   <a href="https://haruishi43.github.io/equilib/"><img alt="Documentation" src="https://img.shields.io/badge/docs-mkdocs-blue"></a>
 </div>
 
-<img src="https://raw.githubusercontent.com/haruishi43/equilib/master/docs/img/equilib.png" alt="equilib" width="720"/>
+<img src="https://media.githubusercontent.com/media/haruishi43/equilib/master/docs/img/equilib.png" alt="equilib" width="720"/>
 
 `equilib` is a library for processing equirectangular (360°) images in Python.
 
