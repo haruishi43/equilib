@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
 
+from equilib._cache import cached_grid
 from equilib.grid_sample import numpy_grid_sample
 from equilib.numpy_utils import create_xyz_grid, create_rotation_matrices
 
@@ -129,6 +130,7 @@ def run(
     mode: str,
     clip_output: bool = True,
     override_func: Optional[Callable[[], Any]] = None,
+    cache: Optional[Dict] = None,
 ) -> Union[np.ndarray, List[List[np.ndarray]], List[Dict[str, np.ndarray]]]:
     """Call Equi2Cube
 
@@ -178,8 +180,13 @@ def run(
     out = np.empty((bs, c, w_face, w_face * 6), dtype=dtype)
 
     # create grid
-    xyz = create_xyz_grid(w_face=w_face, batch=bs, dtype=dtype)
-    xyz = xyz[..., np.newaxis]
+    # NOTE: `xyz` is rotation-invariant, so the class API can pass a bounded
+    # `cache` dict to reuse it across calls with the same input shape/dtype.
+    def _build_xyz():
+        xyz = create_xyz_grid(w_face=w_face, batch=bs, dtype=dtype)
+        return xyz[..., np.newaxis]
+
+    xyz = cached_grid(cache, (bs, dtype), _build_xyz)
 
     # FIXME: not sure why, but z-axis is facing the opposite
     # probably I need to change the way I choose the xyz coordinates

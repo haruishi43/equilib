@@ -52,13 +52,11 @@ class Equi2Pers(object):
         self.mode = mode
         self.z_down = z_down
         self.clip_output = clip_output
-        # FIXME: maybe do useful stuff like precalculating the grid or something
+        # cache for the rotation-invariant grid prep (`m`, `G`), keyed by input
+        # shape/dtype; reused across calls since the config above is fixed.
+        self._cache: Dict = {}
 
     def __call__(self, equi: ArrayLike, rots: Rot, **kwargs) -> ArrayLike:
-        # FIXME: should optimize since some parts of the code can be calculated
-        # before hand.
-        # 1. calculate grid
-        # 2. grid sample
         return equi2pers(
             equi=equi,
             rots=rots,
@@ -69,6 +67,7 @@ class Equi2Pers(object):
             z_down=self.z_down,
             mode=self.mode,
             clip_output=self.clip_output,
+            cache=self._cache,
             **kwargs,
         )
 

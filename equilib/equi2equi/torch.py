@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 
 import torch
 
+from equilib._cache import cached_grid
 from equilib.grid_sample import torch_grid_sample
 from equilib.torch_utils import (
     create_normalized_grid,
@@ -61,6 +62,7 @@ def run(
     width: Optional[int] = None,
     clip_output: bool = True,
     backend: str = "native",
+    cache: Optional[Dict] = None,
 ) -> torch.Tensor:
     """Run Equi2Equi
 
@@ -157,10 +159,19 @@ def run(
     else:
         tmp_dtype = dtype
 
-    m = create_normalized_grid(
-        height=height, width=width, batch=bs, dtype=tmp_dtype, device=tmp_device
-    )
-    m = m.unsqueeze(-1)
+    # NOTE: `m` is rotation-invariant, so the class API can pass a bounded
+    # `cache` dict to reuse it across calls with the same input shape/dtype.
+    def _build_m():
+        m = create_normalized_grid(
+            height=height,
+            width=width,
+            batch=bs,
+            dtype=tmp_dtype,
+            device=tmp_device,
+        )
+        return m.unsqueeze(-1)
+
+    m = cached_grid(cache, (bs, tmp_dtype, tmp_device, height, width), _build_m)
 
     # create batched rotation matrices
     R = create_rotation_matrices(

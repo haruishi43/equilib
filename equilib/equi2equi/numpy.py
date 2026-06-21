@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 
+from equilib._cache import cached_grid
 from equilib.grid_sample import numpy_grid_sample
 from equilib.numpy_utils import create_normalized_grid, create_rotation_matrices
 
@@ -81,6 +82,7 @@ def run(
     width: Optional[int] = None,
     clip_output: bool = True,
     override_func: Optional[Callable[[], Any]] = None,
+    cache: Optional[Dict] = None,
 ) -> np.ndarray:
     """Run Equi2Equi
 
@@ -146,10 +148,15 @@ def run(
     out = np.empty((bs, c, height, width), dtype=dtype)
 
     # create grid and transfrom matrix
-    m = create_normalized_grid(
-        height=height, width=width, batch=bs, dtype=dtype
-    )
-    m = m[..., np.newaxis]
+    # NOTE: `m` is rotation-invariant, so the class API can pass a bounded
+    # `cache` dict to reuse it across calls with the same input shape/dtype.
+    def _build_m():
+        m = create_normalized_grid(
+            height=height, width=width, batch=bs, dtype=dtype
+        )
+        return m[..., np.newaxis]
+
+    m = cached_grid(cache, (bs, dtype, height, width), _build_m)
 
     # create batched rotation matrices
     R = create_rotation_matrices(rots=rots, z_down=z_down, dtype=dtype)
