@@ -137,7 +137,7 @@ exploit `cuda` and batching:
   `scipy` and more robust than `cv2.remap`. You can override it with `scipy` or
   `cv2` via the `override_func` argument.
 
-A `c++`/`cuda` implementation is **WIP**. See the
+See the
 [grid sampling docs](https://haruishi43.github.io/equilib/grid-sampling/) and the
 benchmark scripts in
 [`benchmarks/`](https://github.com/haruishi43/equilib/tree/master/benchmarks).
@@ -167,7 +167,7 @@ for the full workflow, including how releases are published.
 - [x] Cache the rotation-invariant grid prep in the `class` API (all rotation-based transforms; bitwise-identical to the func path). Saves ~6–17% per call on the `torch` path and up to ~20% for `equi2equi`; negligible for the `numpy` `equi2pers`/`equi2cube` where the sampler dominates. See `benchmarks/cache_benchmark.py`.
 - [ ] Optional full-grid cache for the fixed-rotation (static camera) case
 - [ ] Speed up the pure-`numpy` `grid_sample` (the dominant cost on the numpy path, ~100 ms/call)
-- [ ] Try `torch.compile` on grid construction instead of a hand-written `c++`/`cuda` kernel; remove the unused `grid_sample/cpp` stub
+- [ ] Try `torch.compile` on grid construction instead of a hand-written `c++`/`cuda` kernel
 - [ ] More accurate intrinsic matrix using vertical FOV for `equi2pers`
 - [ ] Multiprocessing support (slow on `torch.distributed`)
 - [ ] Compute the torch grid on-device to avoid the per-call CPU→GPU round-trip

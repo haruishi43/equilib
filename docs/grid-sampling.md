@@ -2,8 +2,7 @@
 
 To process equirectangular images quickly, `equilib` relies on grid sampling
 techniques. The goal of the project is to minimize external dependencies and
-take advantage of `cuda` and batch processing with `torch` (and, eventually,
-`c++`) for fast processing.
+take advantage of `cuda` and batch processing with `torch` for fast processing.
 
 The library implements a variety of methods in `numpy` and `torch`:
 
@@ -25,5 +24,3 @@ the sampling function via the `override_func` argument of `grid_sample`.
   [`benchmarks/`](https://github.com/haruishi43/equilib/tree/master/benchmarks).
   For example, `benchmarks/equi2pers/numpy_run_baselines.py` benchmarks the
   `numpy` `equi2pers` path against `scipy` and `cv2`.
-
-A `c++` with `cuda` implementation is **work in progress**.
