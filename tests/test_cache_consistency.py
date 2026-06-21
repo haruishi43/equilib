@@ -118,6 +118,24 @@ def test_cached_matches_pure(name: str, backend: str) -> None:
         )
 
 
+@pytest.mark.parametrize("backend", ["numpy", "torch"])
+def test_pers2equi_cache_varies_with_fov(backend: str) -> None:
+    # pers2equi takes fov_x (and skew) at call time, so they must be part of
+    # the cache key. Reusing one instance across fov_x values must still match
+    # the pure func -- guards against the cache returning a stale grid.
+    dtype = np.float32 if backend == "numpy" else torch.float32
+    inp = _input((3, 32, 48), dtype, backend)
+    obj = Pers2Equi(height=64, width=128)
+    rot = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0}
+
+    for fov_x in (90.0, 60.0, 120.0, 90.0):
+        cached = obj(_clone(inp), deepcopy(rot), fov_x=fov_x)
+        pure = pers2equi(
+            _clone(inp), deepcopy(rot), height=64, width=128, fov_x=fov_x
+        )
+        assert _equal(cached, pure), f"{backend}: mismatch at fov_x={fov_x}"
+
+
 def test_cache_is_bounded() -> None:
     # Feeding many distinct input shapes (here: batch sizes) produces many
     # distinct cache keys; the per-instance cache must not grow without bound.

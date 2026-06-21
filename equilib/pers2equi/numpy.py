@@ -179,7 +179,9 @@ def run(
     # shape/dtype.
     m, G = cached_grid(
         cache,
-        (bs, dtype, h_pers, w_pers),
+        # fov_x/skew are call-time args here (unlike equi2pers) and feed `G`,
+        # so they must be part of the key.
+        (bs, dtype, h_pers, w_pers, fov_x, skew),
         lambda: prep_matrices(
             height=height,
             width=width,
