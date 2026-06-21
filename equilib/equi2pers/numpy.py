@@ -78,38 +78,21 @@ def matmul(
     return M
 
 
-def convert_grid(
-    M: np.ndarray, h_equi: int, w_equi: int, method: str = "robust"
-) -> np.ndarray:
+def convert_grid(M: np.ndarray, h_equi: int, w_equi: int) -> np.ndarray:
     # convert to rotation
     phi = np.arcsin(M[..., 2] / np.linalg.norm(M, axis=-1))
     theta = np.arctan2(M[..., 1], M[..., 0])
 
-    if method == "robust":
-        # convert to pixel
-        # I thought it would be faster if it was done all at once,
-        # but it was faster separately
-        ui = (theta - np.pi) * w_equi / (2 * np.pi)
-        # +pi/2 maps latitude to [0, h]. longitude is periodic (wrap), but
-        # latitude must clamp at the poles -- wrapping folds the pole band onto
-        # the opposite edge (issue #31)
-        uj = (phi + np.pi / 2) * h_equi / np.pi
-        ui += 0.5
-        uj += 0.5
-        ui %= w_equi
-        np.clip(uj, 0, h_equi - 1, out=uj)
-    elif method == "faster":
-        # NOTE: this asserts that theta is in range (-pi ~ pi); latitude is
-        # clamped, so out-of-range phi is handled at the poles
-        ui = (theta - np.pi) * w_equi / (2 * np.pi)
-        uj = (phi + np.pi / 2) * h_equi / np.pi
-        ui += 0.5
-        uj += 0.5
-        ui = np.where(ui < 0, ui + w_equi, ui)
-        ui = np.where(ui >= w_equi, ui - w_equi, ui)
-        np.clip(uj, 0, h_equi - 1, out=uj)
-    else:
-        raise ValueError(f"ERR: {method} is not supported")
+    # convert to pixel
+    ui = (theta - np.pi) * w_equi / (2 * np.pi)
+    # +pi/2 maps latitude to [0, h]. longitude is periodic (wrap), but
+    # latitude must clamp at the poles -- wrapping folds the pole band onto
+    # the opposite edge (issue #31)
+    uj = (phi + np.pi / 2) * h_equi / np.pi
+    ui += 0.5
+    uj += 0.5
+    ui %= w_equi
+    np.clip(uj, 0, h_equi - 1, out=uj)
 
     # stack the pixel maps into a grid
     grid = np.stack((uj, ui), axis=-3)
@@ -211,7 +194,7 @@ def run(
     M = matmul(m, G, R)
 
     # create a pixel map grid
-    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi)
 
     # grid sample
     if override_func is not None:
@@ -291,7 +274,7 @@ def get_bounding_fov(
     M = matmul(m, G, R)
 
     # create a pixel map grid
-    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi, method="robust")
+    grid = convert_grid(M=M, h_equi=h_equi, w_equi=w_equi)
 
     bboxs = []
 

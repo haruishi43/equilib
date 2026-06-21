@@ -25,8 +25,7 @@ TRANSFORMS = ["equi2equi", "equi2pers", "equi2cube"]
 
 
 @pytest.mark.parametrize("transform", TRANSFORMS)
-@pytest.mark.parametrize("method", ["robust", "faster"])
-def test_convert_grid_clamps_latitude(transform: str, method: str) -> None:
+def test_convert_grid_clamps_latitude(transform: str) -> None:
     mod = importlib.import_module(f"equilib.{transform}.numpy")
     h = w = 64
 
@@ -36,15 +35,15 @@ def test_convert_grid_clamps_latitude(transform: str, method: str) -> None:
     dirs = np.stack([np.cos(phis), np.zeros_like(phis), np.sin(phis)], axis=-1)
     dirs = dirs[None, :, None, :].astype(np.float64)  # (b, H', W', 3)
 
-    grid = np.asarray(mod.convert_grid(dirs, h_equi=h, w_equi=w, method=method))
+    grid = np.asarray(mod.convert_grid(dirs, h_equi=h, w_equi=w))
     uj = grid[:, 0].ravel()  # vertical (latitude) source coordinate
 
     assert uj.min() >= 0.0 and uj.max() <= h - 1, (
-        f"{transform}/{method}: uj outside [0, h-1] -> {uj.min()}..{uj.max()}"
+        f"{transform}: uj outside [0, h-1] -> {uj.min()}..{uj.max()}"
     )
     # a wrapped latitude jumps by ~h near the pole; a clamped one stays smooth
     max_jump = float(np.abs(np.diff(uj)).max())
     assert max_jump < 2.0, (
-        f"{transform}/{method}: latitude wrap discontinuity "
+        f"{transform}: latitude wrap discontinuity "
         f"(max adjacent jump {max_jump:.1f} px ~ h={h})"
     )
