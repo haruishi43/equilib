@@ -83,27 +83,17 @@ def matmul(m: torch.Tensor, R: torch.Tensor) -> torch.Tensor:
     return M
 
 
-def convert_grid(
-    xyz: torch.Tensor, h_equi: int, w_equi: int, method: str = "robust"
-) -> torch.Tensor:
+def convert_grid(xyz: torch.Tensor, h_equi: int, w_equi: int) -> torch.Tensor:
     # convert to rotation
     phi = torch.asin(xyz[..., 2] / torch.norm(xyz, dim=-1))
     theta = torch.atan2(xyz[..., 1], xyz[..., 0])
 
-    if method == "robust":
-        ui = (theta / (2 * pi) - 0.5) * w_equi - 0.5
-        uj = (0.5 - phi / pi) * h_equi - 0.5
-        ui %= w_equi
-        uj %= h_equi
-    elif method == "faster":
-        ui = (theta / (2 * pi) - 0.5) * w_equi - 0.5
-        uj = (0.5 - phi / pi) * h_equi - 0.5
-        ui = torch.where(ui < 0, ui + w_equi, ui)
-        ui = torch.where(ui >= w_equi, ui - w_equi, ui)
-        uj = torch.where(uj < 0, uj + h_equi, uj)
-        uj = torch.where(uj >= h_equi, uj - h_equi, uj)
-    else:
-        raise ValueError(f"ERR: {method} is not supported")
+    ui = (theta / (2 * pi) - 0.5) * w_equi - 0.5
+    uj = (0.5 - phi / pi) * h_equi - 0.5
+    ui %= w_equi  # longitude is periodic
+    # latitude must clamp at the poles -- wrapping folds the pole band onto
+    # the opposite edge (issue #31)
+    uj.clamp_(0, h_equi - 1)
 
     # stack the pixel maps into a grid
     grid = torch.stack((uj, ui), dim=-3)
@@ -226,7 +216,7 @@ def run(
     xyz = matmul(xyz, R)
 
     # create a pixel map grid
-    grid = convert_grid(xyz=xyz, h_equi=h_equi, w_equi=w_equi, method="robust")
+    grid = convert_grid(xyz=xyz, h_equi=h_equi, w_equi=w_equi)
 
     # FIXME: putting `grid` to device since `pure`'s bilinear interpolation requires it
     # FIXME: better way of forcing `grid` to be the same dtype?

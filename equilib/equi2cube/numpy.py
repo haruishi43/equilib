@@ -86,35 +86,18 @@ def matmul(m: np.ndarray, R: np.ndarray, method: str = "faster") -> np.ndarray:
     return M
 
 
-def convert_grid(
-    xyz: np.ndarray, h_equi: int, w_equi: int, method: str = "robust"
-) -> np.ndarray:
+def convert_grid(xyz: np.ndarray, h_equi: int, w_equi: int) -> np.ndarray:
     # convert to rotation
     phi = np.arcsin(xyz[..., 2] / np.linalg.norm(xyz, axis=-1))
     theta = np.arctan2(xyz[..., 1], xyz[..., 0])
 
-    if method == "robust":
-        # convert to pixel
-        # I thought it would be faster if it was done all at once,
-        # but it was faster separately
-        ui = (theta / (2 * np.pi) - 0.5) * w_equi - 0.5
-        uj = (0.5 - phi / np.pi) * h_equi - 0.5
-        ui %= w_equi
-        uj %= h_equi
-    elif method == "faster":
-        # NOTE: this asserts that theta and phi are in range
-        # the range of theta is -pi ~ pi
-        # the range of phi is -pi/2 ~ pi/2
-        # this means that if the input `rots` have rotations that are
-        # out of range, it will not work with `faster`
-        ui = (theta / (2 * np.pi) - 0.5) * w_equi - 0.5
-        uj = (0.5 - phi / np.pi) * h_equi - 0.5
-        ui = np.where(ui < 0, ui + w_equi, ui)
-        ui = np.where(ui >= w_equi, ui - w_equi, ui)
-        uj = np.where(uj < 0, uj + h_equi, uj)
-        uj = np.where(uj >= h_equi, uj - h_equi, uj)
-    else:
-        raise ValueError(f"ERR: {method} is not supported")
+    # convert to pixel
+    ui = (theta / (2 * np.pi) - 0.5) * w_equi - 0.5
+    uj = (0.5 - phi / np.pi) * h_equi - 0.5
+    ui %= w_equi  # longitude is periodic
+    # latitude must clamp at the poles -- wrapping folds the pole band onto
+    # the opposite edge (issue #31)
+    np.clip(uj, 0, h_equi - 1, out=uj)
 
     # stack the pixel maps into a grid
     grid = np.stack((uj, ui), axis=-3)
@@ -199,7 +182,7 @@ def run(
     xyz = matmul(xyz, R, method="faster")
 
     # create a pixel map grid
-    grid = convert_grid(xyz=xyz, h_equi=h_equi, w_equi=w_equi, method="robust")
+    grid = convert_grid(xyz=xyz, h_equi=h_equi, w_equi=w_equi)
 
     # grid sample
     if override_func is not None:
