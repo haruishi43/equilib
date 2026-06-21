@@ -164,9 +164,15 @@ for the full workflow, including how releases are published.
 
 ## Roadmap
 
-- [ ] `c++`/`cuda` grid sampling
+- [x] Cache the rotation-invariant grid prep in the `class` API (all rotation-based transforms; bitwise-identical to the func path). Saves ~6–17% per call on the `torch` path and up to ~20% for `equi2equi`; negligible for the `numpy` `equi2pers`/`equi2cube` where the sampler dominates. See `benchmarks/cache_benchmark.py`.
+- [ ] Optional full-grid cache for the fixed-rotation (static camera) case
+- [ ] Speed up the pure-`numpy` `grid_sample` (the dominant cost on the numpy path, ~100 ms/call)
+- [ ] Try `torch.compile` on grid construction instead of a hand-written `c++`/`cuda` kernel; remove the unused `grid_sample/cpp` stub
 - [ ] More accurate intrinsic matrix using vertical FOV for `equi2pers`
 - [ ] Multiprocessing support (slow on `torch.distributed`)
+- [ ] Compute the torch grid on-device to avoid the per-call CPU→GPU round-trip
+- [ ] Resolve the `equi2cube` z-axis orientation uncertainty and add coverage for the untested paths
+- [ ] Add GPU/CUDA coverage to CI (currently CPU-only due to costs)
 
 ## Citation
 

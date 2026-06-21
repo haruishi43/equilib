@@ -44,6 +44,9 @@ class Equi2Equi(object):
         self.clip_output = clip_output
         self.mode = mode
         self.z_down = z_down
+        # cache for the rotation-invariant grid (`m`), keyed by input
+        # shape/dtype; reused across calls since the config above is fixed.
+        self._cache: Dict = {}
 
     def __call__(self, src: ArrayLike, rots: Rot, **kwargs) -> ArrayLike:
         return equi2equi(
@@ -52,6 +55,7 @@ class Equi2Equi(object):
             clip_output=self.clip_output,
             mode=self.mode,
             z_down=self.z_down,
+            cache=self._cache,
             **kwargs,
         )
 

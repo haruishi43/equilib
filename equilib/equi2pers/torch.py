@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 from functools import lru_cache
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
 
+from equilib._cache import cached_grid
 from equilib.grid_sample import torch_grid_sample
 from equilib.torch_utils import (
     create_global2camera_rotation_matrix,
@@ -114,6 +115,7 @@ def run(
     mode: str,
     clip_output: bool = True,
     backend: str = "native",
+    cache: Optional[Dict] = None,
 ) -> torch.Tensor:
     """Run Equi2Pers
 
@@ -196,14 +198,21 @@ def run(
         tmp_dtype = dtype
 
     # create grid and transform matrix
-    m, G = prep_matrices(
-        height=height,
-        width=width,
-        batch=bs,
-        fov_x=fov_x,
-        skew=skew,
-        dtype=tmp_dtype,
-        device=tmp_device,
+    # NOTE: `m` and `G` are rotation-invariant, so the class API can pass a
+    # bounded `cache` dict to reuse them across calls with the same input
+    # shape/dtype.
+    m, G = cached_grid(
+        cache,
+        (bs, tmp_dtype, tmp_device),
+        lambda: prep_matrices(
+            height=height,
+            width=width,
+            batch=bs,
+            fov_x=fov_x,
+            skew=skew,
+            dtype=tmp_dtype,
+            device=tmp_device,
+        ),
     )
 
     # create batched rotation matrices

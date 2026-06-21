@@ -61,6 +61,9 @@ class Equi2Cube(object):
         self.z_down = z_down
         self.clip_output = clip_output
         self.mode = mode
+        # cache for the rotation-invariant grid (`xyz`), keyed by input
+        # shape/dtype; reused across calls since the config above is fixed.
+        self._cache: Dict = {}
 
     def __call__(self, equi: ArrayLike, rots: Rot, **kwargs) -> CubeMaps:
         return equi2cube(
@@ -71,6 +74,7 @@ class Equi2Cube(object):
             z_down=self.z_down,
             clip_output=self.clip_output,
             mode=self.mode,
+            cache=self._cache,
             **kwargs,
         )
 

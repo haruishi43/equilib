@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import torch
 
+from equilib._cache import cached_grid
 from equilib.grid_sample import torch_grid_sample
 from equilib.torch_utils import (
     create_rotation_matrices,
@@ -118,6 +119,7 @@ def run(
     mode: str,
     clip_output: bool = True,
     backend: str = "native",
+    cache: Optional[Dict] = None,
 ) -> Union[
     torch.Tensor, List[List[torch.Tensor]], List[Dict[str, torch.Tensor]]
 ]:
@@ -201,10 +203,15 @@ def run(
         tmp_dtype = dtype
 
     # create grid
-    xyz = create_xyz_grid(
-        w_face=w_face, batch=bs, dtype=tmp_dtype, device=tmp_device
-    )
-    xyz = xyz.unsqueeze(-1)
+    # NOTE: `xyz` is rotation-invariant, so the class API can pass a bounded
+    # `cache` dict to reuse it across calls with the same input shape/dtype.
+    def _build_xyz():
+        xyz = create_xyz_grid(
+            w_face=w_face, batch=bs, dtype=tmp_dtype, device=tmp_device
+        )
+        return xyz.unsqueeze(-1)
+
+    xyz = cached_grid(cache, (bs, tmp_dtype, tmp_device), _build_xyz)
 
     # FIXME: not sure why, but z-axis is facing the opposite
     # probably I need to change the way I choose the xyz coordinates

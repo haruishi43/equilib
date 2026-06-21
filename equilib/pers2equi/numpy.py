@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Tuple, Optional
 
 import numpy as np
 
+from equilib._cache import cached_grid
 from equilib.grid_sample import numpy_grid_sample
 from equilib.numpy_utils import (
     create_global2camera_rotation_matrix,
@@ -113,6 +114,7 @@ def run(
     mode: str,
     clip_output: bool = True,
     override_func: Optional[Callable[[], Any]] = None,
+    cache: Optional[Dict] = None,
 ) -> np.ndarray:
     """Run Pers2Equi
 
@@ -172,15 +174,24 @@ def run(
     out = np.empty((bs, c, height, width), dtype=dtype)
 
     # create grid and transfrom matrix
-    m, G = prep_matrices(
-        height=height,
-        width=width,
-        h_pers=h_pers,
-        w_pers=w_pers,
-        fov_x=fov_x,
-        skew=skew,
-        batch=bs,
-        dtype=dtype,
+    # NOTE: `m` and `G` are rotation-invariant, so the class API can pass a
+    # bounded `cache` dict to reuse them across calls with the same input
+    # shape/dtype.
+    m, G = cached_grid(
+        cache,
+        # fov_x/skew are call-time args here (unlike equi2pers) and feed `G`,
+        # so they must be part of the key.
+        (bs, dtype, h_pers, w_pers, fov_x, skew),
+        lambda: prep_matrices(
+            height=height,
+            width=width,
+            h_pers=h_pers,
+            w_pers=w_pers,
+            fov_x=fov_x,
+            skew=skew,
+            batch=bs,
+            dtype=dtype,
+        ),
     )
 
     # create batched rotation matrices
