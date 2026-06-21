@@ -37,7 +37,7 @@ def convert_grid(
         ui += 0.5
         uj += 0.5
         ui %= w_equi
-        uj = torch.clamp(uj, 0, h_equi - 1)
+        uj.clamp_(0, h_equi - 1)
     elif method == "faster":
         ui = (theta - pi) * w_equi / (2 * pi)
         uj = (phi + pi / 2) * h_equi / pi
@@ -45,7 +45,7 @@ def convert_grid(
         uj += 0.5
         ui = torch.where(ui < 0, ui + w_equi, ui)
         ui = torch.where(ui >= w_equi, ui - w_equi, ui)
-        uj = torch.clamp(uj, 0, h_equi - 1)
+        uj.clamp_(0, h_equi - 1)
     else:
         raise ValueError(f"ERR: {method} is not supported")
 

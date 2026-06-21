@@ -52,7 +52,7 @@ def convert_grid(
         ui += 0.5
         uj += 0.5
         ui %= w_equi
-        uj = np.clip(uj, 0, h_equi - 1)
+        np.clip(uj, 0, h_equi - 1, out=uj)
     elif method == "faster":
         # NOTE: this asserts that theta is in range (-pi ~ pi); latitude is
         # clamped, so out-of-range phi is handled at the poles
@@ -62,7 +62,7 @@ def convert_grid(
         uj += 0.5
         ui = np.where(ui < 0, ui + w_equi, ui)
         ui = np.where(ui >= w_equi, ui - w_equi, ui)
-        uj = np.clip(uj, 0, h_equi - 1)
+        np.clip(uj, 0, h_equi - 1, out=uj)
     else:
         raise ValueError(f"ERR: {method} is not supported")
 

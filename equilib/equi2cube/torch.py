@@ -96,13 +96,13 @@ def convert_grid(
         ui %= w_equi  # longitude is periodic
         # latitude must clamp at the poles -- wrapping folds the pole band onto
         # the opposite edge (issue #31)
-        uj = torch.clamp(uj, 0, h_equi - 1)
+        uj.clamp_(0, h_equi - 1)
     elif method == "faster":
         ui = (theta / (2 * pi) - 0.5) * w_equi - 0.5
         uj = (0.5 - phi / pi) * h_equi - 0.5
         ui = torch.where(ui < 0, ui + w_equi, ui)
         ui = torch.where(ui >= w_equi, ui - w_equi, ui)
-        uj = torch.clamp(uj, 0, h_equi - 1)
+        uj.clamp_(0, h_equi - 1)
     else:
         raise ValueError(f"ERR: {method} is not supported")
 
