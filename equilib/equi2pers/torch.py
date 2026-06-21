@@ -81,20 +81,22 @@ def convert_grid(
 
     if method == "robust":
         ui = (theta - pi) * w_equi / (2 * pi)
-        uj = (phi - pi / 2) * h_equi / pi
+        # +pi/2 maps latitude to [0, h]. longitude is periodic (wrap), but
+        # latitude must clamp at the poles -- wrapping folds the pole band onto
+        # the opposite edge (issue #31)
+        uj = (phi + pi / 2) * h_equi / pi
         ui += 0.5
         uj += 0.5
         ui %= w_equi
-        uj %= h_equi
+        uj = torch.clamp(uj, 0, h_equi - 1)
     elif method == "faster":
         ui = (theta - pi) * w_equi / (2 * pi)
-        uj = (phi - pi / 2) * h_equi / pi
+        uj = (phi + pi / 2) * h_equi / pi
         ui += 0.5
         uj += 0.5
         ui = torch.where(ui < 0, ui + w_equi, ui)
         ui = torch.where(ui >= w_equi, ui - w_equi, ui)
-        uj = torch.where(uj < 0, uj + h_equi, uj)
-        uj = torch.where(uj >= h_equi, uj - h_equi, uj)
+        uj = torch.clamp(uj, 0, h_equi - 1)
     else:
         raise ValueError(f"ERR: {method} is not supported")
 

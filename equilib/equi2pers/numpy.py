@@ -90,25 +90,24 @@ def convert_grid(
         # I thought it would be faster if it was done all at once,
         # but it was faster separately
         ui = (theta - np.pi) * w_equi / (2 * np.pi)
-        uj = (phi - np.pi / 2) * h_equi / np.pi
+        # +pi/2 maps latitude to [0, h]. longitude is periodic (wrap), but
+        # latitude must clamp at the poles -- wrapping folds the pole band onto
+        # the opposite edge (issue #31)
+        uj = (phi + np.pi / 2) * h_equi / np.pi
         ui += 0.5
         uj += 0.5
         ui %= w_equi
-        uj %= h_equi
+        uj = np.clip(uj, 0, h_equi - 1)
     elif method == "faster":
-        # NOTE: this asserts that theta and phi are in range
-        # the range of theta is -pi ~ pi
-        # the range of phi is -pi/2 ~ pi/2
-        # this means that if the input `rots` have rotations that are
-        # out of range, it will not work with `faster`
+        # NOTE: this asserts that theta is in range (-pi ~ pi); latitude is
+        # clamped, so out-of-range phi is handled at the poles
         ui = (theta - np.pi) * w_equi / (2 * np.pi)
-        uj = (phi - np.pi / 2) * h_equi / np.pi
+        uj = (phi + np.pi / 2) * h_equi / np.pi
         ui += 0.5
         uj += 0.5
         ui = np.where(ui < 0, ui + w_equi, ui)
         ui = np.where(ui >= w_equi, ui - w_equi, ui)
-        uj = np.where(uj < 0, uj + h_equi, uj)
-        uj = np.where(uj >= h_equi, uj - h_equi, uj)
+        uj = np.clip(uj, 0, h_equi - 1)
     else:
         raise ValueError(f"ERR: {method} is not supported")
 
