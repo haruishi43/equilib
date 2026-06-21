@@ -43,6 +43,7 @@ dev = [
   "opencv-python-headless",
   "pillow",
   "torchvision",
+  "matplotlib",
   "ruff",
   "pre-commit",
 ]

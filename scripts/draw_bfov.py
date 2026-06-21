@@ -31,7 +31,8 @@ def preprocess(
     if isinstance(img, Image.Image):
         # Sometimes images are RGBA
         img = img.convert("RGB")
-        img = np.asarray(img)
+        # np.array (not asarray) -> writable copy; cv2.line draws onto it later
+        img = np.array(img)
     assert len(img.shape) == 3, "input must be dim=3"
     assert img.shape[-1] == 3, "input must be HWC"
     img = np.transpose(img, (2, 0, 1))
