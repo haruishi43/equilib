@@ -10,6 +10,10 @@ faces forward and the `z-axis` faces up.
 You can flip the coordinate system so that the `z-axis` faces **down** by passing
 `z_down=True` to any transform.
 
+For `equi2cube`, the up and down faces point toward the top and bottom of an
+unrotated panorama. Rotations follow the same convention as `equi2equi` and
+`equi2pers` in every cubemap layout.
+
 ## Equirectangular image
 
 An equirectangular image is any image with a `2:1` aspect ratio that captures a
