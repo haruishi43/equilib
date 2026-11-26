@@ -89,7 +89,7 @@ def convert_grid(xyz: torch.Tensor, h_equi: int, w_equi: int) -> torch.Tensor:
     theta = torch.atan2(xyz[..., 1], xyz[..., 0])
 
     ui = (theta / (2 * pi) - 0.5) * w_equi - 0.5
-    uj = (0.5 - phi / pi) * h_equi - 0.5
+    uj = (0.5 + phi / pi) * h_equi - 0.5
     ui %= w_equi  # longitude is periodic
     # latitude must clamp at the poles -- wrapping folds the pole band onto
     # the opposite edge (issue #31)
@@ -199,14 +199,12 @@ def run(
         xyz = create_xyz_grid(
             w_face=w_face, batch=bs, dtype=tmp_dtype, device=tmp_device
         )
+        # Express cube rays in the equirectangular row-down frame.
+        xyz[..., 2] *= -1
         return xyz.unsqueeze(-1)
 
     xyz = cached_grid(cache, (bs, tmp_dtype, tmp_device), _build_xyz)
 
-    # FIXME: not sure why, but z-axis is facing the opposite
-    # probably I need to change the way I choose the xyz coordinates
-    # this is a temporary fix for now
-    z_down = not z_down
     # create batched rotation matrices
     R = create_rotation_matrices(
         rots=rots, z_down=z_down, dtype=tmp_dtype, device=tmp_device
@@ -238,7 +236,6 @@ def run(
     )
 
     # reformat the output
-    # FIXME: needs to test this
     if cube_format == "horizon":
         pass
     elif cube_format == "list":
